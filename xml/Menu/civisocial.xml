@@ -18,4 +18,10 @@
     <title>Settings</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/civisocial/googlepluscallback</path>
+    <page_callback>CRM_Civisocial_Page_GooglePlusCallback</page_callback>
+    <title>GooglePlusCallback</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>
