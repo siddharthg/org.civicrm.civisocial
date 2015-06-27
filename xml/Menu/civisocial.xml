@@ -12,4 +12,10 @@
     <title>FacebookCallback</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/admin/setting/preferences/civisocial</path>
+    <page_callback>CRM_Civisocial_Form_Settings</page_callback>
+    <title>Settings</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
 </menu>

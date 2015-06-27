@@ -121,3 +121,30 @@ _civisocial_civix_civicrm_angularModules($angularModules);
 function civisocial_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _civisocial_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
+
+
+/**
+ * Include the settings page in civicrm navigation menu.
+ */
+
+function civisocial_civicrm_navigationMenu(&$params){
+  $maxID = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation")+300;
+
+  $civisocial_settings_url = "civicrm/admin/setting/preferences/civisocial";
+
+  $administerMenuID = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'Administer', 'id', 'name');
+
+  $params[$administerMenuID]['child'][$maxID+1]= array (
+      'attributes' => array (
+        'label'      => 'Civisocial Credentials',
+        'name'       => 'Civisocial Credentials',
+        'url'        => $civisocial_settings_url,
+        'permission' => 'administer CiviReport',
+        'operator'   => NULL,
+        'separator'  => NULL,
+        'parentID'   => $administerMenuID,
+        'navID'      => $maxID+1,
+        'active'     => 1
+      )
+    );
+}
