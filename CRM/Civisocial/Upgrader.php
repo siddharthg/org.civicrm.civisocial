@@ -13,14 +13,14 @@ class CRM_Civisocial_Upgrader extends CRM_Civisocial_Upgrader_Base {
    */
 
   public function install() {
-    $this->executeSqlFile('sql/myinstall.sql');
+    $this->executeSqlFile('sql/civisocial_install.sql');
   }
 
   /**
    * Example: Run an external SQL script when the module is uninstalled.
-   *
+   */
   public function uninstall() {
-   $this->executeSqlFile('sql/myuninstall.sql');
+   $this->executeSqlFile('sql/civisocial_uninstall.sql');
   }
 
   /**
