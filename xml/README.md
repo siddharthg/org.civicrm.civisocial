@@ -4,8 +4,8 @@ You need to symlink `xml/schema/Civisocial` and `xml/Civisocial.xml` to your civ
 
 ```
 cd <civicrm_root>/xml/schema
-ls -s <extesion_root>/xml/schema/Civisocial Civisocial
-ls -s <extension_root>/xml/schema/Civisocial.xml Civisocial.xml
+ln -s <extesion_root>/xml/schema/Civisocial Civisocial
+ln -s <extension_root>/xml/schema/Civisocial.xml Civisocial.xml
 ```
 
 You further need to add the following line to xml/schema/schema.xml
