@@ -247,7 +247,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO
           'where' => 'civisocial_user.created_date',
           'headerPattern' => '',
           'dataPattern' => '',
-          'default' => 'NULL',
+          'default' => 'CURRENT_TIMESTAMP',
         ) ,
         'modified_date' => array(
           'name' => 'modified_date',

@@ -2,10 +2,41 @@
 require_once 'CRM/Core/Page.php';
 
 class CRM_Civisocial_Page_FacebookCallback extends CRM_Core_Page {
+
+    function get_response($apiURL, $node, $is_post, $params){
+        $url = $apiURL."/".$node;
+        $urlparams = "";
+        foreach($params as $key=>$value){
+            $urlparams .= $key."=".$value."&";
+        }
+        if($is_post==FALSE){
+            $url = $url."?".$urlparams;
+        }
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        if($is_post==TRUE){
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $urlparams);
+        }
+        else{
+            curl_setopt($ch, CURLOPT_POST, 0);
+        }
+        $response = curl_exec($ch);
+        curl_close($ch); 
+
+        return json_decode($response, true);   
+    }
+
     function run() {
         $apiURL = "https://graph.facebook.com/v2.3";
-        CRM_Utils_System::setTitle(ts('FacebookCallback'));
         $redirect_uri = rawurldecode(CRM_Utils_System::url('civicrm/civisocial/facebookcallback', NULL, TRUE));
+        
+        // Retreive client_id and client_secret from settings
+        $is_enabled = civicrm_api3('setting', 'getvalue', array('group' => 'CiviSocial Account Credentials', 'name' => 'enable_facebook'));
+        if(!$is_enabled){
+            die ("Backend not enabled.");
+        }
+
         $client_secret = civicrm_api3('setting', 'getvalue', array('group' => 'CiviSocial Account Credentials', 'name' => 'facebook_secret'));
         $client_id = civicrm_api3('setting', 'getvalue', array('group' => 'CiviSocial Account Credentials', 'name' => 'facebook_app_id'));
 
@@ -17,25 +48,34 @@ class CRM_Civisocial_Page_FacebookCallback extends CRM_Core_Page {
             die ("FACEBOOK FATAL: the request returned without the code. Please try loging in again.");
         }
 
-        $url = "https://graph.facebook.com/v2.3/oauth/access_token?client_id=".$client_id."&redirect_uri=".$redirect_uri."&client_secret=".$client_secret."&code=".$facebook_code;
+        // Get the access token from facebook for the user
+        $access_token = "";
+        $access_token_response = $this->get_response($apiURL, "oauth/access_token", FALSE, array("client_id"=>$client_id, "client_secret"=>$client_secret, "code"=>$facebook_code, "redirect_uri"=>$redirect_uri));
 
-        // Acquiring Access Token
-        $ch = curl_init( $url );
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = curl_exec( $ch );
-        curl_close($ch); 
+        if(array_key_exists("error", $access_token_response)){
+            // die ($access_token_response["error"]);
+            $access_token = "";
+        }
+        else{
+            $access_token = $access_token_response["access_token"];
+        }
 
-        $result1 = get_object_vars(json_decode($response));
-        $access_token = $result1['access_token'];
+        // Get user data from facebook.
+        $user_data_response = $this->get_response($apiURL, "me", FALSE, array("access_token"=>$access_token));
+        $this->assign('status', $user_data_response);
 
-        // Acquiring rest of the data
-        $ch = curl_init($apiURL."/me?access_token=".$access_token);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = curl_exec( $ch );
-        curl_close($ch); 
 
-        $result = get_object_vars(json_decode($response));
-        $this->assign('status', json_encode($_SESSION));
+        // $params = array('email' => "siddharthgupta0014@gmail.com", 
+        //     'contact_id' => "1",
+        //     'facebook_user_id' => '1323245123',
+        //     'access_token' => '31243213532',
+        //     'oauth_object' => 'oauth_object', 
+        // );
+
+        // $result = get_object_vars(json_decode($response));
+        // 
+        // require_once 'CRM/Civisocial/BAO/CivisocialUser.php';
+        // CRM_Civisocial_BAO_CivisocialUser::create($params);
 
         parent::run();
     }

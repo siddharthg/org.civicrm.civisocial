@@ -92,7 +92,7 @@
     <comment>When was the civisocial user was created.</comment>
     <required>false</required>
     <export>true</export>
-    <default>NULL</default>
+    <default>CURRENT_TIMESTAMP</default>
     <add>4.6</add>
   </field>
   
