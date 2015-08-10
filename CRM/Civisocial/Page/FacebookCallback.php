@@ -1,5 +1,6 @@
 <?php
 require_once 'CRM/Core/Page.php';
+require_once 'CRM/Civisocial/BAO/CivisocialUser.php';
 
 class CRM_Civisocial_Page_FacebookCallback extends CRM_Core_Page {
 
@@ -28,6 +29,8 @@ class CRM_Civisocial_Page_FacebookCallback extends CRM_Core_Page {
     }
 
     function run() {
+        $session = CRM_Core_Session::singleton();
+
         $apiURL = "https://graph.facebook.com/v2.3";
         $redirect_uri = rawurldecode(CRM_Utils_System::url('civicrm/civisocial/facebookcallback', NULL, TRUE));
         
@@ -53,30 +56,18 @@ class CRM_Civisocial_Page_FacebookCallback extends CRM_Core_Page {
         $access_token_response = $this->get_response($apiURL, "oauth/access_token", FALSE, array("client_id"=>$client_id, "client_secret"=>$client_secret, "code"=>$facebook_code, "redirect_uri"=>$redirect_uri));
 
         if(array_key_exists("error", $access_token_response)){
-            // die ($access_token_response["error"]);
+            die ($access_token_response["error"]);
             $access_token = "";
         }
         else{
             $access_token = $access_token_response["access_token"];
         }
 
-        // Get user data from facebook.
         $user_data_response = $this->get_response($apiURL, "me", FALSE, array("access_token"=>$access_token));
-        $this->assign('status', $user_data_response);
 
-
-        // $params = array('email' => "siddharthgupta0014@gmail.com", 
-        //     'contact_id' => "1",
-        //     'facebook_user_id' => '1323245123',
-        //     'access_token' => '31243213532',
-        //     'oauth_object' => 'oauth_object', 
-        // );
-
-        // $result = get_object_vars(json_decode($response));
-        // 
-        // require_once 'CRM/Civisocial/BAO/CivisocialUser.php';
-        // CRM_Civisocial_BAO_CivisocialUser::create($params);
-
+        $contact_id = CRM_Civisocial_BAO_CivisocialUser::handle_facebook_data($user_data_response);
+        $this->assign('status', $contact_id);
+        $session->set('userID', $contact_id);
         parent::run();
     }
 }

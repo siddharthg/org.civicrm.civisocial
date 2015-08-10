@@ -4,13 +4,15 @@
     <path>civicrm/civisocial/login</path>
     <page_callback>CRM_Civisocial_Page_Login</page_callback>
     <title>Login</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_callback>1</access_callback>
+     <is_public>true</is_public>
   </item>
   <item>
     <path>civicrm/civisocial/facebookcallback</path>
     <page_callback>CRM_Civisocial_Page_FacebookCallback</page_callback>
     <title>FacebookCallback</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_callback>1</access_callback>
+     <is_public>true</is_public>
   </item>
   <item>
     <path>civicrm/admin/setting/preferences/civisocial</path>
@@ -22,6 +24,7 @@
     <path>civicrm/civisocial/googlepluscallback</path>
     <page_callback>CRM_Civisocial_Page_GooglePlusCallback</page_callback>
     <title>GooglePlusCallback</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_callback>1</access_callback>
+     <is_public>true</is_public>
   </item>
 </menu>
