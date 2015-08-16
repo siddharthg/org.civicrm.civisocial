@@ -8,26 +8,25 @@
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
  */
 function _civisocial_civix_civicrm_config(&$config = NULL) {
-  static $configured = FALSE;
-  if ($configured) {
-    return;
-  }
-  $configured = TRUE;
+	static $configured = FALSE;
+	if ($configured) {
+		return;
+	}
+	$configured = TRUE;
 
-  $template =& CRM_Core_Smarty::singleton();
+	$template = &CRM_Core_Smarty::singleton();
 
-  $extRoot = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-  $extDir = $extRoot . 'templates';
+	$extRoot = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+	$extDir = $extRoot . 'templates';
 
-  if ( is_array( $template->template_dir ) ) {
-      array_unshift( $template->template_dir, $extDir );
-  }
-  else {
-      $template->template_dir = array( $extDir, $template->template_dir );
-  }
+	if (is_array($template->template_dir)) {
+		array_unshift($template->template_dir, $extDir);
+	} else {
+		$template->template_dir = array($extDir, $template->template_dir);
+	}
 
-  $include_path = $extRoot . PATH_SEPARATOR . get_include_path( );
-  set_include_path($include_path);
+	$include_path = $extRoot . PATH_SEPARATOR . get_include_path();
+	set_include_path($include_path);
 }
 
 /**
@@ -38,9 +37,9 @@ function _civisocial_civix_civicrm_config(&$config = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
  */
 function _civisocial_civix_civicrm_xmlMenu(&$files) {
-  foreach (_civisocial_civix_glob(__DIR__ . '/xml/Menu/*.xml') as $file) {
-    $files[] = $file;
-  }
+	foreach (_civisocial_civix_glob(__DIR__ . '/xml/Menu/*.xml') as $file) {
+		$files[] = $file;
+	}
 }
 
 /**
@@ -49,10 +48,10 @@ function _civisocial_civix_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function _civisocial_civix_civicrm_install() {
-  _civisocial_civix_civicrm_config();
-  if ($upgrader = _civisocial_civix_upgrader()) {
-    $upgrader->onInstall();
-  }
+	_civisocial_civix_civicrm_config();
+	if ($upgrader = _civisocial_civix_upgrader()) {
+		$upgrader->onInstall();
+	}
 }
 
 /**
@@ -61,10 +60,10 @@ function _civisocial_civix_civicrm_install() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
 function _civisocial_civix_civicrm_uninstall() {
-  _civisocial_civix_civicrm_config();
-  if ($upgrader = _civisocial_civix_upgrader()) {
-    $upgrader->onUninstall();
-  }
+	_civisocial_civix_civicrm_config();
+	if ($upgrader = _civisocial_civix_upgrader()) {
+		$upgrader->onUninstall();
+	}
 }
 
 /**
@@ -73,12 +72,12 @@ function _civisocial_civix_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function _civisocial_civix_civicrm_enable() {
-  _civisocial_civix_civicrm_config();
-  if ($upgrader = _civisocial_civix_upgrader()) {
-    if (is_callable(array($upgrader, 'onEnable'))) {
-      $upgrader->onEnable();
-    }
-  }
+	_civisocial_civix_civicrm_config();
+	if ($upgrader = _civisocial_civix_upgrader()) {
+		if (is_callable(array($upgrader, 'onEnable'))) {
+			$upgrader->onEnable();
+		}
+	}
 }
 
 /**
@@ -88,12 +87,12 @@ function _civisocial_civix_civicrm_enable() {
  * @return mixed
  */
 function _civisocial_civix_civicrm_disable() {
-  _civisocial_civix_civicrm_config();
-  if ($upgrader = _civisocial_civix_upgrader()) {
-    if (is_callable(array($upgrader, 'onDisable'))) {
-      $upgrader->onDisable();
-    }
-  }
+	_civisocial_civix_civicrm_config();
+	if ($upgrader = _civisocial_civix_upgrader()) {
+		if (is_callable(array($upgrader, 'onDisable'))) {
+			$upgrader->onDisable();
+		}
+	}
 }
 
 /**
@@ -108,21 +107,20 @@ function _civisocial_civix_civicrm_disable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
 function _civisocial_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  if ($upgrader = _civisocial_civix_upgrader()) {
-    return $upgrader->onUpgrade($op, $queue);
-  }
+	if ($upgrader = _civisocial_civix_upgrader()) {
+		return $upgrader->onUpgrade($op, $queue);
+	}
 }
 
 /**
  * @return CRM_Civisocial_Upgrader
  */
 function _civisocial_civix_upgrader() {
-  if (!file_exists(__DIR__.'/CRM/Civisocial/Upgrader.php')) {
-    return NULL;
-  }
-  else {
-    return CRM_Civisocial_Upgrader_Base::instance();
-  }
+	if (!file_exists(__DIR__ . '/CRM/Civisocial/Upgrader.php')) {
+		return NULL;
+	} else {
+		return CRM_Civisocial_Upgrader_Base::instance();
+	}
 }
 
 /**
@@ -136,31 +134,31 @@ function _civisocial_civix_upgrader() {
  * @return array(string)
  */
 function _civisocial_civix_find_files($dir, $pattern) {
-  if (is_callable(array('CRM_Utils_File', 'findFiles'))) {
-    return CRM_Utils_File::findFiles($dir, $pattern);
-  }
+	if (is_callable(array('CRM_Utils_File', 'findFiles'))) {
+		return CRM_Utils_File::findFiles($dir, $pattern);
+	}
 
-  $todos = array($dir);
-  $result = array();
-  while (!empty($todos)) {
-    $subdir = array_shift($todos);
-    foreach (_civisocial_civix_glob("$subdir/$pattern") as $match) {
-      if (!is_dir($match)) {
-        $result[] = $match;
-      }
-    }
-    if ($dh = opendir($subdir)) {
-      while (FALSE !== ($entry = readdir($dh))) {
-        $path = $subdir . DIRECTORY_SEPARATOR . $entry;
-        if ($entry{0} == '.') {
-        } elseif (is_dir($path)) {
-          $todos[] = $path;
-        }
-      }
-      closedir($dh);
-    }
-  }
-  return $result;
+	$todos = array($dir);
+	$result = array();
+	while (!empty($todos)) {
+		$subdir = array_shift($todos);
+		foreach (_civisocial_civix_glob("$subdir/$pattern") as $match) {
+			if (!is_dir($match)) {
+				$result[] = $match;
+			}
+		}
+		if ($dh = opendir($subdir)) {
+			while (FALSE !== ($entry = readdir($dh))) {
+				$path = $subdir . DIRECTORY_SEPARATOR . $entry;
+				if ($entry{0} == '.') {
+				} elseif (is_dir($path)) {
+					$todos[] = $path;
+				}
+			}
+			closedir($dh);
+		}
+	}
+	return $result;
 }
 /**
  * (Delegated) Implements hook_civicrm_managed().
@@ -170,16 +168,16 @@ function _civisocial_civix_find_files($dir, $pattern) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
 function _civisocial_civix_civicrm_managed(&$entities) {
-  $mgdFiles = _civisocial_civix_find_files(__DIR__, '*.mgd.php');
-  foreach ($mgdFiles as $file) {
-    $es = include $file;
-    foreach ($es as $e) {
-      if (empty($e['module'])) {
-        $e['module'] = 'org.civicrm.civisocial';
-      }
-      $entities[] = $e;
-    }
-  }
+	$mgdFiles = _civisocial_civix_find_files(__DIR__, '*.mgd.php');
+	foreach ($mgdFiles as $file) {
+		$es = include $file;
+		foreach ($es as $e) {
+			if (empty($e['module'])) {
+				$e['module'] = 'org.civicrm.civisocial';
+			}
+			$entities[] = $e;
+		}
+	}
 }
 
 /**
@@ -192,48 +190,48 @@ function _civisocial_civix_civicrm_managed(&$entities) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
  */
 function _civisocial_civix_civicrm_caseTypes(&$caseTypes) {
-  if (!is_dir(__DIR__ . '/xml/case')) {
-    return;
-  }
+	if (!is_dir(__DIR__ . '/xml/case')) {
+		return;
+	}
 
-  foreach (_civisocial_civix_glob(__DIR__ . '/xml/case/*.xml') as $file) {
-    $name = preg_replace('/\.xml$/', '', basename($file));
-    if ($name != CRM_Case_XMLProcessor::mungeCaseType($name)) {
-      $errorMessage = sprintf("Case-type file name is malformed (%s vs %s)", $name, CRM_Case_XMLProcessor::mungeCaseType($name));
-      CRM_Core_Error::fatal($errorMessage);
-      // throw new CRM_Core_Exception($errorMessage);
-    }
-    $caseTypes[$name] = array(
-      'module' => 'org.civicrm.civisocial',
-      'name' => $name,
-      'file' => $file,
-    );
-  }
+	foreach (_civisocial_civix_glob(__DIR__ . '/xml/case/*.xml') as $file) {
+		$name = preg_replace('/\.xml$/', '', basename($file));
+		if ($name != CRM_Case_XMLProcessor::mungeCaseType($name)) {
+			$errorMessage = sprintf("Case-type file name is malformed (%s vs %s)", $name, CRM_Case_XMLProcessor::mungeCaseType($name));
+			CRM_Core_Error::fatal($errorMessage);
+			// throw new CRM_Core_Exception($errorMessage);
+		}
+		$caseTypes[$name] = array(
+			'module' => 'org.civicrm.civisocial',
+			'name' => $name,
+			'file' => $file,
+		);
+	}
 }
 
 /**
-* (Delegated) Implements hook_civicrm_angularModules().
-*
-* Find any and return any files matching "ang/*.ang.php"
-*
-* Note: This hook only runs in CiviCRM 4.5+.
-*
-* @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules
-*/
+ * (Delegated) Implements hook_civicrm_angularModules().
+ *
+ * Find any and return any files matching "ang/*.ang.php"
+ *
+ * Note: This hook only runs in CiviCRM 4.5+.
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules
+ */
 function _civisocial_civix_civicrm_angularModules(&$angularModules) {
-  if (!is_dir(__DIR__ . '/ang')) {
-    return;
-  }
+	if (!is_dir(__DIR__ . '/ang')) {
+		return;
+	}
 
-  $files = _civisocial_civix_glob(__DIR__ . '/ang/*.ang.php');
-  foreach ($files as $file) {
-    $name = preg_replace(':\.ang\.php$:', '', basename($file));
-    $module = include $file;
-    if (empty($module['ext'])) {
-      $module['ext'] = 'org.civicrm.civisocial';
-    }
-    $angularModules[$name] = $module;
-  }
+	$files = _civisocial_civix_glob(__DIR__ . '/ang/*.ang.php');
+	foreach ($files as $file) {
+		$name = preg_replace(':\.ang\.php$:', '', basename($file));
+		$module = include $file;
+		if (empty($module['ext'])) {
+			$module['ext'] = 'org.civicrm.civisocial';
+		}
+		$angularModules[$name] = $module;
+	}
 }
 
 /**
@@ -249,8 +247,8 @@ function _civisocial_civix_civicrm_angularModules(&$angularModules) {
  * @return array, possibly empty
  */
 function _civisocial_civix_glob($pattern) {
-  $result = glob($pattern);
-  return is_array($result) ? $result : array();
+	$result = glob($pattern);
+	return is_array($result) ? $result : array();
 }
 
 /**
@@ -262,35 +260,40 @@ function _civisocial_civix_glob($pattern) {
  * @param int $parentId - used internally to recurse in the menu structure
  */
 function _civisocial_civix_insert_navigation_menu(&$menu, $path, $item, $parentId = NULL) {
-  static $navId;
+	static $navId;
 
-  // If we are done going down the path, insert menu
-  if (empty($path)) {
-    if (!$navId) $navId = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation");
-    $navId ++;
-    $menu[$navId] = array (
-      'attributes' => array_merge($item, array(
-        'label'      => CRM_Utils_Array::value('name', $item),
-        'active'     => 1,
-        'parentID'   => $parentId,
-        'navID'      => $navId,
-      ))
-    );
-    return true;
-  }
-  else {
-    // Find an recurse into the next level down
-    $found = false;
-    $path = explode('/', $path);
-    $first = array_shift($path);
-    foreach ($menu as $key => &$entry) {
-      if ($entry['attributes']['name'] == $first) {
-        if (!$entry['child']) $entry['child'] = array();
-        $found = _civisocial_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
-      }
-    }
-    return $found;
-  }
+	// If we are done going down the path, insert menu
+	if (empty($path)) {
+		if (!$navId) {
+			$navId = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation");
+		}
+
+		$navId++;
+		$menu[$navId] = array(
+			'attributes' => array_merge($item, array(
+				'label' => CRM_Utils_Array::value('name', $item),
+				'active' => 1,
+				'parentID' => $parentId,
+				'navID' => $navId,
+			)),
+		);
+		return true;
+	} else {
+		// Find an recurse into the next level down
+		$found = false;
+		$path = explode('/', $path);
+		$first = array_shift($path);
+		foreach ($menu as $key => &$entry) {
+			if ($entry['attributes']['name'] == $first) {
+				if (!$entry['child']) {
+					$entry['child'] = array();
+				}
+
+				$found = _civisocial_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
+			}
+		}
+		return $found;
+	}
 }
 
 /**
@@ -299,14 +302,14 @@ function _civisocial_civix_insert_navigation_menu(&$menu, $path, $item, $parentI
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
  */
 function _civisocial_civix_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  static $configured = FALSE;
-  if ($configured) {
-    return;
-  }
-  $configured = TRUE;
+	static $configured = FALSE;
+	if ($configured) {
+		return;
+	}
+	$configured = TRUE;
 
-  $settingsDir = __DIR__ . DIRECTORY_SEPARATOR . 'settings';
-  if(is_dir($settingsDir) && !in_array($settingsDir, $metaDataFolders)) {
-    $metaDataFolders[] = $settingsDir;
-  }
+	$settingsDir = __DIR__ . DIRECTORY_SEPARATOR . 'settings';
+	if (is_dir($settingsDir) && !in_array($settingsDir, $metaDataFolders)) {
+		$metaDataFolders[] = $settingsDir;
+	}
 }

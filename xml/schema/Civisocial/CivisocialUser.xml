@@ -51,14 +51,14 @@
   </field>
 
   <field>
-    <name>facebook_user_id</name>
-    <title>Facebook User ID</title>
+    <name>social_user_id</name>
+    <title>Social User ID</title>
     <type>varchar</type>
     <length>128</length>
     <export>true</export>
     <required>false</required>
     <default>NULL</default>
-    <comment>User ID for facebook, to be used to match friends etc.</comment>
+    <comment>User identifier given by Social Media, to be used to match friends etc.</comment>
     <add>4.6</add>
   </field>
 
