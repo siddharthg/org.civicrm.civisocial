@@ -49,17 +49,14 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
 
 	function run() {
 		$session = CRM_Core_Session::singleton();
-
 		if (array_key_exists("redirect", $_GET)) {
 			$session->set("civisocialredirect", $_GET["redirect"]);
 		}
-
 		$redirectTo = $this->getBackendURI();
 		//$session->set("userID", "2");
 		if ($redirectTo) {
 			return CRM_Utils_System::redirect($redirectTo);
 		}
-
 		$this->assign('status', "Backend Not Supported");
 		parent::run();
 	}

@@ -64,22 +64,8 @@ class CRM_Civisocial_BAO_CivisocialUser {
 		return $instance;
 	}
 
-	public static function get_by_user_id($id) {
-		$result = array();
-		$instance = new CRM_Civisocial_DAO_CivisocialUser();
-		$instance->social_user_id = $id;
-
-		$instance->find();
-		while ($instance->fetch()) {
-			$row = array();
-			$instance->storeValues($instance, $row);
-			$result[$row['id']] = $row;
-		}
-		return $result;
-	}
-
-	private static function check_existing($social_user_id) {
-		$result = self::get_by_user_id($social_user_id);
+	private static function check_existing_social_user($social_user_id) {
+		$result = self::get(array("social_user_id" => $social_user_id));
 		if (count($result) > 0) {
 			$existing_civisocial_id = 0;
 			foreach ($result as $key => $value) {
@@ -93,7 +79,7 @@ class CRM_Civisocial_BAO_CivisocialUser {
 	}
 
 	public static function handle_facebook_data($user_data_response, $access_token) {
-		$existing_contact_id = self::check_existing($user_data_response["id"]);
+		$existing_contact_id = self::check_existing_social_user($user_data_response["id"]);
 		if ($existing_contact_id) {
 			return $existing_contact_id;
 		} else {
@@ -138,7 +124,7 @@ class CRM_Civisocial_BAO_CivisocialUser {
 	}
 
 	public static function handle_googleplus_data($user_data_response, $access_token) {
-		$existing_contact_id = self::check_existing($user_data_response["sub"]);
+		$existing_contact_id = self::check_existing_social_user($user_data_response["sub"]);
 		if ($existing_contact_id) {
 			return $existing_contact_id;
 		} else {
