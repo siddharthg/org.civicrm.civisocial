@@ -25,6 +25,13 @@
     <page_callback>CRM_Civisocial_Page_FacebookCallback</page_callback>
     <title>FacebookCallback</title>
     <access_callback>1</access_callback>
-     <is_public>true</is_public>
+    <is_public>true</is_public>
+  </item>
+  <item>
+    <path>civicrm/civisocial/logout</path>
+    <page_callback>CRM_Civisocial_Page_Logout</page_callback>
+    <title>Logout</title>
+    <access_callback>1</access_callback>
+    <is_public>true</is_public>
   </item>
 </menu>
