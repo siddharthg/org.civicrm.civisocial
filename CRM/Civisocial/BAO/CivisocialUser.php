@@ -79,30 +79,28 @@ class CRM_Civisocial_BAO_CivisocialUser {
 	}
 
 	public static function handle_facebook_data($user_data_response, $access_token) {
-		$existing_contact_id = self::check_existing_social_user($user_data_response["id"]);
+		$existing_contact_id = self::check_existing_social_user(CRM_Utils_Array::value("id", $user_data_response));
 		if ($existing_contact_id) {
 			return $existing_contact_id;
 		} else {
-			$email = $user_data_response["email"];
+			$email = CRM_Utils_Array::value("email", $user_data_response);
 			$contacts = civicrm_api3('contact', 'get', array("email" => $email));
 
 			// User was not found or no email
 			if (($contacts["count"] == 0) or ($email == NULL)) {
 				// Create a new contact
-				$this->assign('status', "new contact created");
 				$params = array(
-					'first_name' => $user_data_response["first_name"],
-					'last_name' => $user_data_response["last_name"],
-					'display_name' => $user_data_response["name"],
-					'preffered_language' => $user_data_response["locale"],
-					'gender' => $user_data_response["gender"],
-					'email' => $user_data_response["email"],
+					'first_name' => CRM_Utils_Array::value("first_name", $user_data_response),
+					'last_name' => CRM_Utils_Array::value("last_name", $user_data_response),
+					'display_name' => CRM_Utils_Array::value("name", $user_data_response),
+					'preffered_language' => CRM_Utils_Array::value("locale", $user_data_response),
+					'gender' => CRM_Utils_Array::value("gender", $user_data_response),
+					'email' => CRM_Utils_Array::value("email", $user_data_response),
 					'contact_type' => 'Individual',
 				);
 				$result = civicrm_api3('Contact', 'create', $params);
 				// Create a new civisocial user.
 				$contact_id = $result["id"];
-
 			} else {
 				// Contact was found
 				$contact_id = 0;
@@ -110,12 +108,11 @@ class CRM_Civisocial_BAO_CivisocialUser {
 					$contact_id = $key;
 				}
 			}
-
 			$params = array(
 				'contact_id' => $contact_id,
-				'social_user_id' => $user_data_response["id"],
+				'social_user_id' => CRM_Utils_Array::value("id", $user_data_response),
 				'access_token' => $access_token,
-				'oauth_object' => $user_data_response["link"],
+				'oauth_object' => CRM_Utils_Array::value("link", $user_data_response),
 				'backend' => 'facebook',
 			);
 			self::create($params);
@@ -124,22 +121,22 @@ class CRM_Civisocial_BAO_CivisocialUser {
 	}
 
 	public static function handle_googleplus_data($user_data_response, $access_token) {
-		$existing_contact_id = self::check_existing_social_user($user_data_response["sub"]);
+		$existing_contact_id = self::check_existing_social_user(CRM_Utils_Array::value("sub", $user_data_response));
 		if ($existing_contact_id) {
 			return $existing_contact_id;
 		} else {
-			$email = $user_data_response["email"];
+			$email = CRM_Utils_Array::value("email", $user_data_response);
 			$contacts = civicrm_api3('contact', 'get', array("email" => $email));
 			// User was not found
 			if (($contacts["count"] == 0) or ($email == NULL)) {
 				// Create a new contact
 				$params = array(
-					'first_name' => $user_data_response["given_name"],
-					'last_name' => $user_data_response["family_name"],
-					'display_name' => $user_data_response["name"],
-					'preffered_language' => $user_data_response["locale"],
-					'gender' => $user_data_response["gender"],
-					'email' => $user_data_response["email"],
+					'first_name' => CRM_Utils_Array::value("given_name", $user_data_response),
+					'last_name' => CRM_Utils_Array::value("family_name", $user_data_response),
+					'display_name' => CRM_Utils_Array::value("name", $user_data_response),
+					'preffered_language' => CRM_Utils_Array::value("locale", $user_data_response),
+					'gender' => CRM_Utils_Array::value("gender", $user_data_response),
+					'email' => CRM_Utils_Array::value("email", $user_data_response),
 					'contact_type' => 'Individual',
 				);
 				$result = civicrm_api3('Contact', 'create', $params);
@@ -154,9 +151,9 @@ class CRM_Civisocial_BAO_CivisocialUser {
 			}
 			$params = array(
 				'contact_id' => $contact_id,
-				'social_user_id' => $user_data_response["sub"],
+				'social_user_id' => CRM_Utils_Array::value("sub", $user_data_response),
 				'access_token' => $access_token,
-				'oauth_object' => $user_data_response["profile"],
+				'oauth_object' => CRM_Utils_Array::value("profile", $user_data_response),
 				'backend' => 'googleplus',
 			);
 			self::create($params);
