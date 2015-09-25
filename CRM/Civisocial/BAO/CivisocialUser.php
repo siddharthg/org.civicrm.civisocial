@@ -100,8 +100,8 @@ class CRM_Civisocial_BAO_CivisocialUser {
 			$email = $user_data_response["email"];
 			$contacts = civicrm_api3('contact', 'get', array("email" => $email));
 
-			// User was not found
-			if ($contacts["count"] == 0) {
+			// User was not found or no email
+			if (($contacts["count"] == 0) or ($email == NULL)) {
 				// Create a new contact
 				$this->assign('status', "new contact created");
 				$params = array(
@@ -145,7 +145,7 @@ class CRM_Civisocial_BAO_CivisocialUser {
 			$email = $user_data_response["email"];
 			$contacts = civicrm_api3('contact', 'get', array("email" => $email));
 			// User was not found
-			if ($contacts["count"] == 0) {
+			if (($contacts["count"] == 0) or ($email == NULL)) {
 				// Create a new contact
 				$params = array(
 					'first_name' => $user_data_response["given_name"],
