@@ -1,2 +1,4 @@
-# org.civicrm.civisocial
-[GSoC 2015] CiviSocial - Social Media Integration
+# CiviSocial - Social Media Integration into CiviCRM
+The sheer number of social media users has been increasing exponentially along with social media websites. Day by day, Social Media is integrating deeper with people's lives. Social Media Integration into CiviCRM will allow users to quickly fill forms and sign petitions. CiviCRM will also be able to automatically post/tweet about events, campaigns, petitions and  certain types of activities (Eg.Progress towards fundraising goals) and organizations using CiviCRM will be able to analyze how people react to them all at one place. Social Media Integration into CiviCRM hopes to boost the exposure of CiviCRM as a platform and make it easier for people to connect.
+
+For more information visit [this wiki](https://wiki.civicrm.org/confluence/display/CRM/Social+Media+Inegration).
