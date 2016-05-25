@@ -108,13 +108,18 @@ class CRM_Civisocial_BAO_CivisocialUser {
 					$contact_id = $key;
 				}
 			}
+
+			$dateTime = date('YmdHis', time());
 			$params = array(
 				'contact_id' => $contact_id,
 				'social_user_id' => CRM_Utils_Array::value("id", $user_data_response),
 				'access_token' => $access_token,
 				'oauth_object' => CRM_Utils_Array::value("link", $user_data_response),
 				'backend' => 'facebook',
+				'created_date' => $dateTime,
+				'modified_date' => $dateTime,
 			);
+			// exit( var_dump( $params ) );
 			self::create($params);
 			return $contact_id;
 		}
@@ -149,12 +154,16 @@ class CRM_Civisocial_BAO_CivisocialUser {
 					$contact_id = $key;
 				}
 			}
+
+			$dateTime = date('Y-m-d H:i:s', time());
 			$params = array(
 				'contact_id' => $contact_id,
 				'social_user_id' => CRM_Utils_Array::value("sub", $user_data_response),
 				'access_token' => $access_token,
 				'oauth_object' => CRM_Utils_Array::value("profile", $user_data_response),
 				'backend' => 'googleplus',
+				'created_date' => $dateTime,
+				'modified_date' => $dateTime,
 			);
 			self::create($params);
 			return $contact_id;
