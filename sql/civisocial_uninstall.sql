@@ -1,3 +1,3 @@
 
 
-DROP TABLE IF EXISTS `civisocial_user`;
+DROP TABLE IF EXISTS `civicrm_civisocial_user`;

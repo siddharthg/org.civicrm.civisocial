@@ -39,7 +39,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 	 *
 	 * @var string
 	 */
-	static $_tableName = 'civisocial_user';
+		static $_tableName = 'civicrm_civisocial_user';
 	/**
 	 * static instance to hold the field values
 	 *
@@ -130,10 +130,10 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 	/**
 	 * class constructor
 	 *
-	 * @return civisocial_user
+	 * @return civicrm_civisocial_user
 	 */
 	function __construct() {
-		$this->__table = 'civisocial_user';
+		$this->__table = 'civicrm_civisocial_user';
 		parent::__construct();
 	}
 	/**
@@ -164,7 +164,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'description' => 'Unique User ID',
 					'required' => true,
 					'import' => true,
-					'where' => 'civisocial_user.id',
+					'where' => 'civicrm_civisocial_user.id',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'export' => true,
@@ -184,7 +184,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'maxlength' => 128,
 					'size' => 30,
 					'export' => true,
-					'where' => 'civisocial_user.backend',
+					'where' => 'civicrm_civisocial_user.backend',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'html' => array(
@@ -200,7 +200,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'maxlength' => 128,
 					'size' => 128,
 					'export' => true,
-					'where' => 'civisocial_user.social_user_id',
+					'where' => 'civicrm_civisocial_user.social_user_id',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'default' => 'NULL',
@@ -214,7 +214,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'maxlength' => 511,
 					'size' => 511,
 					'export' => true,
-					'where' => 'civisocial_user.access_token',
+					'where' => 'civicrm_civisocial_user.access_token',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'default' => 'NULL',
@@ -228,7 +228,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'maxlength' => 1023,
 					'size' => 1023,
 					'export' => true,
-					'where' => 'civisocial_user.oauth_object',
+					'where' => 'civicrm_civisocial_user.oauth_object',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'default' => 'NULL',
@@ -240,7 +240,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'description' => 'When was the civisocial user was created.',
 					'required' => false,
 					'export' => true,
-					'where' => 'civisocial_user.created_date',
+					'where' => 'civicrm_civisocial_user.created_date',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'default' => 'NULL',
@@ -252,7 +252,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'description' => 'When was the the civisocial user was created or modified or deleted.',
 					'required' => false,
 					'export' => true,
-					'where' => 'civisocial_user.modified_date',
+					'where' => 'civicrm_civisocial_user.modified_date',
 					'headerPattern' => '',
 					'dataPattern' => '',
 					'default' => 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
