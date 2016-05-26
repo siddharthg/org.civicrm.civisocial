@@ -235,7 +235,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 				),
 				'created_date' => array(
 					'name' => 'created_date',
-					'type' => CRM_Utils_Type::T_DATE,
+					'type' => CRM_Utils_Type::T_TIMESTAMP,
 					'title' => ts('Created Date'),
 					'description' => 'When was the civisocial user was created.',
 					'required' => false,
@@ -243,10 +243,11 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'where' => 'civisocial_user.created_date',
 					'headerPattern' => '',
 					'dataPattern' => '',
+					'default' => 'NULL',
 				),
 				'modified_date' => array(
 					'name' => 'modified_date',
-					'type' => CRM_Utils_Type::T_DATE,
+					'type' => CRM_Utils_Type::T_TIMESTAMP,
 					'title' => ts('Modified Date'),
 					'description' => 'When was the the civisocial user was created or modified or deleted.',
 					'required' => false,
@@ -254,6 +255,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
 					'where' => 'civisocial_user.modified_date',
 					'headerPattern' => '',
 					'dataPattern' => '',
+					'default' => 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
 				),
 			);
 		}
