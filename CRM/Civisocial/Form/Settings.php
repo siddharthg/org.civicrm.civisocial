@@ -13,8 +13,11 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 	private $_submittedValues = array();
 	private $_settings = array();
 
-	function buildQuickForm() {
-		CRM_Utils_System::setTitle(ts('Civisocial OAuth Credential Preferences'));
+	/**
+     * Build the settings form
+     */
+	public function buildQuickForm() {
+		CRM_Utils_System::setTitle(ts('CiviSocial OAuth Credential Preferences'));
 
 		$settings = $this->getFormSettings();
 		foreach ($settings as $name => $setting) {
@@ -39,17 +42,23 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 		$this->assign('elementNames', $this->getRenderableElementNames());
 		parent::buildQuickForm();
 	}
-	function postProcess() {
+
+	/**
+   	 * Process the form submission.
+   	 */
+	public function postProcess() {
 		$this->_submittedValues = $this->exportValues();
-		$this->saveSettings();
-		parent::postProcess();
+		if ($this->saveSettings()) {
+			CRM_Core_Session::setStatus(ts('CiviSocial preferences have been saved.'), ts('Saved'), 'success');
+		}
 	}
+
 	/**
 	 * Get the fields/elements defined in this form.
 	 *
 	 * @return array (string)
 	 */
-	function getRenderableElementNames() {
+	public function getRenderableElementNames() {
 		// The _elements list includes some items which should not be
 		// auto-rendered in the loop -- such as "qfKey" and "buttons". These
 		// items don't have labels. We'll identify renderable by filtering on
@@ -63,12 +72,13 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 		}
 		return $elementNames;
 	}
+
 	/**
 	 * Get the settings we are going to allow to be set on this form.
 	 *
 	 * @return array
 	 */
-	function getFormSettings() {
+	public function getFormSettings() {
 		if (empty($this->_settings)) {
 			$settings = civicrm_api3('setting', 'getfields', array('filters' => $this->_settingFilter));
 		}
@@ -76,22 +86,24 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 		// $settings = $settings['values'] + $extraSettings['values'];
 		return $settings['values'];
 	}
+
 	/**
 	 * Get the settings we are going to allow to be set on this form.
 	 *
 	 * @return array
 	 */
-	function saveSettings() {
+	public function saveSettings() {
 		$settings = $this->getFormSettings();
 		$values = array_intersect_key($this->_submittedValues, $settings);
-		civicrm_api3('setting', 'create', $values);
+		return (civicrm_api3('setting', 'create', $values));
 	}
+
 	/**
 	 * Set defaults for form.
 	 *
 	 * @see CRM_Core_Form::setDefaultValues()
 	 */
-	function setDefaultValues() {
+	public function setDefaultValues() {
 		$existing = civicrm_api3('setting', 'get', array('return' => array_keys($this->getFormSettings())));
 		$defaults = array();
 		$domainID = CRM_Core_Config::domainID();
@@ -100,4 +112,5 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 		}
 		return $defaults;
 	}
+
 }
