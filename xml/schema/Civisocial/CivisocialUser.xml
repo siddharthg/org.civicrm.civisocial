@@ -3,8 +3,8 @@
 <table>
   <base>CRM/Civisocial</base>
   <class>CivisocialUser</class>
-  <name>civisocial_user</name>
-  <comment>User objects are defined by a civisocial_user record plus a related civicrm_contact record.</comment>
+  <name>civicrm_civisocial_user</name>
+  <comment>User objects are defined by a civicrm_civisocial_user record plus a related civicrm_contact record.</comment>
   <add>4.6</add>
 
   <field>
@@ -92,7 +92,7 @@
     <comment>When was the civisocial user was created.</comment>
     <required>false</required>
     <export>true</export>
-    <default>CURRENT_TIMESTAMP</default>
+    <default>NULL</default>
     <add>4.6</add>
   </field>
   
