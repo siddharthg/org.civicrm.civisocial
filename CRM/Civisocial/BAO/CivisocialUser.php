@@ -52,6 +52,11 @@ class CRM_Civisocial_BAO_CivisocialUser {
 		return $result;
 	}
 
+	/**
+	 * Create social user
+	 *
+	 * @param array $userInfo
+	 */
 	public static function create($params) {
 		$className = 'CRM_Civisocial_DAO_CivisocialUser';
 		$entityName = 'CivisocialUser';
@@ -64,106 +69,53 @@ class CRM_Civisocial_BAO_CivisocialUser {
 		return $instance;
 	}
 
-	private static function check_existing_social_user($social_user_id) {
-		$result = self::get(array("social_user_id" => $social_user_id));
+	/**
+	 * Create contact
+	 *
+	 * @param array $userInfo
+	 *
+	 * @return int
+	 *		Contact ID of created or existing contact
+	 */
+	public static function createContact($userInfo) {
+		$email = CRM_Utils_Array::value("email", $userInfo);
+		$contacts = civicrm_api3(
+			'contact',
+			'get',
+			array("email" => $email)
+		);
+
+		if (($contacts["count"] == 0) || ($email == NULL)) {
+			$result = civicrm_api3('Contact', 'create', $userInfo);
+			return $result["id"];
+		} else {
+			$contactId = 0;
+			foreach ($contacts["values"] as $key => $value) {
+				$contactId = $key;
+				// @todo: Update the contact with the new info
+			}
+			return $contactId;
+		}
+	}
+
+	/**
+	 * Check if social media user already exists
+	 *
+	 * @param int $socialUserId
+	 * @return int | bool
+	 */
+	public static function socialUserExists($socialUserId, $backend) {
+		$result = self::get(array("social_user_id" => $socialUserId, "backend" => $backend));
 		if (count($result) > 0) {
-			$existing_civisocial_id = 0;
+			$civisocialId = 0;
 			foreach ($result as $key => $value) {
-				$existing_civisocial_id = $key;
+				$civisocialId = $key;
 			}
-			$contact_id = $result[$existing_civisocial_id]["contact_id"];
-			return $contact_id;
+			$contactId = $result[$civisocialId]["contact_id"];
+			return $contactId;
 		} else {
-			return NULL;
+			return FALSE;
 		}
 	}
 
-	public static function handle_facebook_data($user_data_response, $access_token) {
-		$existing_contact_id = self::check_existing_social_user(CRM_Utils_Array::value("id", $user_data_response));
-		if ($existing_contact_id) {
-			return $existing_contact_id;
-		} else {
-			$email = CRM_Utils_Array::value("email", $user_data_response);
-			$contacts = civicrm_api3('contact', 'get', array("email" => $email));
-
-			// User was not found or no email
-			if (($contacts["count"] == 0) or ($email == NULL)) {
-				// Create a new contact
-				$params = array(
-					'first_name' => CRM_Utils_Array::value("first_name", $user_data_response),
-					'last_name' => CRM_Utils_Array::value("last_name", $user_data_response),
-					'display_name' => CRM_Utils_Array::value("name", $user_data_response),
-					'preffered_language' => CRM_Utils_Array::value("locale", $user_data_response),
-					'gender' => CRM_Utils_Array::value("gender", $user_data_response),
-					'email' => CRM_Utils_Array::value("email", $user_data_response),
-					'contact_type' => 'Individual',
-				);
-				$result = civicrm_api3('Contact', 'create', $params);
-				// Create a new civisocial user.
-				$contact_id = $result["id"];
-			} else {
-				// Contact was found
-				$contact_id = 0;
-				foreach ($contacts["values"] as $key => $value) {
-					$contact_id = $key;
-				}
-			}
-
-			$timestamp = time();
-			$params = array(
-				'contact_id' => $contact_id,
-				'social_user_id' => CRM_Utils_Array::value("id", $user_data_response),
-				'access_token' => $access_token,
-				'oauth_object' => CRM_Utils_Array::value("link", $user_data_response),
-				'backend' => 'facebook',
-				'created_date' => $timestamp, // TODO: Created Date not being recorded
-			);
-			self::create($params);
-			return $contact_id;
-		}
-	}
-
-	public static function handle_googleplus_data($user_data_response, $access_token) {
-		$existing_contact_id = self::check_existing_social_user(CRM_Utils_Array::value("sub", $user_data_response));
-		if ($existing_contact_id) {
-			return $existing_contact_id;
-		} else {
-			$email = CRM_Utils_Array::value("email", $user_data_response);
-			$contacts = civicrm_api3('contact', 'get', array("email" => $email));
-			// User was not found
-			if (($contacts["count"] == 0) or ($email == NULL)) {
-				// Create a new contact
-				$params = array(
-					'first_name' => CRM_Utils_Array::value("given_name", $user_data_response),
-					'last_name' => CRM_Utils_Array::value("family_name", $user_data_response),
-					'display_name' => CRM_Utils_Array::value("name", $user_data_response),
-					'preffered_language' => CRM_Utils_Array::value("locale", $user_data_response),
-					'gender' => CRM_Utils_Array::value("gender", $user_data_response),
-					'email' => CRM_Utils_Array::value("email", $user_data_response),
-					'contact_type' => 'Individual',
-				);
-				$result = civicrm_api3('Contact', 'create', $params);
-				// Create a new civisocial user.
-				$contact_id = $result["id"];
-			} else {
-				// Contact was found
-				$contact_id = 0;
-				foreach ($contacts["values"] as $key => $value) {
-					$contact_id = $key;
-				}
-			}
-
-			$timestamp = time();
-			$params = array(
-				'contact_id' => $contact_id,
-				'social_user_id' => CRM_Utils_Array::value("sub", $user_data_response),
-				'access_token' => $access_token,
-				'oauth_object' => CRM_Utils_Array::value("profile", $user_data_response),
-				'backend' => 'googleplus',
-				'created_date' => $timestamp, // TODO: Created Date not being recorded
-			);
-			self::create($params);
-			return $contact_id;
-		}
-	}
 }

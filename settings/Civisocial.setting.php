@@ -13,13 +13,12 @@ return array(
 		'description' => 'Enable User Authentication via Facebook',
 		'help_text' => '',
 		'html_type' => 'CheckBox',
-		'quick_form_type' => 'Element',
-		'values' => array(1=>''),
+		'quick_form_type' => 'YesNo',
 	),
-	'facebook_app_id' => array(
+	'facebook_api_key' => array(
 		'group_name' => 'CiviSocial Account Credentials',
 		'group' => 'civisocial',
-		'name' => 'facebook_app_id',
+		'name' => 'facebook_api_key',
 		'type' => 'String',
 		'is_domain' => 1,
 		'is_contact' => 0,
@@ -29,7 +28,7 @@ return array(
 		'html_type' => 'Text',
 		'quick_form_type' => 'Element',
 	),
-	'facebook_secret' => array(
+	'facebook_api_secret' => array(
 		'group_name' => 'CiviSocial Account Credentials',
 		'group' => 'civisocial',
 		'name' => 'Secret',
@@ -54,12 +53,12 @@ return array(
 		'description' => 'Enable User Authentication via Google Plus',
 		'help_text' => '',
 		'html_type' => 'CheckBox',
-		'quick_form_type' => 'Element',
+		'quick_form_type' => 'YesNo',
 	),
-	'google_plus_key' => array(
+	'googleplus_api_key' => array(
 		'group_name' => 'CiviSocial Account Credentials',
 		'group' => 'civisocial',
-		'name' => 'google_plus_key',
+		'name' => 'googleplus_api_key',
 		'type' => 'String',
 		'is_domain' => 1,
 		'is_contact' => 0,
@@ -69,10 +68,10 @@ return array(
 		'html_type' => 'Text',
 		'quick_form_type' => 'Element',
 	),
-	'google_plus_secret' => array(
+	'googleplus_api_secret' => array(
 		'group_name' => 'CiviSocial Account Credentials',
 		'group' => 'civisocial',
-		'name' => 'google_plus_secret',
+		'name' => 'googleplus_api_secret',
 		'type' => 'String',
 		'is_domain' => 1,
 		'is_contact' => 0,
@@ -94,12 +93,12 @@ return array(
 		'description' => 'Enable User Authentication via Twitter',
 		'help_text' => '',
 		'html_type' => 'CheckBox',
-		'quick_form_type' => 'Element',
+		'quick_form_type' => 'YesNo',
 	),
-	'twitter_consumer_key' => array(
+	'twitter_api_key' => array(
 		'group_name' => 'CiviSocial Account Credentials',
 		'group' => 'civisocial',
-		'name' => 'twitter_consumer_key',
+		'name' => 'twitter_api_key',
 		'type' => 'String',
 		'is_domain' => 1,
 		'is_contact' => 0,
@@ -109,10 +108,10 @@ return array(
 		'html_type' => 'Text',
 		'quick_form_type' => 'Element',
 	),
-	'twitter_consumer_secret' => array(
+	'twitter_api_secret' => array(
 		'group_name' => 'CiviSocial Account Credentials',
 		'group' => 'civisocial',
-		'name' => 'twitter_consumer_secret',
+		'name' => 'twitter_api_secret',
 		'type' => 'String',
 		'is_domain' => 1,
 		'is_contact' => 0,

@@ -14,16 +14,9 @@
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
   <item>
-    <path>civicrm/civisocial/googlepluscallback</path>
-    <page_callback>CRM_Civisocial_Page_GooglePlusCallback</page_callback>
-    <title>GooglePlusCallback</title>
-    <access_callback>1</access_callback>
-    <is_public>true</is_public>
-  </item>
-  <item>
-    <path>civicrm/civisocial/facebookcallback</path>
-    <page_callback>CRM_Civisocial_Page_FacebookCallback</page_callback>
-    <title>FacebookCallback</title>
+    <path>civicrm/civisocial/callback</path>
+    <page_callback>CRM_Civisocial_Page_OAuthCallback</page_callback>
+    <title>OAuthCallback</title>
     <access_callback>1</access_callback>
     <is_public>true</is_public>
   </item>
