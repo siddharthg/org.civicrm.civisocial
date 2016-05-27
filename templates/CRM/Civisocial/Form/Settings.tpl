@@ -10,7 +10,7 @@
 	  </div>
 	  <div class="crm-section">
 	    <div class="label">{$form.facebook_app_id.label}</div>
-	    <div class="content">{$form.facebook_app_id.html|crmAddClass:big|crmAddClass:big}</div>
+	    <div class="content">{$form.facebook_app_id.html|crmAddClass:big}</div>
 	    <div class="clear"></div>
 	  </div>
 	  <div class="crm-section">

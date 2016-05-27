@@ -13,7 +13,8 @@ return array(
 		'description' => 'Enable User Authentication via Facebook',
 		'help_text' => '',
 		'html_type' => 'CheckBox',
-		'quick_form_type' => 'YesNo',
+		'quick_form_type' => 'Element',
+		'values' => array(1=>''),
 	),
 	'facebook_app_id' => array(
 		'group_name' => 'CiviSocial Account Credentials',
@@ -53,7 +54,7 @@ return array(
 		'description' => 'Enable User Authentication via Google Plus',
 		'help_text' => '',
 		'html_type' => 'CheckBox',
-		'quick_form_type' => 'YesNo',
+		'quick_form_type' => 'Element',
 	),
 	'google_plus_key' => array(
 		'group_name' => 'CiviSocial Account Credentials',
@@ -93,7 +94,7 @@ return array(
 		'description' => 'Enable User Authentication via Twitter',
 		'help_text' => '',
 		'html_type' => 'CheckBox',
-		'quick_form_type' => 'YesNo',
+		'quick_form_type' => 'Element',
 	),
 	'twitter_consumer_key' => array(
 		'group_name' => 'CiviSocial Account Credentials',

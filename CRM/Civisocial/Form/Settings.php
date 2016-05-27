@@ -32,12 +32,17 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 			}
 		}
 		$this->addButtons(array(
-			array(
-				'type' => 'submit',
-				'name' => ts('Submit'),
-				'isDefault' => TRUE,
-			),
-		));
+	        array(
+	          'type' => 'submit',
+	          'name' => ts('Save'),
+	          'isDefault' => TRUE,
+	        ),
+	        array(
+	          'type' => 'cancel',
+	          'name' => ts('Cancel'),
+	        ),
+	      )
+	    );
 		// export form elements
 		$this->assign('elementNames', $this->getRenderableElementNames());
 		parent::buildQuickForm();
