@@ -14,6 +14,7 @@ class CRM_Civisocial_Upgrader extends CRM_Civisocial_Upgrader_Base {
 
 	public function install() {
 		$this->executeSqlFile('sql/civisocial_install.sql');
+		//@todo: Rebuild menu cache
 	}
 
 	/**

@@ -55,6 +55,7 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
 		$this->_submittedValues = $this->exportValues();
 		if ($this->saveSettings()) {
 			CRM_Core_Session::setStatus(ts('CiviSocial preferences have been saved.'), ts('Saved'), 'success');
+			// @todo: Flush Settings cache
 		}
 	}
 
