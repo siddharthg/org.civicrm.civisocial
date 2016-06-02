@@ -1,8 +1,8 @@
 <?php
 require_once 'CRM/Core/Page.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/Facebook.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/Googleplus.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/Twitter.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/Facebook.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/Googleplus.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/Twitter.php';
 
 class CRM_Civisocial_Page_Login extends CRM_Core_Page {
 
@@ -37,9 +37,9 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
 			exit("Backend doesn't exist or not enabled.");
 		}
 
-		$classname = "CRM_Civisocial_Backend_SocialMedia_".ucwords($backend);
-		$socialMedia = new $classname();
-		$redirectTo = $socialMedia->getLoginUri();
+		$classname = "CRM_Civisocial_Backend_OAuthProvider_".ucwords($backend);
+		$oAuthProvider = new $classname();
+		$redirectTo = $oAuthProvider->getLoginUri();
 
 		if ($redirectTo) {
 			return CRM_Utils_System::redirect($redirectTo);

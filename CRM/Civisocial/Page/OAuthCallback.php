@@ -1,9 +1,9 @@
 <?php
 require_once 'CRM/Core/Page.php';
 require_once 'CRM/Civisocial/BAO/CivisocialUser.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/Facebook.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/Googleplus.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/Twitter.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/Facebook.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/Googleplus.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/Twitter.php';
 
 class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
 
@@ -44,7 +44,7 @@ class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
 
 		// Check if the backend exists and is enabled
 		// @todo: this is getting redundant. Maybe create a method in 
-		//			SocialMedia class
+		//			OAuthProvider class
 		$isEnabled = civicrm_api3(
 			"setting",
 			"getvalue",
@@ -59,10 +59,10 @@ class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
 		}
 
 		// @todo: Do we still need to check if the class exists?
-		$classname = "CRM_Civisocial_Backend_SocialMedia_".ucwords($backend);
-		$socialMedia = new $classname();
+		$classname = "CRM_Civisocial_Backend_OAuthProvider_".ucwords($backend);
+		$oAuthProvider = new $classname();
 
-		$socialMedia->handleCallback();
+		$oAuthProvider->handleCallback();
 	}
 
 }

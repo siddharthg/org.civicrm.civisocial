@@ -1,13 +1,17 @@
 <?php
 /**
  * This class defines common functions and declares that should be overridden
- * by each Social Media (OAuth Provider)
+ * by each OAuth Provider
  *
- * To add a new social media, add a new file named [social_media_alias].php
- * in SocialMedia/. Methods declared by this class should be overriden.
+ * To add a new OAuth Provider, add a new file named [oauth_provider_alias].php
+ * in OAuthProvider/ and extend this class. Methods declared by this class should
+ * be overriden by the new class. All letters of oauth_provider_alias should be in
+ * small case. For eg. googleplus. The class name of new OAuthProvider class should
+ * start with an uppercase letter. Rest of the letters should be in small case. 
+ * For eg. Googleplus is a valid class name. GooglePlus is not a valid class name.
  */
 
-class CRM_Civisocial_Backend_SocialMedia {
+class CRM_Civisocial_Backend_OAuthProvider {
 	/**
 	 * API key/App ID/Consumer Key provided by OAuth provider
 	 *
