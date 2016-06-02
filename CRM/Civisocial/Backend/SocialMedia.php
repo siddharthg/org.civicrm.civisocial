@@ -40,8 +40,8 @@ class CRM_Civisocial_Backend_SocialMedia {
 	 * Social user information
 	 *
 	 * @var array
-	 *
-	private $userProfile = array();
+	 */
+	protected $userProfile;
 
 	/**
 	 * HTTP Status code of last API request
@@ -82,7 +82,7 @@ class CRM_Civisocial_Backend_SocialMedia {
 	 * Get social user information
 	 *
 	 * @return array
-	 *
+	 */
 	public function getUserProfile() {
 		return $this->userProfile;
 	}

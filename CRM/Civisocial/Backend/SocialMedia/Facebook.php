@@ -11,20 +11,18 @@ class CRM_Civisocial_Backend_SocialMedia_Facebook extends CRM_Civisocial_Backend
 	private $alias = 'facebook';
 
 	/**
-	 * Facebook user information
+	 * Construct Facebook OAuth object
 	 *
-	 * @var array
+	 * @param string $accessToken
+	 *		Preobtained access token. Makes the OAuth Provider ready
+	 *		to make requests.
 	 */
-	private $userProfile;
-
-	/**
-	 * Construct Facebook object
-	 */
-	public function __construct() {
+	public function __construct($accessToken = NULL) {
 		$this->apiUri = 'https://graph.facebook.com/v2.6';
 		$this->getApiCredentials($this->alias);
+		$this->token = $accessToken;
 	}
-	
+
 	/**
 	 * Authorization URI that user will be redirected to for login
 	 *
@@ -116,8 +114,8 @@ class CRM_Civisocial_Backend_SocialMedia_Facebook extends CRM_Civisocial_Backend
 	    CRM_Utils_System::redirect($requestOrigin);
 	}
 	
-	public function IsAuthorized() {
-		if (isset($this->userProfile)) {
+	public function isAuthorized() {
+		if ($this->token && isset($this->userProfile)) {
 			return TRUE;
 		}
 		
@@ -132,12 +130,9 @@ class CRM_Civisocial_Backend_SocialMedia_Facebook extends CRM_Civisocial_Backend
 			}
 		} else {
 			$this->userProfile = $response;
+
 			return TRUE;
 		}
-	}
-	
-	public function getUserProfile() {
-		return $this->userProfile;
 	}
 
 }
