@@ -41,6 +41,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 	 * Process authentication information returned by OAuth provider after login
 	 */
 	public function handleCallback() {
+		parent::handleCallback();
 		$session = CRM_Core_Session::singleton();
 		$requestOrigin = $session->get("civisocialredirect");
 		if (!$requestOrigin) {

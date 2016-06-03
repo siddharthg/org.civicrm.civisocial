@@ -57,8 +57,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 	 * Process information returned by OAuth provider after login
 	 */
 	public function handleCallback() {
+		parent::handleCallback();
 		$session = CRM_Core_Session::singleton();
-
 		$requestOrigin = $session->get("civisocialredirect");
 		if (!$requestOrigin) {
 			$requestOrigin = CRM_Utils_System::url('civicrm', NULL, TRUE);

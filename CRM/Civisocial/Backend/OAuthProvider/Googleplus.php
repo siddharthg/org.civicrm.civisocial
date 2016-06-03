@@ -41,6 +41,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 	 * Process information returned by OAuth provider after login
 	 */
 	public function handleCallback() {
+		parent::handleCallback();
 		$session = CRM_Core_Session::singleton();
 		$requestOrigin = $session->get("civisocialredirect");
 		if (!$requestOrigin) {

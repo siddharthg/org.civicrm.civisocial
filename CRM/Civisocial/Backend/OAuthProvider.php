@@ -18,14 +18,14 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 * @var string
 	 */
 	protected $apiKey;
-	
+
 	/**
 	 * API Secret/App Secret/Consumer Secret provided by OAuth provider
 	 *
 	 * @var string
 	 */
 	protected $apiSecret;
-	
+
 	/**
 	 * Base URL for API requests
 	 *
@@ -97,7 +97,7 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 * @param string $backend
 	 *		OAuth Provider short name (alias)
 	 */
-	protected function getApiCredentials($backend) {
+	public function getApiCredentials($backend) {
 		$this->apiKey = civicrm_api3(
 			"setting",
 			"getvalue",
@@ -124,7 +124,7 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 *
 	 * @return string
 	 */
-	protected function getCallbackUri($backend) {
+	public function getCallbackUri($backend) {
 		return rawurldecode(CRM_Utils_System::url("civicrm/civisocial/callback/{$backend}", NULL, TRUE));
 	}
 
@@ -140,6 +140,9 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 * Process information returned by OAuth provider after login
 	 */
 	public function handleCallback() {
+		if ($this->isLoggedIn()) {
+			CRM_Utils_System::redirect(CRM_Utils_System::url('', NULL, TRUE));
+		}
 	}
 
 	/**
@@ -158,7 +161,31 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	}
 
 	/**
-	 * Check if the user is connected to OAuth provider and authorized
+	 * Disconnect with OAuth provider
+	 */
+	public function logout() {
+		$session = CRM_Core_Session::singleton();
+		$session->set('civisocial_logged_in', NULL);
+		$session->set('civisocial_backend', NULL);
+		$session->set('access_token', NULL);
+	}
+
+	/**
+	 * Check if the user is already logged in
+	 *
+	 * @return bool
+	 */
+	public function isLoggedIn() {
+		$session = CRM_Core_Session::singleton();
+		if ($session->get('civisocial_logged_in')) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/**
+	 * Check if the user is connected to OAuth provider and authorized.
+	 * It can also be used to validate access tokens after setting one.
 	 *
 	 * @return bool
 	 */
