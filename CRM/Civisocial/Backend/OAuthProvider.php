@@ -197,7 +197,7 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 *
 	 * @return array
 	 */ 
-	public function get($node, $params) {
+	public function get($node, $params = array()) {
 		return $this->http($node, $params, 'GET');
 	}
 
@@ -206,7 +206,7 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 *
 	 * @return array
 	 */ 
-	public function post($node, $params) {
+	public function post($node, $params = array()) {
 		return $this->http($node, $params, 'POST');
 	}
 
@@ -217,7 +217,6 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 *		API node
 	 * @param array $params
 	 *		GET/POST parameters
-	 *		If it's a GET request $node may not contain query string
 	 * @param string $method
 	 *		HTTP method (GET/POST)
 	 * @return array
@@ -225,10 +224,14 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	 * @todo Refactor the method to merge with Twitter
 	 */
 	public function http($node, $params, $method = 'GET') {
-		$uri = $this->apiUri . "/" . $node;
+		$nodeParts = explode('?', $node);
+		if (count($nodeParts) == 2) {
+			$node = $nodeParts[0];
+		}
+
 		$paramsStr = http_build_query($params);
 
-		$ch = curl_init($uri);
+		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -240,10 +243,15 @@ class CRM_Civisocial_Backend_OAuthProvider {
 			if (!empty($paramsStr)) {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $paramsStr);
 			}
+			$node = implode('?', $nodeParts);
 		} elseif ($method == 'GET') {
-			$uri .= '?'.http_build_query($params);
+			$node .= '?'.$paramsStr;
+			if (isset($nodeParts[1])) {
+				$node .= '&'.$nodeParts[1];
+			}
 		}
 
+		$uri = $this->apiUri . '/' . $node;
 		curl_setopt($ch, CURLOPT_URL, $uri);
 		$response = curl_exec($ch);
 		$this->httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
