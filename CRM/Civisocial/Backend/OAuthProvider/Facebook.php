@@ -26,15 +26,50 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 	/**
 	 * Authorization URI that user will be redirected to for login
 	 *
+	 * @param array $permissions
+	 *		Permissions to be requested
+	 *
 	 * @return string | bool
+	 * @todo Check if requests have been reviewed by Facebook
 	 */
-	public function getLoginUri() {
+	public function getLoginUri($permissions = array(), $reRequest = FALSE) {
 		$uri = 'https://www.facebook.com/dialog/oauth';
 		$params = array(
 			'client_id' => $this->apiKey,
 			'redirect_uri' => $this->getCallbackUri($this->alias),
 		);
+		if (empty($permissions)) {
+			$params['scope'] = implode(',', array_merge($this->getBasicPermissions(), $this->getExtraPermissions()));
+		} else {
+			$params['scope'] = implode(',', $permissions);
+		}
+		if ($reRequest) {
+	  		$params['auth_type'] = 'rerequest';
+		}
 		return $uri."?".http_build_query($params);
+	}
+
+	/**
+	 * Minimum permissions required to use the login
+	 */
+	public function getBasicPermissions() {
+		return array(
+			'public_profile',
+			'email',
+		);
+	}
+
+	/**
+	 * Extra recommended permissions
+	 * 'rsvp_events' and 'publish_actions' require to be reviewed by
+	 * Facebook before the app can request it
+	 */
+	public function getExtraPermissions() {
+		return array(
+			'user_likes',
+			'rsvp_event',
+			'publish_actions',
+		);
 	}
 
 	/**
@@ -63,13 +98,22 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 			'redirect_uri' => $this->getCallbackUri($this->alias),
 		);
 
-		$response = $this->http('oauth/access_token', $params);
+		$response = $this->get('oauth/access_token', $params);
 		if (isset($response['error'])) {
 			exit($response['error']);
 		}
 
 		$this->token = CRM_Utils_Array::value('access_token', $response);
-		// @todo: Check if all the required scopes are granted
+
+		// Check if all basic perimissions have been granted
+		$deniedPermissions = $this->checkPermissions($this->getBasicPermissions());
+
+		if (!empty($deniedPermissions)) {
+			CRM_Utils_System::redirect($this->getLoginUri($deniedPermissions, TRUE));
+			// @todo:	It would be better if we inform first (eg. You need to provide
+			//			email to continue) and then provide a link to re-authorize
+		}
+
 		$this->login($this->alias, $this->token);
 
 		// Authentication is successful. Fetch user profile
@@ -115,12 +159,74 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 	    CRM_Utils_System::redirect($requestOrigin);
 	}
 	
+	/**
+	 * Check if the user is connected to Facebook and authorized.
+	 * It can also be used to validate access tokens after setting one.
+	 *
+	 * @return bool
+	 */
 	public function isAuthorized() {
 		if ($this->token && isset($this->userProfile)) {
 			return TRUE;
 		}
-		
-		$response = $this->get('me', array('access_token' => $this->token));
+		$response = $this->get('me');
+		if (!$response) {
+			return FALSE;
+		}
+		$this->userProfile = $response;
+		return TRUE;
+	}
+
+	/**
+	 * Check if all passed permissions have beeen granted
+	 *
+	 * @param array $permissions
+	 *		Permissions to check if they have been granted
+	 * @return array
+	 *		An array of permissions that were denied
+	 */
+	public function checkPermissions($permissions = array()) {
+		$grantedPermissions = $this->getGrantedPermissions();
+		if (count($permissions) > count($grantedPermissions)) {
+			return FALSE;
+		}
+		return array_diff($permissions, $grantedPermissions);
+	}
+
+	/**
+	 * Get a list of granted permissions
+	 *
+	 * @return array | bool
+	 *		FALSE if authorization fails
+	 */
+	public function getGrantedPermissions() {
+		$response = $this->get('me/permissions');
+		if ($response) {
+			$grantedPermissions = array();
+			foreach ($response['data'] as $permission) {
+				if ($permission['status'] == 'granted') {
+					$grantedPermissions[] = $permission['permission'];
+				}
+			}
+			return $grantedPermissions;
+		}
+		return FALSE;
+	}
+
+	/**
+	 * GET wrapper for Facebook HTTP request
+ 	 * @param string $node
+	 *		API node
+	 * @param array $params
+	 *		GET/POST parameters
+	 *
+	 * @return array
+	 */ 
+	public function http($node, $params = array(), $method = 'GET') {
+		if ($this->token) {
+			$params['access_token'] = $this->token;
+		}
+		$response = parent::http($node, $params, $method);
 		if (isset($response['error'])) {
 			if ($response['error']['type'] == 'OAuthException') {
 				// Invalid access token
@@ -130,9 +236,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 				exit($response['error']['message']);
 			}
 		} else {
-			$this->userProfile = $response;
-
-			return TRUE;
+			return $response;
 		}
 	}
 
