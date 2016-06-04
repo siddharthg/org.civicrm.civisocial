@@ -1,7 +1,7 @@
 <?php
-require_once 'CRM/Civisocial/Backend/SocialMedia.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider.php';
 
-class CRM_Civisocial_Backend_SocialMedia_Googleplus extends CRM_Civisocial_Backend_SocialMedia {
+class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Backend_OAuthProvider {
 
 	/**
 	 * Short name (alias) for OAuth provider
@@ -11,15 +11,16 @@ class CRM_Civisocial_Backend_SocialMedia_Googleplus extends CRM_Civisocial_Backe
 	private $alias = 'googleplus';
 
 	/**
-	 * Google Plus user information
+	 * Construct Google OAuth object
 	 *
-	 * @var array
+	 * @param string $accessToken
+	 *		Preobtained access token. Makes the OAuth Provider ready
+	 *		to make requests.
 	 */
-	private $userProfile;
-
-	public function __construct() {
+	public function __construct($accessToken = NULL) {
 		$this->apiUri = 'https://www.googleapis.com/oauth2/v3';
 		$this->getApiCredentials($this->alias);
+		$this->token = $accessToken;
 	}
 	
 	public function getLoginUri() {
@@ -40,6 +41,7 @@ class CRM_Civisocial_Backend_SocialMedia_Googleplus extends CRM_Civisocial_Backe
 	 * Process information returned by OAuth provider after login
 	 */
 	public function handleCallback() {
+		parent::handleCallback();
 		$session = CRM_Core_Session::singleton();
 		$requestOrigin = $session->get("civisocialredirect");
 		if (!$requestOrigin) {
@@ -118,15 +120,16 @@ class CRM_Civisocial_Backend_SocialMedia_Googleplus extends CRM_Civisocial_Backe
 	    // @todo: Is status shown on public pages?
 	    CRM_Utils_System::redirect($requestOrigin);
 	}
-	
-	public function IsAuthorized() {
-		if (isset($this->userProfile)) {
+
+	public function isAuthorized() {
+		if ($this->token && isset($this->userProfile)) {
 			return TRUE;
 		}
 		$response = $this->get('userinfo', array('access_token' => $this->token, 'alt' => 'json'));
 		if (isset($response['error'])) {
-			if ($response['error'] == 'invalid_token') {
+			if ($response['error'] == 'invalid_token' || $response['error'] == 'invalid_request') {
 				// Invalid access token
+				// @todo: Log error
 				return FALSE;
 			} else {
 				// Non-access token related error.
@@ -136,10 +139,6 @@ class CRM_Civisocial_Backend_SocialMedia_Googleplus extends CRM_Civisocial_Backe
 			$this->userProfile = $response;
 			return TRUE;
 		}
-	}
-	
-	public function getUserProfile() {
-		return $this->userProfile;
 	}
 
 }

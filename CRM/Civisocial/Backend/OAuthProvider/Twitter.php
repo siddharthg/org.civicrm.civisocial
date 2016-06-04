@@ -1,8 +1,8 @@
 <?php
-require_once 'CRM/Civisocial/Backend/SocialMedia.php';
-require_once 'CRM/Civisocial/Backend/SocialMedia/OAuth/OAuth.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider.php';
+require_once 'CRM/Civisocial/Backend/OAuthProvider/OAuth/OAuth.php';
 
-class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_SocialMedia {
+class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backend_OAuthProvider {
 
 	/**
 	 * Short name (alias) for OAuth provider
@@ -12,13 +12,6 @@ class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_
 	private $alias = "twitter";
 
 	/**
-	 * Twitter user information
-	 *
-	 * @var array
-	 */
-	private $userProfile;
-
-	/**
 	 * Contains the last API request URL
 	 *
 	 * @var string
@@ -26,9 +19,13 @@ class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_
 	private $url;
 
 	/**
-	 * Construct Twitter object
+	 * Construct Twitter OAuth object
+	 *
+	 * @param string $accessToken
+	 *		Preobtained access token. Makes the OAuth Provider ready
+	 *		to make requests.
 	 */
-	public function __construct() {
+	public function __construct($accessToken = NULL) {
 		$this->apiUri = 'https://api.twitter.com/1.1/';
 		$this->getApiCredentials($this->alias);
 
@@ -36,7 +33,9 @@ class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_
 		$this->sha1_method = new OAuthSignatureMethod_HMAC_SHA1();
 		$this->consumer = new OAuthConsumer($this->apiKey, $this->apiSecret);
 		
-		$this->token = NULL;
+		if ($accessToken && isset($accessToken['oauth_token']) && isset($accessToken['oauth_token_secret'])) {
+			$this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
+		}
 	}
 
 	/**
@@ -58,8 +57,8 @@ class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_
 	 * Process information returned by OAuth provider after login
 	 */
 	public function handleCallback() {
+		parent::handleCallback();
 		$session = CRM_Core_Session::singleton();
-
 		$requestOrigin = $session->get("civisocialredirect");
 		if (!$requestOrigin) {
 			$requestOrigin = CRM_Utils_System::url('civicrm', NULL, TRUE);
@@ -147,7 +146,7 @@ class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_
 	 * @returns bool
 	 */
 	public function isAuthorized() {
-		if (isset($this->userProfile)) {
+		if ($this->token && isset($this->userProfile)) {
 			return TRUE;
 		}
 		
@@ -157,15 +156,6 @@ class CRM_Civisocial_Backend_SocialMedia_Twitter extends CRM_Civisocial_Backend_
 			return TRUE;
 		}
 		return false;
-	}
-
-	/**
-	 * Get if the user is connected to OAuth provider and authorized
-	 *
-	 * @return array
-	 */
-	public function getUserProfile() {
-		return $this->userProfile;
 	}
 
 	/**
