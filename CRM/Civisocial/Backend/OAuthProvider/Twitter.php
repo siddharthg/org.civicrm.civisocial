@@ -12,11 +12,11 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 	private $alias = "twitter";
 
 	/**
-	 * Contains the last API request URL
+	 * Contains the HTTP header from the last request
 	 *
 	 * @var string
 	 */
-	private $url;
+	private $httpHeader;
 
 	/**
 	 * Construct Twitter OAuth object
@@ -72,14 +72,14 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 
 		if (isset($_REQUEST['denied'])) {
 			CRM_Utils_System::redirect($requestOrigin);
-		    // @todo: Find a way to show the error message
+				// @todo: Find a way to show the error message
 		}
 
 		// If the oauth_token is not what we expect, bail
 		if (isset($_REQUEST['oauth_token']) && $requestToken['oauth_token'] !== $_REQUEST['oauth_token']) {
-		    // Not a valid callback.
-		    CRM_Utils_System::redirect($requestOrigin);
-		     // @todo: Find a way to show the error message
+			// Not a valid callback.
+			CRM_Utils_System::redirect($requestOrigin);
+			 // @todo: Find a way to show the error message
 		}
 
 		$this->token = new OAuthConsumer($requestToken['oauth_token'], $requestToken['oauth_token_secret']);
@@ -90,25 +90,25 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 
 		$session->set('access_token', $accessToken);
 
-	    // Remove no longer needed request tokens
-	    $session->set('oauth_token', NULL);
-	    $session->set('oauth_token_secret', NULL);
-	    //@todo: Can't I UNSET using Session class?
+		// Remove no longer needed request tokens
+		$session->set('oauth_token', NULL);
+		$session->set('oauth_token_secret', NULL);
+		//@todo: Can't I UNSET using Session class?
 		
 		$this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
 
 		$userProfile = array();
-	    if ($this->isAuthorized()) {
-	    	$userProfile = $this->getUserProfile();
-	    } else {
-	    	// Start over
-	    	CRM_Utils_System::redirect($this->getLoginUri());
-	    }
+		if ($this->isAuthorized()) {
+			$userProfile = $this->getUserProfile();
+		} else {
+			// Start over
+			CRM_Utils_System::redirect($this->getLoginUri());
+		}
 
-	    $twitterUserId = CRM_Utils_Array::value("id", $userProfile);
+		$twitterUserId = CRM_Utils_Array::value("id", $userProfile);
 
-	    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($twitterUserId, $this->alias)) {
-		    $user = array(
+		if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($twitterUserId, $this->alias)) {
+			$user = array(
 				'first_name' => CRM_Utils_Array::value("name", $userProfile),
 				'last_name' => '',
 				'display_name' => CRM_Utils_Array::value("name", $userProfile),
@@ -118,11 +118,11 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 				'contact_type' => 'Individual',
 			);
 
-		    // Create contact
-		    $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
+			// Create contact
+			$contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
 
-		    // Create social user
-		    $socialUser = array(
+			// Create social user
+			$socialUser = array(
 				'contact_id' => $contactId,
 				'social_user_id' => $twitterUserId,
 				'access_token' => $accessToken['oauth_token'],
@@ -130,14 +130,14 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 				'oauth_object' => $accessToken['oauth_token_secret'],
 				'backend' => $this->alias,
 				'created_date' => time(), // @todo: Created Date not being recorded
-		    );
+			);
 
-		    CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
+			CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
 		}
 
-	    CRM_Core_Session::setStatus(ts('Login via Twitter successful.'), ts('Login Successful'), 'success');
-	    // @todo: Is status shown on public pages?
-	    CRM_Utils_System::redirect($requestOrigin);
+		CRM_Core_Session::setStatus(ts('Login via Twitter successful.'), ts('Login Successful'), 'success');
+		// @todo: Is status shown on public pages?
+		CRM_Utils_System::redirect($requestOrigin);
 	}
 
 	/**
@@ -159,9 +159,30 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 	}
 
 	/**
+	 * Check if the connected app has certain permission.
+	 * Requires isAuthorized() have been called first.
+	 *
+	 * @param string $permission
+	 *
+	 * @return bool
+	 *		FALSE if the permssion has not been granted or
+	 *		the request failed
+	 *
+	 * @todo: A permission string have more than one permissions
+	 *			eg. read-write has read and write permission
+	 */
+	public function checkPermissions($permission) {
+		$header = $this->getHeader();
+		if ($header['x_access_level'] == $permission) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/**
 	 * Get a request_token from Twitter
 	 *
-	 * @return  array
+	 * @return	array
 	 * 		a key/value array containing oauth_token and oauth_token_secret
 	 */
 	public function getRequestToken($oauthCallback) {
@@ -187,6 +208,15 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 		} else {
 			return "https://api.twitter.com/oauth/authenticate?oauth_token={$token}";
 		}
+	}
+
+	/**
+	 * Get header from the last request
+	 * 
+	 * @return array
+	 */
+	public function getHeader() {
+		return $this->httpHeader;
 	}
 
 	/**
@@ -252,7 +282,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 	 * @return API results
 	 */
 	public function http($url, $method, $postfields = NULL) {
-		$this->http_info = array();
+		$this->httpInfo = array();
 		$ci = curl_init();
 		/* Curl settings */
 		curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
@@ -260,7 +290,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 		curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
 		curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, $this->sslVerifyPeer);
-		// curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'getHeader'));
+		curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'setHeader'));
 		curl_setopt($ci, CURLOPT_HEADER, FALSE);
 
 		switch ($method) {
@@ -286,22 +316,18 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 		return $response;
 	}
 
-	/**
-	 * Returns last API request's HTTP status
-	 *
-	 * @return int
-	 */
-	public function lastStatusCode() {
-		return $this->http_status;
-	}
 
 	/**
-	 * Returns last API request URL
-	 *
-	 * @return string
-	 */
-	public function lastAPICall() {
-		return $this->last_api_call;
+	* Get the header info to store.
+	*/
+	public function setHeader($ci, $header) {
+		$i = strpos($header, ':');
+		if (!empty($i)) {
+			$key = str_replace('-', '_', strtolower(substr($header, 0, $i)));
+			$value = trim(substr($header, $i + 2));
+			$this->httpHeader[$key] = $value;
+		}
+		return strlen($header);
 	}
 
 }

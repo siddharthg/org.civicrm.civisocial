@@ -28,6 +28,9 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 	 *
 	 * @param array $permissions
 	 *		Permissions to be requested
+	 * @params bool $reRequest
+	 *		Facebook requires that app specifies if it is rerequest
+	 *		or it won't show the login dialog
 	 *
 	 * @return string | bool
 	 * @todo Check if requests have been reviewed by Facebook
@@ -219,6 +222,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 	 *		API node
 	 * @param array $params
 	 *		GET/POST parameters
+	 * @param string $method
+	 *		HTTP method (GET/POST)
 	 *
 	 * @return array
 	 */ 

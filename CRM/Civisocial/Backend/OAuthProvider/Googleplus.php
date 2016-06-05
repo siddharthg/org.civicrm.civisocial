@@ -23,18 +23,56 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 		$this->token = $accessToken;
 	}
 	
-	public function getLoginUri() {
+	/**
+	 * Authorization URI that user will be redirected to for login
+	 *
+	 * @param array $permissions
+	 *		Permissions to be requested
+	 *
+	 * @return string | bool
+	 */
+	public function getLoginUri($permissions = array()) {
 		$uri = 'https://accounts.google.com/o/oauth2/auth';
 
 		$params = array(
-			'scope' => 'email profile',
 			'response_type' => 'code',
 			'client_id' => $this->apiKey,
 			'redirect_uri' => $this->getCallbackUri($this->alias),
 		);
+		if (empty($permissions)) {
+			// Google OAuth doesn't allow you to choose which permisions
+			// to allow. So, extra permissions are not requested.
+			$params['scope'] = implode(' ', $this->getBasicPermissions());
+		} else {
+			$params['scope'] = implode(' ', $permissions);
+		}
 
 		// URL decode because Google wants space intact in scope parameter
 		return urldecode($uri."?".http_build_query($params));
+	}
+
+	/**
+	 * Minimum permissions required to use the login
+	 */
+	public function getBasicPermissions() {
+		return array(
+			'https://www.googleapis.com/auth/plus.login',
+			'https://www.googleapis.com/auth/plus.me',
+			'https://www.googleapis.com/auth/userinfo.profile',
+			'https://www.googleapis.com/auth/userinfo.email',
+		);
+	}
+
+	/**
+	 * Extra recommended permissions
+	 *
+	 * @todo: Create an interface to ask these permissions or do we force
+	 *		users to grant all access in the beginning.
+	 */
+	public function getExtraPermissions() {
+		return array(
+			'https://www.googleapis.com/auth/plus.stream.write',
+		);
 	}
 
 	/**
@@ -71,11 +109,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 		}
 
 		$this->token = CRM_Utils_Array::value('access_token', $response);
-		// @todo: Check if all the required scopes are granted
 		$this->login($this->alias, $this->token);
 
-		// // Authentication is successfull. Fetch user profile
-		// $userProfile = $this->get('userinfo', array('access_token' => $accessToken, 'alt' => 'json'));
 		// Authentication is successful. Fetch user profile
 		$userProfile = array();
 	    if ($this->isAuthorized()) {
@@ -121,11 +156,42 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 	    CRM_Utils_System::redirect($requestOrigin);
 	}
 
+	/**
+	 * Check if the user is connected to Google and authorized.
+	 * It can also be used to validate access tokens after setting one.
+	 *
+	 * @return bool
+	 */
 	public function isAuthorized() {
 		if ($this->token && isset($this->userProfile)) {
 			return TRUE;
 		}
-		$response = $this->get('userinfo', array('access_token' => $this->token, 'alt' => 'json'));
+		$response = $this->get('userinfo');
+		if (!$response) {
+			return FALSE;
+		}
+		$this->userProfile = $response;
+		return TRUE;
+	}
+
+	/**
+	 * GET wrapper for Google's HTTP request
+ 	 * @param string $node
+	 *		API node
+	 * @param array $params
+	 *		GET/POST parameters
+	 * @param string $method
+	 *		HTTP method (GET/POST)
+	 *
+	 * @return array
+	 */ 
+	public function http($node, $params = array(), $method = 'GET') {
+		$params['alt'] = 'json';
+		if ($this->token) {
+			$params['access_token'] = $this->token;
+		}
+		$response = parent::http($node, $params, $method);
+		var_dump($response);
 		if (isset($response['error'])) {
 			if ($response['error'] == 'invalid_token' || $response['error'] == 'invalid_request') {
 				// Invalid access token
@@ -136,8 +202,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 				exit($response['error'].'<br/>'.$response['error_description']);
 			}
 		} else {
-			$this->userProfile = $response;
-			return TRUE;
+			return $response;
 		}
 	}
 
