@@ -106,6 +106,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 		}
 
 		$twitterUserId = CRM_Utils_Array::value("id", $userProfile);
+		$this->login($this->alias, $accessToken, $twitterUserId);
 
 		if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($twitterUserId, $this->alias)) {
 			$user = array(
@@ -150,7 +151,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 			return TRUE;
 		}
 		
-		$userProfile = $this->get('account/verify_credentials');
+		$userProfile = $this->get('account/verify_credentials.json?include_email=true');
 		if (200 == $this->httpCode) {
 			$this->userProfile = $userProfile;
 			return TRUE;

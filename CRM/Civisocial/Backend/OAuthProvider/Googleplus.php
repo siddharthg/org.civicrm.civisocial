@@ -109,7 +109,6 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 		}
 
 		$this->token = CRM_Utils_Array::value('access_token', $response);
-		$this->login($this->alias, $this->token);
 
 		// Authentication is successful. Fetch user profile
 		$userProfile = array();
@@ -121,6 +120,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 	    }
 
 	    $googleplusUserId = CRM_Utils_Array::value("sub", $userProfile);
+		$this->login($this->alias, $this->token, $googleplusUserId);
 
 	    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($googleplusUserId, $this->alias)) {
 		    $user = array(

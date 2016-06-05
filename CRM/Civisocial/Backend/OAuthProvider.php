@@ -148,15 +148,18 @@ class CRM_Civisocial_Backend_OAuthProvider {
 	/**
 	 * Save Backend information to the session
 	 *
-	 * @param $backend
+	 * @param string $backend
 	 *		Shortname for OAuth provider
-	 * @param $accessToken
+	 * @param string $accessToken
 	 *		Access Token provided by OAuth provider after successfull authentication
+	 *@param string $backendId
+	 *		Unique user ID to OAuthProvider
 	 */
-	public function login($backend, $accessToken) {
+	public function login($backend, $accessToken, $backendId) {
 		$session = CRM_Core_Session::singleton();
 		$session->set('civisocial_logged_in', TRUE);
 		$session->set('civisocial_backend', $backend);
+		$session->set('civisocial_backend_user_id', $backendId);
 		$session->set('access_token', $accessToken);
 	}
 

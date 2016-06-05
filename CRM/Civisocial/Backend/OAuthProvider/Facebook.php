@@ -117,8 +117,6 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 			//			email to continue) and then provide a link to re-authorize
 		}
 
-		$this->login($this->alias, $this->token);
-
 		// Authentication is successful. Fetch user profile
 		$userProfile = array();
 	    if ($this->isAuthorized()) {
@@ -129,6 +127,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 	    }
 
 	    $facebookUserId = CRM_Utils_Array::value("id", $userProfile);
+		$this->login($this->alias, $this->token, $facebookUserId);
 
 	    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($facebookUserId, $this->alias)) {
 		    $user = array(
