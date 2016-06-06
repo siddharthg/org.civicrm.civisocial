@@ -1,5 +1,5 @@
 <?php
-require_once 'CRM/Civisocial/Backend/OAuthProvider.php';
+require_once 'CRM/Civisocial/OAuthProvider.php';
 
 class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Backend_OAuthProvider {
 
@@ -84,8 +84,12 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
     $session = CRM_Core_Session::singleton();
     $requestOrigin = $session->get("civisocialredirect");
     if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('civicrm', NULL, TRUE);
-      // @todo: What if the user is not logged in? Make it home url?
+      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
+    }
+
+    // Check if the user denied acccess
+    if (isset($_GET['error']) && $_GET['error'] = 'access_denied') {
+      CRM_Utils_System::redirect($requestOrigin);
     }
 
     // Google sends a code to the callback url, this is further used to acquire

@@ -1,5 +1,5 @@
 <?php
-require_once 'CRM/Civisocial/Backend/OAuthProvider.php';
+require_once 'CRM/Civisocial/OAuthProvider.php';
 
 class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backend_OAuthProvider {
 
@@ -45,7 +45,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
       $params['scope'] = implode(',', array_merge($this->getBasicPermissions(), $this->getExtraPermissions()));
     }
     else {
-      $params['scope'] = implode(',', $permissions);
+      $params['scope'] = implode(',', array_merge($this->getBasicPermissions(), $permissions));
     }
     if ($reRequest) {
       $params['auth_type'] = 'rerequest';
@@ -84,7 +84,12 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
     $session = CRM_Core_Session::singleton();
     $requestOrigin = $session->get("civisocialredirect");
     if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('civicrm', NULL, TRUE);
+      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
+    }
+
+    // Check if the user denied acccess
+    if (isset($_GET['error']) && $_GET['error'] = 'access_denied') {
+      CRM_Utils_System::redirect($requestOrigin);
     }
 
     // Facebook sends a code to the callback url, this is further used to acquire

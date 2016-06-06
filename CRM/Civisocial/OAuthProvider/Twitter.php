@@ -1,6 +1,6 @@
 <?php
-require_once 'CRM/Civisocial/Backend/OAuthProvider.php';
-require_once 'CRM/Civisocial/Backend/OAuthProvider/OAuth/OAuth.php';
+require_once 'CRM/Civisocial/OAuthProvider.php';
+require_once 'CRM/Civisocial/OAuthProvider/OAuth/OAuth.php';
 
 class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backend_OAuthProvider {
 
@@ -61,8 +61,13 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
     $session = CRM_Core_Session::singleton();
     $requestOrigin = $session->get("civisocialredirect");
     if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('civicrm', NULL, TRUE);
+      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
       // @todo: What if the user is not logged in? Make it home url?
+    }
+
+    // Check if the user denied acccess
+    if (isset($_GET['denied'])) {
+      CRM_Utils_System::redirect($requestOrigin);
     }
 
     // Get temporary credentials from the session

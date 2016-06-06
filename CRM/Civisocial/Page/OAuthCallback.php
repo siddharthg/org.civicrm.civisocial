@@ -1,9 +1,9 @@
 <?php
 require_once 'CRM/Core/Page.php';
 require_once 'CRM/Civisocial/BAO/CivisocialUser.php';
-require_once 'CRM/Civisocial/Backend/OAuthProvider/Facebook.php';
-require_once 'CRM/Civisocial/Backend/OAuthProvider/Googleplus.php';
-require_once 'CRM/Civisocial/Backend/OAuthProvider/Twitter.php';
+require_once 'CRM/Civisocial/OAuthProvider/Facebook.php';
+require_once 'CRM/Civisocial/OAuthProvider/Googleplus.php';
+require_once 'CRM/Civisocial/OAuthProvider/Twitter.php';
 
 class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
 
