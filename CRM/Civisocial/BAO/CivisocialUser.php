@@ -74,7 +74,7 @@ class CRM_Civisocial_BAO_CivisocialUser {
    * @param array $userInfo
    *
    * @return int
-   *        Contact ID of created or existing contact
+   *   Contact ID of created or existing contact
    */
   public static function createContact($userInfo) {
     $email = CRM_Utils_Array::value("email", $userInfo);
@@ -102,6 +102,7 @@ class CRM_Civisocial_BAO_CivisocialUser {
    * Check if social media user already exists
    *
    * @param int $socialUserId
+   *
    * @return int | bool
    */
   public static function socialUserExists($socialUserId, $backend) {
@@ -111,7 +112,7 @@ class CRM_Civisocial_BAO_CivisocialUser {
       foreach ($result as $key => $value) {
         $civisocialId = $key;
       }
-      $contactId = $result[$civisocialId]["contact_id"];
+      $contactId = $result[$civisocialId]["id"];
       return $contactId;
     }
     else {

@@ -132,7 +132,14 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
     $googleplusUserId = CRM_Utils_Array::value("sub", $userProfile);
     $this->login($this->alias, $this->token, $googleplusUserId);
 
-    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($googleplusUserId, $this->alias)) {
+    if (!civicrm_api3(
+      'CivisocialUser',
+      'socialuserexists',
+      array(
+        'social_user_id' => $googleplusUserId,
+        'backend' => $this->alias,
+      )
+    )) {
       $user = array(
         'first_name' => CRM_Utils_Array::value("given_name", $userProfile),
         'last_name' => CRM_Utils_Array::value("family_name", $userProfile),
@@ -145,8 +152,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
         $user['email'] = CRM_Utils_Array::value("email", $userProfile);
       }
 
-      // Create contact
-      $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
+      // Find/create contact to map with social user
+      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
       // Create social user
       $socialUser = array(
@@ -158,11 +165,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
-      CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
+      civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
-
-    CRM_Core_Session::setStatus(ts('Login via Google successful.'), ts('Login Successful'), 'success');
-    // @todo: Is status shown on public pages?
     CRM_Utils_System::redirect($requestOrigin);
   }
 

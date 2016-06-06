@@ -136,7 +136,14 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
     $facebookUserId = CRM_Utils_Array::value("id", $userProfile);
     $this->login($this->alias, $this->token, $facebookUserId);
 
-    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($facebookUserId, $this->alias)) {
+    if (!civicrm_api3(
+      'CivisocialUser',
+      'socialuserexists',
+      array(
+        'social_user_id' => $facebookUserId,
+        'backend' => $this->alias,
+      )
+    )) {
       $user = array(
         'first_name' => CRM_Utils_Array::value("name", $userProfile),
         'last_name' => '',
@@ -147,8 +154,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
         'contact_type' => 'Individual',
       );
 
-      // Create contact
-      $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
+      // Find/create contact to map with social user
+      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
       // Create social user
       $socialUser = array(
@@ -160,11 +167,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
-      CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
+      civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
-
-    CRM_Core_Session::setStatus(ts('Login via Facebook successful.'), ts('Login Successful'), 'success');
-    // @todo: Is status shown on public pages?
     CRM_Utils_System::redirect($requestOrigin);
   }
 
@@ -225,6 +229,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 
   /**
    * GET wrapper for Facebook HTTP request
+   *
    * @param string $node
    *   API node
    * @param array $params
