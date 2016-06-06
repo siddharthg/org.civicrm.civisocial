@@ -23,12 +23,12 @@ class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
     // @todo: this is getting redundant. Maybe create a method in
     //			OAuthProvider class
     $isEnabled = civicrm_api3(
-    "setting",
-    "getvalue",
-    array(
-      "group" => "CiviSocial Account Credentials",
-      "name" => "enable_{$backend}",
-    )
+      "setting",
+      "getvalue",
+      array(
+        "group" => "CiviSocial Account Credentials",
+        "name" => "enable_{$backend}",
+      )
     );
 
     if (!$isEnabled) {

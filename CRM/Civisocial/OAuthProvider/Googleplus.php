@@ -14,8 +14,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
    * Construct Google OAuth object
    *
    * @param string $accessToken
-   *        Preobtained access token. Makes the OAuth Provider ready
-   *        to make requests.
+   *   Preobtained access token. Makes the OAuth Provider ready
+   *   to make requests.
    */
   public function __construct($accessToken = NULL) {
     $this->apiUri = 'https://www.googleapis.com/oauth2/v3';
@@ -27,7 +27,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
    * Authorization URI that user will be redirected to for login
    *
    * @param array $permissions
-   *        Permissions to be requested
+   *   Permissions to be requested
    *
    * @return string | bool
    */
@@ -54,6 +54,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 
   /**
    * Minimum permissions required to use the login
+   *
+   * @return array
    */
   public function getBasicPermissions() {
     return array(
@@ -67,8 +69,10 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
   /**
    * Extra recommended permissions
    *
+   * @return array
+   *
    * @todo: Create an interface to ask these permissions or do we force
-   *        users to grant all access in the beginning.
+   *   users to grant all access in the beginning.
    */
   public function getExtraPermissions() {
     return array(
@@ -183,11 +187,11 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
   /**
    * GET wrapper for Google's HTTP request
    * @param string $node
-   *        API node
+   *   API node
    * @param array $params
-   *        GET/POST parameters
+   *   GET/POST parameters
    * @param string $method
-   *        HTTP method (GET/POST)
+   *   HTTP method (GET/POST)
    *
    * @return array
    */

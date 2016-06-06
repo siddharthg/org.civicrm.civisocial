@@ -79,9 +79,9 @@ class CRM_Civisocial_BAO_CivisocialUser {
   public static function createContact($userInfo) {
     $email = CRM_Utils_Array::value("email", $userInfo);
     $contacts = civicrm_api3(
-    'contact',
-    'get',
-    array("email" => $email)
+      'contact',
+      'get',
+      array("email" => $email)
     );
 
     if (($contacts["count"] == 0) || ($email == NULL)) {

@@ -14,8 +14,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Construct Facebook OAuth object
    *
    * @param string $accessToken
-   *        Preobtained access token. Makes the OAuth Provider ready
-   *        to make requests.
+   *   Preobtained access token. Makes the OAuth Provider ready
+   *   to make requests.
    */
   public function __construct($accessToken = NULL) {
     $this->apiUri = 'https://graph.facebook.com/v2.6';
@@ -27,10 +27,10 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Authorization URI that user will be redirected to for login
    *
    * @param array $permissions
-   *        Permissions to be requested
+   *   Permissions to be requested
    * @params bool $reRequest
-   *        Facebook requires that app specifies if it is rerequest
-   *        or it won't show the login dialog
+   *   Facebook requires that app specifies if it is rerequest
+   *   or it won't show the login dialog
    *
    * @return string | bool
    * @todo Check if requests have been reviewed by Facebook
@@ -190,9 +190,10 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Check if all passed permissions have beeen granted
    *
    * @param array $permissions
-   *        Permissions to check if they have been granted
+   *   Permissions to check if they have been granted
+   *
    * @return array
-   *        An array of permissions that were denied
+   *   An array of permissions that were denied
    */
   public function checkPermissions($permissions = array()) {
     $grantedPermissions = $this->getGrantedPermissions();
@@ -206,7 +207,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Get a list of granted permissions
    *
    * @return array | bool
-   *        FALSE if authorization fails
+   *   FALSE if authorization fails
    */
   public function getGrantedPermissions() {
     $response = $this->get('me/permissions');
@@ -225,11 +226,11 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
   /**
    * GET wrapper for Facebook HTTP request
    * @param string $node
-   *        API node
+   *   API node
    * @param array $params
-   *        GET/POST parameters
+   *   GET/POST parameters
    * @param string $method
-   *        HTTP method (GET/POST)
+   *   HTTP method (GET/POST)
    *
    * @return array
    */

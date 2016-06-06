@@ -22,8 +22,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
    * Construct Twitter OAuth object
    *
    * @param string $accessToken
-   *        Preobtained access token. Makes the OAuth Provider ready
-   *        to make requests.
+   *   Preobtained access token. Makes the OAuth Provider ready
+   *   to make requests.
    */
   public function __construct($accessToken = NULL) {
     $this->apiUri = 'https://api.twitter.com/1.1/';
@@ -41,7 +41,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
   /**
    * Authorization URI that user will be redirected to for login
    *
-   * @return string | bool
+   * @return string|bool
    */
   public function getLoginUri() {
     $tempCredentials = $this->getRequestToken($this->getCallbackUri($this->alias));
@@ -150,7 +150,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
   /**
    * Get if the user is connected to OAuth provider and authorized
    *
-   * @returns bool
+   * @return bool
    */
   public function isAuthorized() {
     if ($this->token && isset($this->userProfile)) {
@@ -172,11 +172,11 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
    * @param string $permission
    *
    * @return bool
-   *        FALSE if the permssion has not been granted or
-   *        the request failed
+   *   FALSE if the permssion has not been granted or
+   *   the request failed
    *
    * @todo: A permission string have more than one permissions
-   *            eg. read-write has read and write permission
+   *       eg. read-write has read and write permission
    */
   public function checkPermissions($permission) {
     $header = $this->getHeader();
@@ -189,8 +189,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
   /**
    * Get a request_token from Twitter
    *
-   * @return    array
-   *         a key/value array containing oauth_token and oauth_token_secret
+   * @return array
+   *    a key/value array containing oauth_token and oauth_token_secret
    */
   public function getRequestToken($oauthCallback) {
     $parameters = array();
@@ -232,7 +232,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
    * secret, to sign API calls.
    *
    * @return array
-   *        OAuth token and secret
+   *   OAuth token and secret
    */
   public function getAccessToken($oauth_verifier) {
     $params = array();
@@ -329,6 +329,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 
   /**
    * Get the header info to store.
+   *
+   * @return array
    */
   public function setHeader($ci, $header) {
     $i = strpos($header, ':');

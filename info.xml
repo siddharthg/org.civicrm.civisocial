@@ -18,9 +18,9 @@
   <version>0.5</version>
   <develStage>alpha</develStage>
   <compatibility>
-    <ver>4.2</ver>
+    <ver>4.7</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>This module is being developed. See https://github.com/siddharthg/org.civicrm.civisocial</comments>
   <civix>
     <namespace>CRM/Civisocial</namespace>
   </civix>
