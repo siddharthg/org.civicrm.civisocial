@@ -45,7 +45,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
       $params['scope'] = implode(',', array_merge($this->getBasicPermissions(), $this->getExtraPermissions()));
     }
     else {
-      $params['scope'] = implode(',', $permissions);
+      $params['scope'] = implode(',', array_merge($this->getBasicPermissions(), $permissions));
     }
     if ($reRequest) {
       $params['auth_type'] = 'rerequest';
