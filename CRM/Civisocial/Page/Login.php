@@ -7,7 +7,7 @@ require_once 'CRM/Civisocial/OAuthProvider/Twitter.php';
 class CRM_Civisocial_Page_Login extends CRM_Core_Page {
 
   public function run() {
-    $oAuthProvider = new CRM_Civisocial_Backend_OAuthProvider();
+    $oAuthProvider = new CRM_Civisocial_OAuthProvider();
 
     $session = CRM_Core_Session::singleton();
     if (array_key_exists("redirect", $_GET)) {
@@ -49,7 +49,7 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
         exit("Backend doesn't exist or not enabled.");
       }
 
-      $classname = "CRM_Civisocial_Backend_OAuthProvider_" . ucwords($backend);
+      $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($backend);
       $oAuthProvider = new $classname();
       $redirectTo = $oAuthProvider->getLoginUri();
       if ($redirectTo) {

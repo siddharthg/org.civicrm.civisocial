@@ -36,7 +36,7 @@ class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
     }
 
     // @todo: Do we still need to check if the class exists?
-    $classname = "CRM_Civisocial_Backend_OAuthProvider_" . ucwords($backend);
+    $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($backend);
     $oAuthProvider = new $classname();
 
     $oAuthProvider->handleCallback();

@@ -2,7 +2,7 @@
 require_once 'CRM/Civisocial/OAuthProvider.php';
 require_once 'CRM/Civisocial/OAuthProvider/OAuth/OAuth.php';
 
-class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider {
 
   /**
    * Short name (alias) for OAuth provider

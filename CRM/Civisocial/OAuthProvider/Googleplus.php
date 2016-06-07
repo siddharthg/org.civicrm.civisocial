@@ -1,7 +1,7 @@
 <?php
 require_once 'CRM/Civisocial/OAuthProvider.php';
 
-class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvider {
 
   /**
    * Short name (alias) for OAuth provider

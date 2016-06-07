@@ -11,7 +11,7 @@
  * For eg. Googleplus is a valid class name. GooglePlus is not a valid class name.
  */
 
-class CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider {
   /**
    * API key/App ID/Consumer Key provided by OAuth provider
    *

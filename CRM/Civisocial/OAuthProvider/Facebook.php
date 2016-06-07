@@ -1,7 +1,7 @@
 <?php
 require_once 'CRM/Civisocial/OAuthProvider.php';
 
-class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider {
 
   /**
    * Short name (alias) for OAuth provider
@@ -153,7 +153,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
         'email' => CRM_Utils_Array::value("email", $userProfile),
         'contact_type' => 'Individual',
       );
-
+      var_dump($userProfile); var_dump($user); exit;
       // Find/create contact to map with social user
       $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
