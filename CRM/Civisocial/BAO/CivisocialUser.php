@@ -1,9 +1,9 @@
 <?php
 /*
 +--------------------------------------------------------------------+
-| CiviCRM version 4.6                                                |
+| CiviCRM version 4.7                                                |
 +--------------------------------------------------------------------+
-| Copyright CiviCRM LLC (c) 2004-2015                                |
+| Copyright CiviCRM LLC (c) 2004-2016                                |
 +--------------------------------------------------------------------+
 | This file is a part of CiviCRM.                                    |
 |                                                                    |
@@ -24,37 +24,40 @@
 | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
 +--------------------------------------------------------------------+
  */
+
 /**
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2016
  *
+ * Civisocial User BAO class.
  */
-class CRM_Civisocial_BAO_CivisocialUser {
+class CRM_Civisocial_BAO_CivisocialUser extends CRM_Civisocial_DAO_CivisocialUser {
 
-  public static function get($params) {
-    $result = array();
-    $instance = new CRM_Civisocial_DAO_CivisocialUser();
-    if (!empty($params)) {
-      $fields = $instance->fields();
-      foreach ($params as $key => $value) {
-        if (isset($fields[$key])) {
-          $instance->$key = $value;
-        }
-      }
+  /**
+   * Retrieve the information about the social user
+   *
+   * @param array $params
+   *   (reference ) an assoc array of name/value pairs.
+   * @param array $defaults
+   *   (reference ) an assoc array to hold the flattened values.
+   *
+   * @return array
+   *   CRM_Batch_BAO_CivisocialUser object on success, null otherwise
+   */
+  public static function retrieve(&$params, &$defaults) {
+    $civisocialUser = new CRM_Civisocial_DAO_CivisocialUser();
+    $civisocialUser->copyValues($params);
+    if ($civisocialUser->find(TRUE)) {
+      CRM_Core_DAO::storeValues($civisocialUser, $defaults);
+      return $civisocialUser;
     }
-    $instance->find();
-    while ($instance->fetch()) {
-      $row = array();
-      $instance->storeValues($instance, $row);
-      $result[$row['id']] = $row;
-    }
-    return $result;
+    return NULL;
   }
 
   /**
    * Create social user
    *
-   * @param string $params
+   * @param array $params
    */
   public static function create($params) {
     $className = 'CRM_Civisocial_DAO_CivisocialUser';
@@ -106,18 +109,17 @@ class CRM_Civisocial_BAO_CivisocialUser {
    * @return int | bool
    */
   public static function socialUserExists($socialUserId, $backend) {
-    $result = self::get(array("social_user_id" => $socialUserId, "backend" => $backend));
-    if (count($result) > 0) {
-      $civisocialId = 0;
-      foreach ($result as $key => $value) {
-        $civisocialId = $key;
-      }
-      $contactId = $result[$civisocialId]["id"];
-      return $contactId;
+    $params = array(
+      'social_user_id' => $socialUserId,
+      'backend' => $backend,
+    );
+    $defaults = array();
+    $result = self::retrieve($params, $defaults);
+
+    if ($result) {
+      return $defaults['id'];
     }
-    else {
-      return FALSE;
-    }
+    return FALSE;
   }
 
 }
