@@ -157,14 +157,14 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   }
   else {
     // Get name of the Logged in User
-    $user = civicrm_api3('contact', 'get', array("id" => $userID));
-    $smarty->assign("name", $user["values"][$userID]["display_name"]);
+    $user = civicrm_api3('contact', 'get', array("id" => $userId));
+    $smarty->assign("name", $user["values"][$userId]["display_name"]);
 
-    // Get the backend which is saved in the session
+    // Get the OAuth Provider which is saved in the session
 
-    $OAuthProvider = CRM_Core_Session::singleton()->get("civisocial_backend");
+    $OAuthProvider = CRM_Core_Session::singleton()->get("civisocial_oauth_provider");
 
-    $smarty->assign("backend", $OAuthProvider);
+    $smarty->assign("OAuthProvider", $OAuthProvider);
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => "loggedin.tpl",
     ));

@@ -7,7 +7,7 @@ require_once 'CRM/Civisocial/OAuthProvider/Twitter.php';
 class CRM_Civisocial_Page_Login extends CRM_Core_Page {
 
   public function run() {
-    $oAuthProvider = new CRM_Civisocial_OAuthProvider();
+    $oap = new CRM_Civisocial_OAuthProvider();
 
     $session = CRM_Core_Session::singleton();
     if (array_key_exists("redirect", $_GET)) {
@@ -23,25 +23,26 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
     $path = explode('/', $path);
 
     if (count($path) == 3 && $path[2] == 'logout') {
-      $oAuthProvider->login();
+      $oap->login();
       CRM_Utils_System::redirect(CRM_Utils_System::url('', NULL, TRUE));
     }
     elseif (count($path) == 4 && $path[2] == 'login') {
-      $oAuthProvider->handleCallback();
+      // Check if already logged in
+      $oap->handleCallback();
 
-      $backend = CRM_Utils_Array::value(3, $path);
-      if (!$backend) {
+      $OAuthProvider = CRM_Utils_Array::value(3, $path);
+      if (!$OAuthProvider) {
         exit("Bad Request");
         // @todo: Redirect to home or show Page not found?
       }
 
-      // Check if the backend exists and is enabled
+      // Check if the OAuth Provider exists and is enabled
       $isEnabled = civicrm_api3(
         "setting",
         "getvalue",
         array(
           "group" => "CiviSocial Account Credentials",
-          "name" => "enable_{$backend}",
+          "name" => "enable_{$OAuthProvider}",
         )
       );
 
@@ -49,9 +50,9 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
         exit("OAuth Provider either doesn't exist or not enabled.");
       }
 
-      $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($backend);
-      $oAuthProvider = new $classname();
-      $redirectTo = $oAuthProvider->getLoginUri();
+      $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($OAuthProvider);
+      $oap = new $classname();
+      $redirectTo = $oap->getLoginUri();
       if ($redirectTo) {
         return CRM_Utils_System::redirect($redirectTo);
       }

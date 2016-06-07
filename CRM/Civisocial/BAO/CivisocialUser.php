@@ -85,7 +85,7 @@ class CRM_Civisocial_BAO_CivisocialUser extends CRM_Civisocial_DAO_CivisocialUse
       array("email" => $email)
     );
 
-    if (($contacts["count"] == 0) || ($email == NULL)) {
+    if ($contacts["count"] == 0 || $email == NULL) {
       $result = civicrm_api3('Contact', 'create', $userInfo);
       return $result["id"];
     }
@@ -114,7 +114,7 @@ class CRM_Civisocial_BAO_CivisocialUser extends CRM_Civisocial_DAO_CivisocialUse
   public static function socialUserExists($socialUserId, $oauthProvider) {
     $params = array(
       'social_user_id' => $socialUserId,
-      'backend' => $oauthProvider,
+      'oauth_provider' => $oauthProvider,
     );
     $defaults = array();
     $result = self::retrieve($params, $defaults);

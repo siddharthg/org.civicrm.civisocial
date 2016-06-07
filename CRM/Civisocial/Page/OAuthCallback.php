@@ -14,12 +14,12 @@ class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
     }
     $path = explode('/', $path);
 
-    $backend = CRM_Utils_Array::value(3, $path);
-    if (!$backend) {
-      exit("BACKEND ERROR: No backend found in request");
+    $OAuthProvider = CRM_Utils_Array::value(3, $path);
+    if (!$OAuthProvider) {
+      exit("BACKEND ERROR: No OAuth Provider found in request");
     }
 
-    // Check if the backend exists and is enabled
+    // Check if the OAuth Provider exists and is enabled
     // @todo: this is getting redundant. Maybe create a method in
     //			OAuthProvider class
     $isEnabled = civicrm_api3(
@@ -27,19 +27,18 @@ class CRM_Civisocial_Page_OAuthCallback extends CRM_Core_Page {
       "getvalue",
       array(
         "group" => "CiviSocial Account Credentials",
-        "name" => "enable_{$backend}",
+        "name" => "enable_{$OAuthProvider}",
       )
     );
 
     if (!$isEnabled) {
-      exit("Backend either doesn't exist or is not enabled.");
+      exit("OAuth Provider either doesn't exist or is not enabled.");
     }
 
     // @todo: Do we still need to check if the class exists?
-    $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($backend);
-    $oAuthProvider = new $classname();
-
-    $oAuthProvider->handleCallback();
+    $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($OAuthProvider);
+    $oap = new $classname();
+    $oap->handleCallback();
   }
 
 }

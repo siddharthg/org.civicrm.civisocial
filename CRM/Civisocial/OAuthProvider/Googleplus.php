@@ -133,7 +133,7 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
       'socialuserexists',
       array(
         'social_user_id' => $googleplusUserId,
-        'backend' => $this->alias,
+        'oauth_provider' => $this->alias,
       )
     );
 
@@ -157,8 +157,8 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $googleplusUserId,
-        'access_token' => $this->token,
-        'backend' => $this->alias,
+        'oauth_token' => $this->token,
+        'oauth_provider' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 

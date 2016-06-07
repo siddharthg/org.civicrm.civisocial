@@ -37,8 +37,8 @@
   </foreignKey>
 
   <field>
-    <name>backend</name>
-    <title>Backend</title>
+    <name>oauth_provider</name>
+    <title>OAuth Provider</title>
     <type>varchar</type>
     <length>128</length>
     <html>
@@ -46,19 +46,19 @@
       <size>30</size>
     </html>
     <export>true</export>
-    <comment>Backend OAuth Provider</comment>
+    <comment>OAuth Provider</comment>
     <add>4.6</add>
   </field>
 
   <field>
     <name>social_user_id</name>
-    <title>Social User ID</title>
+    <title>OAuth Provider User ID</title>
     <type>varchar</type>
     <length>128</length>
     <export>true</export>
     <required>false</required>
     <default>NULL</default>
-    <comment>User identifier given by Social Media, to be used to match friends etc.</comment>
+    <comment>User identifier given by OAuth Provider</comment>
     <add>4.6</add>
   </field>
 
@@ -75,14 +75,14 @@
   </field>
 
   <field>
-    <name>oauth_object</name>
-    <title>Serialized Object returned by OAuth Provider</title>
+    <name>oauth_token</name>
+    <title>Access Token Secret provided by OAuth Provider</title>
     <type>varchar</type>
     <length>1023</length>
     <export>true</export>
     <required>false</required>
     <default>NULL</default>
-    <comment>Access Token Provided by OAuth Provider</comment>
+    <comment>Access Token Secret Provided by OAuth Provider</comment>
     <add>4.6</add>
   </field>
 

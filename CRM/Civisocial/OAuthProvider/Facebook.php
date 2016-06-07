@@ -138,7 +138,7 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       'socialuserexists',
       array(
         'social_user_id' => $facebookUserId,
-        'backend' => $this->alias,
+        'oauth_provider' => $this->alias,
       )
     );
 
@@ -160,9 +160,8 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $facebookUserId,
-        'access_token' => $this->token,
-      // @todo: Rename oauth_object in table to oauth_secret?
-        'backend' => $this->alias,
+        'oauth_token' => $this->token,
+        'oauth_provider' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 

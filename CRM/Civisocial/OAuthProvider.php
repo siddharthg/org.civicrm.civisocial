@@ -166,7 +166,7 @@ class CRM_Civisocial_OAuthProvider {
       $session->set('civisocial_logged_in', TRUE);
     }
     $session->set('civisocial_oauth_provider', $OAuthProvider);
-    $session->set('civisocial_oauth_provider_id', $OAuthProviderId);
+    $session->set('civisocial_social_user_id', $OAuthProviderId);
     $session->set('civisocial_contact_id', $contactId);
     $session->set('access_token', $accessToken);
   }

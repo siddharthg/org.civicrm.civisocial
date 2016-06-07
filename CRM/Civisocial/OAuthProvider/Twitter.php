@@ -116,7 +116,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
       'socialuserexists',
       array(
         'social_user_id' => $twitterUserId,
-        'backend' => $this->alias,
+        'oauth_provider' => $this->alias,
       )
     );
 
@@ -138,9 +138,9 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $twitterUserId,
-        'access_token' => $accessToken['oauth_token'],
-        'oauth_object' => $accessToken['oauth_token_secret'],
-        'backend' => $this->alias,
+        'oauth_token' => $accessToken['oauth_token'],
+        'oauth_secret' => $accessToken['oauth_token_secret'],
+        'oauth_provider' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
