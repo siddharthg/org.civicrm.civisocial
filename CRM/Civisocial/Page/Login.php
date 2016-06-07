@@ -23,7 +23,7 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
     $path = explode('/', $path);
 
     if (count($path) == 3 && $path[2] == 'logout') {
-      $oAuthProvider->logout();
+      $oAuthProvider->login();
       CRM_Utils_System::redirect(CRM_Utils_System::url('', NULL, TRUE));
     }
     elseif (count($path) == 4 && $path[2] == 'login') {
@@ -37,16 +37,16 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
 
       // Check if the backend exists and is enabled
       $isEnabled = civicrm_api3(
-      "setting",
-      "getvalue",
-      array(
-        "group" => "CiviSocial Account Credentials",
-        "name" => "enable_{$backend}",
-      )
+        "setting",
+        "getvalue",
+        array(
+          "group" => "CiviSocial Account Credentials",
+          "name" => "enable_{$backend}",
+        )
       );
 
       if (!$isEnabled) {
-        exit("Backend doesn't exist or not enabled.");
+        exit("OAuth Provider either doesn't exist or not enabled.");
       }
 
       $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($backend);

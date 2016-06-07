@@ -144,7 +144,8 @@ class CRM_Civisocial_OAuthProvider {
   }
 
   /**
-   * Save Backend information to the session
+   * Save OAuth Provider information to the session.
+   * Acts as a logout if no parameters is passed.
    *
    * @param string $OAuthProvider
    *   Shortname for OAuth provider
@@ -156,23 +157,18 @@ class CRM_Civisocial_OAuthProvider {
    *   Contact ID of the social user
    *
    */
-  public function login($OAuthProvider, $accessToken, $OAuthProviderId, $contactId) {
+  public function login($OAuthProvider = NULL, $accessToken = NULL, $OAuthProviderId = NULL, $contactId = NULL) {
     $session = CRM_Core_Session::singleton();
-    $session->set('civisocial_logged_in', TRUE);
-    $session->set('civisocial_backend', $OAuthProvider);
-    $session->set('civisocial_backend_user_id', $OAuthProviderId);
+
+    if ($OAuthProvider == NULL && $accessToken == NULL && $OAuthProviderId == NULL && $contactId == NULL) {
+      $session->set('civisocial_logged_in', FALSE);
+    } else {
+      $session->set('civisocial_logged_in', TRUE);
+    }
+    $session->set('civisocial_oauth_provider', $OAuthProvider);
+    $session->set('civisocial_oauth_provider_id', $OAuthProviderId);
     $session->set('civisocial_contact_id', $contactId);
     $session->set('access_token', $accessToken);
-  }
-
-  /**
-   * Disconnect with OAuth provider
-   */
-  public function logout() {
-    $session = CRM_Core_Session::singleton();
-    $session->set('civisocial_logged_in', NULL);
-    $session->set('civisocial_backend', NULL);
-    $session->set('access_token', NULL);
   }
 
   /**
