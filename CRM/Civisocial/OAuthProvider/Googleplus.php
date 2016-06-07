@@ -205,7 +205,6 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
       $params['access_token'] = $this->token;
     }
     $response = parent::http($node, $params, $method);
-    var_dump($response);
     if (isset($response['error'])) {
       if ($response['error'] == 'invalid_token' || $response['error'] == 'invalid_request') {
         // Invalid access token

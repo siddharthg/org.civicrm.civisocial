@@ -145,15 +145,15 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       )
     )) {
       $user = array(
-        'first_name' => CRM_Utils_Array::value("name", $userProfile),
-        'last_name' => '',
+        'first_name' => CRM_Utils_Array::value('first_name', $userProfile),
+        'last_name' => CRM_Utils_Array::value('last_name', $userProfile),
         'display_name' => CRM_Utils_Array::value("name", $userProfile),
-        'preffered_language' => CRM_Utils_Array::value("lang", $userProfile),
-        'gender' => NULL,
+        'preffered_language' => CRM_Utils_Array::value("locale", $userProfile),
+        'gender' => CRM_Utils_Array::value('gender', $userProfile),
         'email' => CRM_Utils_Array::value("email", $userProfile),
         'contact_type' => 'Individual',
       );
-      var_dump($userProfile); var_dump($user); exit;
+
       // Find/create contact to map with social user
       $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
@@ -182,7 +182,7 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
     if ($this->token && isset($this->userProfile)) {
       return TRUE;
     }
-    $response = $this->get('me');
+    $response = $this->get('me?fields=id,first_name,last_name,name,locale,gender,email');
     if (!$response) {
       return FALSE;
     }

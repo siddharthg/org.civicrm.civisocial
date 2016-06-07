@@ -164,7 +164,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $userProfile = $this->get('account/verify_credentials.json?include_email=true');
     if (200 == $this->httpCode) {
       $this->userProfile = $userProfile;
-      var_dump($this->getHeader());
       return TRUE;
     }
     return FALSE;
