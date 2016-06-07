@@ -1,5 +1,4 @@
 <?php
-require_once 'CRM/Civisocial/OAuthProvider.php';
 require_once 'CRM/Civisocial/OAuthProvider/OAuth/OAuth.php';
 
 class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider {
@@ -112,16 +111,16 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     }
 
     $twitterUserId = CRM_Utils_Array::value("id", $userProfile);
-    $this->login($this->alias, $accessToken, $twitterUserId);
-
-    if (!civicrm_api3(
+    $contactId = civicrm_api3(
       'CivisocialUser',
       'socialuserexists',
       array(
         'social_user_id' => $twitterUserId,
         'backend' => $this->alias,
       )
-    )) {
+    );
+
+    if (!$contactId) {
       $user = array(
         'first_name' => CRM_Utils_Array::value("name", $userProfile),
         'last_name' => '',
@@ -140,7 +139,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
         'contact_id' => $contactId,
         'social_user_id' => $twitterUserId,
         'access_token' => $accessToken['oauth_token'],
-                // @todo: Rename oauth_object in table to oauth_secret?
         'oauth_object' => $accessToken['oauth_token_secret'],
         'backend' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
@@ -148,6 +146,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
 
       civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
+    $this->login($this->alias, $accessToken, $twitterUserId, $contactId);
     CRM_Utils_System::redirect($requestOrigin);
   }
 

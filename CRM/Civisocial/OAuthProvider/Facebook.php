@@ -1,5 +1,4 @@
 <?php
-require_once 'CRM/Civisocial/OAuthProvider.php';
 
 class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider {
 
@@ -134,16 +133,16 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
     }
 
     $facebookUserId = CRM_Utils_Array::value("id", $userProfile);
-    $this->login($this->alias, $this->token, $facebookUserId);
-
-    if (!civicrm_api3(
+    $contactId = civicrm_api3(
       'CivisocialUser',
       'socialuserexists',
       array(
         'social_user_id' => $facebookUserId,
         'backend' => $this->alias,
       )
-    )) {
+    );
+
+    if (!$contactId) {
       $user = array(
         'first_name' => CRM_Utils_Array::value('first_name', $userProfile),
         'last_name' => CRM_Utils_Array::value('last_name', $userProfile),
@@ -169,6 +168,7 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
 
       civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
+    $this->login($this->alias, $this->token, $facebookUserId, $contactId);
     CRM_Utils_System::redirect($requestOrigin);
   }
 

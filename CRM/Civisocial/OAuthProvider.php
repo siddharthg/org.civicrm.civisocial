@@ -94,16 +94,16 @@ class CRM_Civisocial_OAuthProvider {
   /**
    * Retrieve API credentails for the given Social Media
    *
-   * @param string $backend
+   * @param string $OAuthProvider
    *      OAuth Provider short name (alias)
    */
-  public function getApiCredentials($backend) {
+  public function getApiCredentials($OAuthProvider) {
     $this->apiKey = civicrm_api3(
             "setting",
             "getvalue",
             array(
               "group" => "CiviSocial Account Credentials",
-              "name" => "{$backend}_api_key",
+              "name" => "{$OAuthProvider}_api_key",
             )
         );
     $this->apiSecret = civicrm_api3(
@@ -111,7 +111,7 @@ class CRM_Civisocial_OAuthProvider {
             "getvalue",
             array(
               "group" => "CiviSocial Account Credentials",
-              "name" => "{$backend}_api_secret",
+              "name" => "{$OAuthProvider}_api_secret",
             )
         );
   }
@@ -119,13 +119,13 @@ class CRM_Civisocial_OAuthProvider {
   /**
    * URL to be redirected to after user authorizes
    *
-   * @param string $backend
+   * @param string $OAuthProvider
    *      OAuth Provider short name (alias)
    *
    * @return string
    */
-  public function getCallbackUri($backend) {
-    return rawurldecode(CRM_Utils_System::url("civicrm/civisocial/callback/{$backend}", NULL, TRUE));
+  public function getCallbackUri($OAuthProvider) {
+    return CRM_Utils_System::url("civicrm/civisocial/callback/{$OAuthProvider}", NULL, TRUE, NULL, FALSE);
   }
 
   /**
@@ -146,18 +146,22 @@ class CRM_Civisocial_OAuthProvider {
   /**
    * Save Backend information to the session
    *
-   * @param string $backend
-   *      Shortname for OAuth provider
+   * @param string $OAuthProvider
+   *   Shortname for OAuth provider
    * @param string $accessToken
-   *      Access Token provided by OAuth provider after successfull authentication
-   * @param string $backendId
-   *      Unique user ID to OAuthProvider
+   *   Access Token provided by OAuth provider after successfull authentication
+   * @param string $OAuthProviderId
+   *   Unique user ID to OAuthProvider
+   * @param int $contactId
+   *   Contact ID of the social user
+   *
    */
-  public function login($backend, $accessToken, $backendId) {
+  public function login($OAuthProvider, $accessToken, $OAuthProviderId, $contactId) {
     $session = CRM_Core_Session::singleton();
     $session->set('civisocial_logged_in', TRUE);
-    $session->set('civisocial_backend', $backend);
-    $session->set('civisocial_backend_user_id', $backendId);
+    $session->set('civisocial_backend', $OAuthProvider);
+    $session->set('civisocial_backend_user_id', $OAuthProviderId);
+    $session->set('civisocial_contact_id', $contactId);
     $session->set('access_token', $accessToken);
   }
 

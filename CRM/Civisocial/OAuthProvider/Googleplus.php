@@ -1,6 +1,4 @@
 <?php
-require_once 'CRM/Civisocial/OAuthProvider.php';
-
 class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvider {
 
   /**
@@ -130,16 +128,16 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
     }
 
     $googleplusUserId = CRM_Utils_Array::value("sub", $userProfile);
-    $this->login($this->alias, $this->token, $googleplusUserId);
-
-    if (!civicrm_api3(
+    $contactId = civicrm_api3(
       'CivisocialUser',
       'socialuserexists',
       array(
         'social_user_id' => $googleplusUserId,
         'backend' => $this->alias,
       )
-    )) {
+    );
+
+    if (!$contactId) {
       $user = array(
         'first_name' => CRM_Utils_Array::value("given_name", $userProfile),
         'last_name' => CRM_Utils_Array::value("family_name", $userProfile),
@@ -160,13 +158,13 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
         'contact_id' => $contactId,
         'social_user_id' => $googleplusUserId,
         'access_token' => $this->token,
-      // @todo: Rename oauth_object in table to oauth_secret?
         'backend' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
       civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
+    $this->login($this->alias, $this->token, $googleplusUserId, $contactId);
     CRM_Utils_System::redirect($requestOrigin);
   }
 
