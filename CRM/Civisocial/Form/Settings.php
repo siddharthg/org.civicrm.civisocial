@@ -1,7 +1,4 @@
 <?php
-
-require_once 'CRM/Core/Form.php';
-
 /**
  * Form controller class
  *
@@ -14,11 +11,16 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
   private $_settings = array();
 
   /**
+   * Preprocess the form.
+   */
+  public function preProcess() {
+    CRM_Utils_System::setTitle(ts('CiviSocial OAuth Credentials'));
+  }
+
+  /**
    * Build the settings form
    */
   public function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts('CiviSocial OAuth Credential Preferences'));
-
     $settings = $this->getFormSettings();
     foreach ($settings as $name => $setting) {
       if (isset($setting['quick_form_type'])) {

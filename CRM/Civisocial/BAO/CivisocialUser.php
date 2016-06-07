@@ -55,20 +55,18 @@ class CRM_Civisocial_BAO_CivisocialUser extends CRM_Civisocial_DAO_CivisocialUse
   }
 
   /**
-   * Create social user
+   * Create social user.
    *
    * @param array $params
    */
   public static function create($params) {
-    $className = 'CRM_Civisocial_DAO_CivisocialUser';
-    $entityName = 'CivisocialUser';
-    $hook = empty($params['id']) ? 'create' : 'edit';
-    CRM_Utils_Hook::pre($hook, $entityName, CRM_Utils_Array::value('id', $params), $params);
-    $instance = new $className();
-    $instance->copyValues($params);
-    $instance->save();
-    CRM_Utils_Hook::post($hook, $entityName, $instance->id, $instance);
-    return $instance;
+    $op = empty($params['id']) ? 'create' : 'edit';
+    CRM_Utils_Hook::pre($op, 'CivisocialUser', CRM_Utils_Array::value('id', $params), $params);
+    $civisocialUser = new CRM_Civisocial_DAO_CivisocialUser();
+    $civisocialUser->copyValues($params);
+    $civisocialUser->save();
+    CRM_Utils_Hook::post($op, 'CivisocialUser', $civisocialUser->id, $civisocialUser);
+    return $civisocialUser;
   }
 
   /**
@@ -105,19 +103,24 @@ class CRM_Civisocial_BAO_CivisocialUser extends CRM_Civisocial_DAO_CivisocialUse
    * Check if social media user already exists
    *
    * @param int $socialUserId
+   *   ID provided by OAuthProvider. Eg. Facebook ID.
+   * @param string $oauthProvider
+   *   OAuthProvider alias. Eg. googleplus
    *
-   * @return int | bool
+   * @return int|bool
+   *   Returns contact_id of the social user if the user exits.
+   *   FALSE otherwise
    */
-  public static function socialUserExists($socialUserId, $backend) {
+  public static function socialUserExists($socialUserId, $oauthProvider) {
     $params = array(
       'social_user_id' => $socialUserId,
-      'backend' => $backend,
+      'backend' => $oauthProvider,
     );
     $defaults = array();
     $result = self::retrieve($params, $defaults);
 
     if ($result) {
-      return $defaults['id'];
+      return $defaults['contact_id'];
     }
     return FALSE;
   }

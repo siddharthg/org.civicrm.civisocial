@@ -18,6 +18,7 @@
   <version>0.5</version>
   <develStage>alpha</develStage>
   <compatibility>
+    <ver>4.6</ver>
     <ver>4.7</ver>
   </compatibility>
   <comments>This module is being developed. See https://github.com/siddharthg/org.civicrm.civisocial</comments>
