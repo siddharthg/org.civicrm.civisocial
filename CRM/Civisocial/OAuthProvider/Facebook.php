@@ -1,7 +1,6 @@
 <?php
-require_once 'CRM/Civisocial/OAuthProvider.php';
 
-class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider {
 
   /**
    * Short name (alias) for OAuth provider
@@ -14,8 +13,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Construct Facebook OAuth object
    *
    * @param string $accessToken
-   *        Preobtained access token. Makes the OAuth Provider ready
-   *        to make requests.
+   *   Preobtained access token. Makes the OAuth Provider ready
+   *   to make requests.
    */
   public function __construct($accessToken = NULL) {
     $this->apiUri = 'https://graph.facebook.com/v2.6';
@@ -27,10 +26,10 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Authorization URI that user will be redirected to for login
    *
    * @param array $permissions
-   *        Permissions to be requested
+   *   Permissions to be requested
    * @params bool $reRequest
-   *        Facebook requires that app specifies if it is rerequest
-   *        or it won't show the login dialog
+   *   Facebook requires that app specifies if it is rerequest
+   *   or it won't show the login dialog
    *
    * @return string | bool
    * @todo Check if requests have been reviewed by Facebook
@@ -134,37 +133,41 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
     }
 
     $facebookUserId = CRM_Utils_Array::value("id", $userProfile);
-    $this->login($this->alias, $this->token, $facebookUserId);
+    $contactId = civicrm_api3(
+      'CivisocialUser',
+      'socialuserexists',
+      array(
+        'social_user_id' => $facebookUserId,
+        'oauth_provider' => $this->alias,
+      )
+    );
 
-    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($facebookUserId, $this->alias)) {
+    if (!$contactId) {
       $user = array(
-        'first_name' => CRM_Utils_Array::value("name", $userProfile),
-        'last_name' => '',
+        'first_name' => CRM_Utils_Array::value('first_name', $userProfile),
+        'last_name' => CRM_Utils_Array::value('last_name', $userProfile),
         'display_name' => CRM_Utils_Array::value("name", $userProfile),
-        'preffered_language' => CRM_Utils_Array::value("lang", $userProfile),
-        'gender' => NULL,
+        'preffered_language' => CRM_Utils_Array::value("locale", $userProfile),
+        'gender' => CRM_Utils_Array::value('gender', $userProfile),
         'email' => CRM_Utils_Array::value("email", $userProfile),
         'contact_type' => 'Individual',
       );
 
-      // Create contact
-      $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
+      // Find/create contact to map with social user
+      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
       // Create social user
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $facebookUserId,
-        'access_token' => $this->token,
-      // @todo: Rename oauth_object in table to oauth_secret?
-        'backend' => $this->alias,
+        'oauth_token' => $this->token,
+        'oauth_provider' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
-      CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
+      civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
-
-    CRM_Core_Session::setStatus(ts('Login via Facebook successful.'), ts('Login Successful'), 'success');
-    // @todo: Is status shown on public pages?
+    $this->login($this->alias, $this->token, $facebookUserId, $contactId);
     CRM_Utils_System::redirect($requestOrigin);
   }
 
@@ -178,7 +181,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
     if ($this->token && isset($this->userProfile)) {
       return TRUE;
     }
-    $response = $this->get('me');
+    $response = $this->get('me?fields=id,first_name,last_name,name,locale,gender,email');
     if (!$response) {
       return FALSE;
     }
@@ -190,9 +193,10 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Check if all passed permissions have beeen granted
    *
    * @param array $permissions
-   *        Permissions to check if they have been granted
+   *   Permissions to check if they have been granted
+   *
    * @return array
-   *        An array of permissions that were denied
+   *   An array of permissions that were denied
    */
   public function checkPermissions($permissions = array()) {
     $grantedPermissions = $this->getGrantedPermissions();
@@ -206,7 +210,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
    * Get a list of granted permissions
    *
    * @return array | bool
-   *        FALSE if authorization fails
+   *   FALSE if authorization fails
    */
   public function getGrantedPermissions() {
     $response = $this->get('me/permissions');
@@ -224,12 +228,13 @@ class CRM_Civisocial_Backend_OAuthProvider_Facebook extends CRM_Civisocial_Backe
 
   /**
    * GET wrapper for Facebook HTTP request
+   *
    * @param string $node
-   *        API node
+   *   API node
    * @param array $params
-   *        GET/POST parameters
+   *   GET/POST parameters
    * @param string $method
-   *        HTTP method (GET/POST)
+   *   HTTP method (GET/POST)
    *
    * @return array
    */

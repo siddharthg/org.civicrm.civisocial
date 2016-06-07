@@ -1,7 +1,5 @@
 <?php
-require_once 'CRM/Civisocial/OAuthProvider.php';
-
-class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvider {
 
   /**
    * Short name (alias) for OAuth provider
@@ -14,8 +12,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
    * Construct Google OAuth object
    *
    * @param string $accessToken
-   *        Preobtained access token. Makes the OAuth Provider ready
-   *        to make requests.
+   *   Preobtained access token. Makes the OAuth Provider ready
+   *   to make requests.
    */
   public function __construct($accessToken = NULL) {
     $this->apiUri = 'https://www.googleapis.com/oauth2/v3';
@@ -27,7 +25,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
    * Authorization URI that user will be redirected to for login
    *
    * @param array $permissions
-   *        Permissions to be requested
+   *   Permissions to be requested
    *
    * @return string | bool
    */
@@ -54,6 +52,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
 
   /**
    * Minimum permissions required to use the login
+   *
+   * @return array
    */
   public function getBasicPermissions() {
     return array(
@@ -67,8 +67,10 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
   /**
    * Extra recommended permissions
    *
+   * @return array
+   *
    * @todo: Create an interface to ask these permissions or do we force
-   *        users to grant all access in the beginning.
+   *   users to grant all access in the beginning.
    */
   public function getExtraPermissions() {
     return array(
@@ -126,9 +128,16 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
     }
 
     $googleplusUserId = CRM_Utils_Array::value("sub", $userProfile);
-    $this->login($this->alias, $this->token, $googleplusUserId);
+    $contactId = civicrm_api3(
+      'CivisocialUser',
+      'socialuserexists',
+      array(
+        'social_user_id' => $googleplusUserId,
+        'oauth_provider' => $this->alias,
+      )
+    );
 
-    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($googleplusUserId, $this->alias)) {
+    if (!$contactId) {
       $user = array(
         'first_name' => CRM_Utils_Array::value("given_name", $userProfile),
         'last_name' => CRM_Utils_Array::value("family_name", $userProfile),
@@ -141,24 +150,21 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
         $user['email'] = CRM_Utils_Array::value("email", $userProfile);
       }
 
-      // Create contact
-      $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
+      // Find/create contact to map with social user
+      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
       // Create social user
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $googleplusUserId,
-        'access_token' => $this->token,
-      // @todo: Rename oauth_object in table to oauth_secret?
-        'backend' => $this->alias,
+        'oauth_token' => $this->token,
+        'oauth_provider' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
-      CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
+      civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
-
-    CRM_Core_Session::setStatus(ts('Login via Google successful.'), ts('Login Successful'), 'success');
-    // @todo: Is status shown on public pages?
+    $this->login($this->alias, $this->token, $googleplusUserId, $contactId);
     CRM_Utils_System::redirect($requestOrigin);
   }
 
@@ -183,11 +189,11 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
   /**
    * GET wrapper for Google's HTTP request
    * @param string $node
-   *        API node
+   *   API node
    * @param array $params
-   *        GET/POST parameters
+   *   GET/POST parameters
    * @param string $method
-   *        HTTP method (GET/POST)
+   *   HTTP method (GET/POST)
    *
    * @return array
    */
@@ -197,7 +203,6 @@ class CRM_Civisocial_Backend_OAuthProvider_Googleplus extends CRM_Civisocial_Bac
       $params['access_token'] = $this->token;
     }
     $response = parent::http($node, $params, $method);
-    var_dump($response);
     if (isset($response['error'])) {
       if ($response['error'] == 'invalid_token' || $response['error'] == 'invalid_request') {
         // Invalid access token

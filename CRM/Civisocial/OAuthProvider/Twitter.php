@@ -1,8 +1,7 @@
 <?php
-require_once 'CRM/Civisocial/OAuthProvider.php';
 require_once 'CRM/Civisocial/OAuthProvider/OAuth/OAuth.php';
 
-class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backend_OAuthProvider {
+class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider {
 
   /**
    * Short name (alias) for OAuth provider
@@ -22,8 +21,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
    * Construct Twitter OAuth object
    *
    * @param string $accessToken
-   *        Preobtained access token. Makes the OAuth Provider ready
-   *        to make requests.
+   *   Preobtained access token. Makes the OAuth Provider ready
+   *   to make requests.
    */
   public function __construct($accessToken = NULL) {
     $this->apiUri = 'https://api.twitter.com/1.1/';
@@ -41,7 +40,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
   /**
    * Authorization URI that user will be redirected to for login
    *
-   * @return string | bool
+   * @return string|bool
    */
   public function getLoginUri() {
     $tempCredentials = $this->getRequestToken($this->getCallbackUri($this->alias));
@@ -112,9 +111,16 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
     }
 
     $twitterUserId = CRM_Utils_Array::value("id", $userProfile);
-    $this->login($this->alias, $accessToken, $twitterUserId);
+    $contactId = civicrm_api3(
+      'CivisocialUser',
+      'socialuserexists',
+      array(
+        'social_user_id' => $twitterUserId,
+        'oauth_provider' => $this->alias,
+      )
+    );
 
-    if (!CRM_Civisocial_BAO_CivisocialUser::socialUserExists($twitterUserId, $this->alias)) {
+    if (!$contactId) {
       $user = array(
         'first_name' => CRM_Utils_Array::value("name", $userProfile),
         'last_name' => '',
@@ -125,32 +131,29 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
         'contact_type' => 'Individual',
       );
 
-      // Create contact
-      $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($user);
+      // Find/create contact to map with social user
+      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
 
       // Create social user
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $twitterUserId,
-        'access_token' => $accessToken['oauth_token'],
-                // @todo: Rename oauth_object in table to oauth_secret?
-        'oauth_object' => $accessToken['oauth_token_secret'],
-        'backend' => $this->alias,
+        'oauth_token' => $accessToken['oauth_token'],
+        'oauth_secret' => $accessToken['oauth_token_secret'],
+        'oauth_provider' => $this->alias,
         'created_date' => time(), // @todo: Created Date not being recorded
       );
 
-      CRM_Civisocial_BAO_CivisocialUser::create($socialUser);
+      civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
-
-    CRM_Core_Session::setStatus(ts('Login via Twitter successful.'), ts('Login Successful'), 'success');
-    // @todo: Is status shown on public pages?
+    $this->login($this->alias, $accessToken, $twitterUserId, $contactId);
     CRM_Utils_System::redirect($requestOrigin);
   }
 
   /**
    * Get if the user is connected to OAuth provider and authorized
    *
-   * @returns bool
+   * @return bool
    */
   public function isAuthorized() {
     if ($this->token && isset($this->userProfile)) {
@@ -169,28 +172,32 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
    * Check if the connected app has certain permission.
    * Requires isAuthorized() have been called first.
    *
-   * @param string $permission
+   * @param array $permission
+   *   Possible values: read, write, directmessages
    *
    * @return bool
-   *        FALSE if the permssion has not been granted or
-   *        the request failed
+   *   FALSE if one or more permssions have not been granted or
+   *   the request failed
    *
-   * @todo: A permission string have more than one permissions
-   *            eg. read-write has read and write permission
+   * @todo: A permission string has more than one permissions
+   *       eg. read-write has read and write permission
    */
-  public function checkPermissions($permission) {
+  public function checkPermissions($permissions) {
     $header = $this->getHeader();
-    if ($header['x_access_level'] == $permission) {
-      return TRUE;
+    $accessLevel = $header['x_access_level'];
+    foreach ($permissions as $permission) {
+      if (FALSE === strpos($accessLevel, $permission)) {
+        return FALSE;
+      }
     }
-    return FALSE;
+    return TRUE;
   }
 
   /**
    * Get a request_token from Twitter
    *
-   * @return    array
-   *         a key/value array containing oauth_token and oauth_token_secret
+   * @return array
+   *   A key/value array containing oauth_token and oauth_token_secret
    */
   public function getRequestToken($oauthCallback) {
     $parameters = array();
@@ -232,7 +239,7 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
    * secret, to sign API calls.
    *
    * @return array
-   *        OAuth token and secret
+   *   OAuth token and secret
    */
   public function getAccessToken($oauth_verifier) {
     $params = array();
@@ -329,6 +336,8 @@ class CRM_Civisocial_Backend_OAuthProvider_Twitter extends CRM_Civisocial_Backen
 
   /**
    * Get the header info to store.
+   *
+   * @return array
    */
   public function setHeader($ci, $header) {
     $i = strpos($header, ':');
