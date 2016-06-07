@@ -164,6 +164,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $userProfile = $this->get('account/verify_credentials.json?include_email=true');
     if (200 == $this->httpCode) {
       $this->userProfile = $userProfile;
+      var_dump($this->getHeader());
       return TRUE;
     }
     return FALSE;
@@ -173,28 +174,32 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    * Check if the connected app has certain permission.
    * Requires isAuthorized() have been called first.
    *
-   * @param string $permission
+   * @param array $permission
+   *   Possible values: read, write, directmessages
    *
    * @return bool
-   *   FALSE if the permssion has not been granted or
+   *   FALSE if one or more permssions have not been granted or
    *   the request failed
    *
-   * @todo: A permission string have more than one permissions
+   * @todo: A permission string has more than one permissions
    *       eg. read-write has read and write permission
    */
-  public function checkPermissions($permission) {
+  public function checkPermissions($permissions) {
     $header = $this->getHeader();
-    if ($header['x_access_level'] == $permission) {
-      return TRUE;
+    $accessLevel = $header['x_access_level'];
+    foreach ($permissions as $permission) {
+      if (FALSE === strpos($accessLevel, $permission)) {
+        return FALSE;
+      }
     }
-    return FALSE;
+    return TRUE;
   }
 
   /**
    * Get a request_token from Twitter
    *
    * @return array
-   *    a key/value array containing oauth_token and oauth_token_secret
+   *   A key/value array containing oauth_token and oauth_token_secret
    */
   public function getRequestToken($oauthCallback) {
     $parameters = array();
