@@ -140,33 +140,33 @@ function civisocial_civicrm_navigationMenu(&$params) {
   );
 }
 
-function civisocial_civicrm_buildForm($formName, &$form) {
-  // @todo: Link with Login
-  $session = CRM_Core_Session::singleton();
-  $smarty = CRM_Core_Smarty::singleton();
-  $userId = $session->get('civisocial_contact_id');
-  if ($session->get('civisocial_logged_in')) {
-      // If there is no user logged in.
-      $id = $form->get('id');
-      $redirecturl = CRM_Utils_System::url(CRM_Utils_System::currentPath(), array('id' => $id, 'reset' => 1), FALSE, NULL, FALSE, TRUE);
-      $smarty->assign("redirecturl", $redirecturl);
+// function civisocial_civicrm_buildForm($formName, &$form) {
+//   // @todo: Link with Login
+//   $session = CRM_Core_Session::singleton();
+//   $smarty = CRM_Core_Smarty::singleton();
+//   $userId = $session->get('civisocial_contact_id');
+//   if ($session->get('civisocial_logged_in')) {
+//       // If there is no user logged in.
+//       $id = $form->get('id');
+//       $redirecturl = CRM_Utils_System::url(CRM_Utils_System::currentPath(), array('id' => $id, 'reset' => 1), FALSE, NULL, FALSE, TRUE);
+//       $smarty->assign("redirecturl", $redirecturl);
 
-      CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'socialbutton.tpl',
-      ));
-  }
-  else {
-    // Get name of the Logged in User
-    $user = civicrm_api3('contact', 'get', array("id" => $userId));
-    $smarty->assign("name", $user["values"][$userId]["display_name"]);
+//       CRM_Core_Region::instance('page-body')->add(array(
+//         'template' => 'socialbutton.tpl',
+//       ));
+//   }
+//   else {
+//     // Get name of the Logged in User
+//     $user = civicrm_api3('contact', 'get', array("id" => $userId));
+//     $smarty->assign("name", $user["values"][$userId]["display_name"]);
 
-    // Get the OAuth Provider which is saved in the session
+//     // Get the OAuth Provider which is saved in the session
 
-    $OAuthProvider = CRM_Core_Session::singleton()->get("civisocial_oauth_provider");
+//     $OAuthProvider = CRM_Core_Session::singleton()->get("civisocial_oauth_provider");
 
-    $smarty->assign("OAuthProvider", $OAuthProvider);
-    CRM_Core_Region::instance('page-body')->add(array(
-      'template' => "loggedin.tpl",
-    ));
-  }
-}
+//     $smarty->assign("OAuthProvider", $OAuthProvider);
+//     CRM_Core_Region::instance('page-body')->add(array(
+//       'template' => "loggedin.tpl",
+//     ));
+//   }
+// }

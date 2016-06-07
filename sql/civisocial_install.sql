@@ -17,6 +17,7 @@ CREATE TABLE `civicrm_civisocial_user` (
      `oauth_secret` varchar(1024) NULL DEFAULT NULL COMMENT 'Access Token Secret Provided by OAuth Provider',
      `created_date` timestamp NULL DEFAULT NULL COMMENT 'When was the civisocial user was created.',
      `modified_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When was the the civisocial user was created or modified or deleted.'
-, PRIMARY KEY ( `id` )
+, PRIMARY KEY ( `id` ),
+, UNIQUE KEY ( `contact_id`, `oauth_provider`, `social_user_id`)
 , CONSTRAINT FK_civicrm_civisocial_user_contact_id FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
