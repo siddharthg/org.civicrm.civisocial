@@ -83,6 +83,13 @@ class CRM_Civisocial_OAuthProvider {
   protected $httpInfo = array();
 
   /**
+   * Contains the HTTP header from the last request
+   *
+   * @var string
+   */
+  protected $httpHeader;
+
+  /**
    * Get social user information
    *
    * @return array
@@ -132,6 +139,15 @@ class CRM_Civisocial_OAuthProvider {
    * Authorization URI that user will be redirected to for login
    */
   public function getLoginUri() {
+  }
+
+  /**
+   * Get header from the last request
+   *
+   * @return array
+   */
+  public function getHeader() {
+    return $this->httpHeader;
   }
 
   /**
@@ -197,7 +213,27 @@ class CRM_Civisocial_OAuthProvider {
    * @return array
    */
   public function get($node, $params = array()) {
-    return $this->http($node, $params, 'GET');
+    $nodeParts = explode('?', $node);
+    if (count($nodeParts) == 2) {
+      $node = $nodeParts[0];
+    }
+
+    if (isset($nodeParts[1])) {
+      $node .= '?' . $nodeParts[1];
+    }
+
+    if (!empty($params)) {
+      if (FALSE !== strpos($node, '?')) {
+        $node .= '&';
+      }
+      else {
+        $node .= '?';
+      }
+      $node .= http_build_query($params);
+    }
+
+    $url = "{$this->apiUri}/{$node}";
+    return $this->http($url, 'GET');
   }
 
   /**
@@ -205,59 +241,73 @@ class CRM_Civisocial_OAuthProvider {
    *
    * @return array
    */
-  public function post($node, $params = array()) {
-    return $this->http($node, $params, 'POST');
+  public function post($node, $params) {
+    $url = "{$this->apiUri}/{$node}";
+    return $this->http($url, 'POST', $params);
   }
 
   /**
-   * Make HTTP requests
+   * Make a HTTP request
    *
-   * @param string $node
-   *      API node
+   * @param string $url
+   *   Request URL
    * @param array $params
-   *      GET/POST parameters
+   *   Request parameters
    * @param string $method
-   *      HTTP method (GET/POST)
+   *   Request method
    *
    * @return array
-   *      JSON response decoded to an array
-   * @todo Refactor the method to merge with Twitter
+   *   Response from API
    */
-  public function http($node, $params, $method = 'GET') {
-    $nodeParts = explode('?', $node);
-    if (count($nodeParts) == 2) {
-      $node = $nodeParts[0];
+  public function http($url, $method = 'GET', $postFields = NULL) {
+    $this->httpInfo = array();
+    $ci = curl_init();
+
+    curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
+    curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);
+    curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
+    curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, $this->sslVerifyPeer);
+    curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'setHeader'));
+    curl_setopt($ci, CURLOPT_HEADER, FALSE);
+
+    switch ($method) {
+      case 'POST':
+        curl_setopt($ci, CURLOPT_POST, TRUE);
+        if (!empty($postFields)) {
+          curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        }
+        break;
+
+      case 'DELETE':
+        curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        if (!empty($postFields)) {
+          $url = "{$url}?{$postFields}";
+        }
     }
 
-    $paramsStr = http_build_query($params);
+    curl_setopt($ci, CURLOPT_URL, $url);
+    $response = curl_exec($ci);
+    $this->httpCode = curl_getinfo($ci, CURLINFO_HTTP_CODE);
+    $this->httpInfo = array_merge($this->httpInfo, curl_getinfo($ci));
+    $this->url = $url;
+    curl_close($ci);
+    return $response;
+  }
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
-    curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->sslVerifyPeer);
-    curl_setopt($ch, CURLOPT_HEADER, FALSE);
-
-    if ($method == 'POST') {
-      curl_setopt($ch, CURLOPT_POST, TRUE);
-      if (!empty($paramsStr)) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $paramsStr);
-      }
-      $node = implode('?', $nodeParts);
+  /**
+   * Get the header info to store.
+   *
+   * @return array
+   */
+  public function setHeader($ci, $header) {
+    $i = strpos($header, ':');
+    if (!empty($i)) {
+      $key = str_replace('-', '_', strtolower(substr($header, 0, $i)));
+      $value = trim(substr($header, $i + 2));
+      $this->httpHeader[$key] = $value;
     }
-    elseif ($method == 'GET') {
-      $node .= '?' . $paramsStr;
-      if (isset($nodeParts[1])) {
-        $node .= '&' . $nodeParts[1];
-      }
-    }
-
-    $uri = $this->apiUri . '/' . $node;
-    curl_setopt($ch, CURLOPT_URL, $uri);
-    $response = curl_exec($ch);
-    $this->httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    return json_decode($response, TRUE);
+    return strlen($header);
   }
 
 }

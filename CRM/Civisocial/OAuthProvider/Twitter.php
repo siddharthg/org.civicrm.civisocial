@@ -11,13 +11,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
   private $alias = "twitter";
 
   /**
-   * Contains the HTTP header from the last request
-   *
-   * @var string
-   */
-  private $httpHeader;
-
-  /**
    * Construct Twitter OAuth object
    *
    * @param string $accessToken
@@ -25,7 +18,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    *   to make requests.
    */
   public function __construct($accessToken = NULL) {
-    $this->apiUri = 'https://api.twitter.com/1.1/';
+    $this->apiUri = 'https://api.twitter.com/1.1';
     $this->getApiCredentials($this->alias);
 
     // Twitter, why you no upgrade to OAuth 2.0?
@@ -44,7 +37,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    */
   public function getLoginUri() {
     $tempCredentials = $this->getRequestToken($this->getCallbackUri($this->alias));
-    // var_dump($tempCredentials); exit;
     $session = CRM_Core_Session::singleton();
     $session->set('oauth_token', $tempCredentials['oauth_token']);
     $session->set('oauth_token_secret', $tempCredentials['oauth_token_secret']);
@@ -194,15 +186,18 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
   }
 
   /**
-   * Get a request_token from Twitter
+   * Get a request_token from Twitter.
    *
+   * @param string $oauthCallback
+   *   URI that will be redirected to after the user authorizes the app
+   * 
    * @return array
    *   A key/value array containing oauth_token and oauth_token_secret
    */
   public function getRequestToken($oauthCallback) {
-    $parameters = array();
-    $parameters['oauth_callback'] = $oauthCallback;
-    $request = $this->oAuthRequest('https://api.twitter.com/oauth/request_token', 'GET', $parameters);
+    $params = array();
+    $params['oauth_callback'] = $oauthCallback;
+    $request = $this->oAuthRequest('https://api.twitter.com/oauth/request_token', 'GET', $params);
     $token = OAuthUtil::parse_parameters($request);
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
     return $token;
@@ -211,39 +206,39 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
   /**
    * Get the authorize URL
    *
+   * @param mixed $requestToken
+   *   Request token obtained from Twitter
+   * @param bool $silentSignIn
+   *   If FALSE the user will see 'Authorize App' screen regardless if they
+   *   they have previously authorized the app.
+   *
    * @return string
    */
-  public function getAuthorizeURL($token, $sign_in_with_twitter = TRUE) {
-    if (is_array($token)) {
-      $token = $token['oauth_token'];
+  public function getAuthorizeURL($requestToken, $silentSignIn = TRUE) {
+    if (is_array($requestToken)) {
+      $requestToken = $requestToken['oauth_token'];
     }
-    if (empty($sign_in_with_twitter)) {
-      return "https://api.twitter.com/oauth/authorize?oauth_token={$token}";
+    if ($silentSignIn) {
+      return "https://api.twitter.com/oauth/authenticate?oauth_token={$requestToken}";
     }
     else {
-      return "https://api.twitter.com/oauth/authenticate?oauth_token={$token}";
+      return "https://api.twitter.com/oauth/authorize?oauth_token={$requestToken}";
     }
-  }
-
-  /**
-   * Get header from the last request
-   *
-   * @return array
-   */
-  public function getHeader() {
-    return $this->httpHeader;
   }
 
   /**
    * Exchange request token and secret for an access token and
    * secret, to sign API calls.
    *
+   * @param string $oauthVerifier
+   *   OAuth Verifier string provided by Twitter
+   *
    * @return array
    *   OAuth token and secret
    */
-  public function getAccessToken($oauth_verifier) {
+  public function getAccessToken($oauthVerifier) {
     $params = array();
-    $params['oauth_verifier'] = $oauth_verifier;
+    $params['oauth_verifier'] = $oauthVerifier;
     $request = $this->oAuthRequest('https://api.twitter.com/oauth/access_token', 'GET', $params);
     $token = OAuthUtil::parse_parameters($request);
     $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
@@ -252,36 +247,71 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
 
   /**
    * GET wrapper for oAuthRequest.
+   *
+   * @param string $node
+   *   Twitter REST API node
+   * @param array $params
+   *   Parameters to REST API
+   *
+   * @return array
+   *   Response from Twitter REST API
    */
-  public function get($url, $params = array()) {
-    $response = $this->oAuthRequest($url, 'GET', $params);
+  public function get($node, $params = array()) {
+    $response = $this->oAuthRequest($node, 'GET', $params);
     return json_decode($response, TRUE);
   }
 
   /**
    * POST wrapper for oAuthRequest.
+   *
+   * @param string $node
+   *   Twitter REST API node
+   * @param array $params
+   *   Parameters to REST API
+   *
+   * @return array
+   *   Response from Twitter REST API
    */
-  public function post($url, $parameters = array()) {
-    $response = $this->oAuthRequest($url, 'POST', $parameters);
+  public function post($node, $params = array()) {
+    $response = $this->oAuthRequest($node, 'POST', $params);
     return json_decode($response, TRUE);
   }
 
   /**
-   * DELETE wrapper for oAuthReqeust.
+   * DELETE wrapper for oAuthRequest.
+   *
+   * @param string $node
+   *   Twitter REST API node
+   * @param array $params
+   *   Parameters to REST API
+   *
+   * @return array
+   *   Response from Twitter REST API
    */
-  public function delete($url, $parameters = array()) {
-    $response = $this->oAuthRequest($url, 'DELETE', $parameters);
+  public function delete($node, $params = array()) {
+    $response = $this->oAuthRequest($node, 'DELETE', $params);
     return json_decode($response, TRUE);
   }
 
   /**
    * Format and sign an OAuth / API request
+   *
+   * @param string $node
+   *   Twitter REST API node
+   * @param array $params
+   *   Parameters to REST API
+   *
+   * @return array
+   *   Response from Twitter REST API
    */
-  private function oAuthRequest($url, $method, $parameters) {
-    if (strrpos($url, 'https://') !== 0 && strrpos($url, 'http://') !== 0) {
-      $url = "{$this->apiUri}{$url}.json";
+  private function oAuthRequest($node, $method, $params) {
+    if (strrpos($node, 'https://') !== 0 && strrpos($node, 'http://') !== 0) {
+      $url = "{$this->apiUri}/{$node}.json";
     }
-    $request = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $parameters);
+    else {
+      $url = $node;
+    }
+    $request = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $params);
     $request->sign_request($this->sha1_method, $this->consumer, $this->token);
     switch ($method) {
       case 'GET':
@@ -290,63 +320,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
       default:
         return $this->http($request->get_normalized_http_url(), $method, $request->to_postdata());
     }
-  }
-
-  /**
-   * Make an HTTP request
-   *
-   * @return API results
-   */
-  public function http($url, $method, $postfields = NULL) {
-    $this->httpInfo = array();
-    $ci = curl_init();
-    /* Curl settings */
-    curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
-    curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);
-    curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
-    curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, $this->sslVerifyPeer);
-    curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'setHeader'));
-    curl_setopt($ci, CURLOPT_HEADER, FALSE);
-
-    switch ($method) {
-      case 'POST':
-        curl_setopt($ci, CURLOPT_POST, TRUE);
-        if (!empty($postfields)) {
-          curl_setopt($ci, CURLOPT_POSTFIELDS, $postfields);
-        }
-        break;
-
-      case 'DELETE':
-        curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
-        if (!empty($postfields)) {
-          $url = "{$url}?{$postfields}";
-        }
-    }
-
-    curl_setopt($ci, CURLOPT_URL, $url);
-    $response = curl_exec($ci);
-    $this->httpCode = curl_getinfo($ci, CURLINFO_HTTP_CODE);
-    $this->httpInfo = array_merge($this->httpInfo, curl_getinfo($ci));
-    $this->url = $url;
-    curl_close($ci);
-    return $response;
-  }
-
-
-  /**
-   * Get the header info to store.
-   *
-   * @return array
-   */
-  public function setHeader($ci, $header) {
-    $i = strpos($header, ':');
-    if (!empty($i)) {
-      $key = str_replace('-', '_', strtolower(substr($header, 0, $i)));
-      $value = trim(substr($header, $i + 2));
-      $this->httpHeader[$key] = $value;
-    }
-    return strlen($header);
   }
 
 }
