@@ -194,28 +194,13 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
    *
    * @return array
    */
-  public function http($url, $method = 'GET', $postFields = array()) {
-    $params = array();
-    $params['alt'] = 'json';
+  // public function http($url, $method = 'GET', $postParams = array()) {
+  public function http($url, $method, $postParams = array(), $getParams = array()) {
+    $getParams['alt'] = 'json';
     if ($this->token) {
-      $params['access_token'] = $this->token;
+      $getParams['access_token'] = $this->token;
     }
-    // @todo: Create some method like `appendQueryString` in the base class
-    if ($method == 'GET') {
-      if (!empty($params)) {
-        if (FALSE !== strpos($url, '?')) {
-          $url .= '&';
-        }
-        else {
-          $url .= '?';
-        }
-        $url .= http_build_query($params);
-      }
-    }
-    else {
-      $postFields = array_merge($postFields, $params);
-    }
-    $responseJson = parent::http($url, $method, $postFields);
+    $responseJson = parent::http($url, $method, $postParams, $getParams);
     $response = json_decode($responseJson, TRUE);
     if (isset($response['error'])) {
       if ($response['error'] == 'invalid_token' || $response['error'] == 'invalid_request') {

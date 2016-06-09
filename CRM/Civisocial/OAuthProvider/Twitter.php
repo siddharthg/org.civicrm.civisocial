@@ -151,8 +151,8 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     if ($this->token && isset($this->userProfile)) {
       return TRUE;
     }
-
-    $userProfile = $this->get('account/verify_credentials.json?include_email=true');
+    $getParams = array('include_email' => 'true' );
+    $userProfile = $this->get('account/verify_credentials', $getParams);
     if (200 == $this->httpCode) {
       $this->userProfile = $userProfile;
       return TRUE;
@@ -246,34 +246,36 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
   }
 
   /**
-   * GET wrapper for oAuthRequest.
+   * GET wrapper for HTTP request
    *
-   * @param string $node
-   *   Twitter REST API node
-   * @param array $params
-   *   Parameters to REST API
+   * @param $node
+   *   API node
+   * @param $getParams
+   *   GET parameters
    *
    * @return array
-   *   Response from Twitter REST API
+   *   Response to API request
    */
-  public function get($node, $params = array()) {
-    $response = $this->oAuthRequest($node, 'GET', $params);
+  public function get($node, $getParams = array()) {
+    $response = $this->oAuthRequest($node, 'GET', $getParams);
     return json_decode($response, TRUE);
   }
 
   /**
-   * POST wrapper for oAuthRequest.
+   * POST wrapper for HTTP request
    *
    * @param string $node
-   *   Twitter REST API node
-   * @param array $params
-   *   Parameters to REST API
+   *   API node
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   To match base class's method declaration
    *
    * @return array
-   *   Response from Twitter REST API
+   *   Response to API request
    */
-  public function post($node, $params = array()) {
-    $response = $this->oAuthRequest($node, 'POST', $params);
+  public function post($node, $postParams = array(), $getParams = array()) {
+    $response = $this->oAuthRequest($node, 'POST', $postParams);
     return json_decode($response, TRUE);
   }
 

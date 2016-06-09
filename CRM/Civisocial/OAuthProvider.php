@@ -210,59 +210,56 @@ class CRM_Civisocial_OAuthProvider {
   /**
    * GET wrapper for HTTP request
    *
+   * @param $node
+   *   API node
+   * @param $getParams
+   *   GET parameters
+   *
    * @return array
+   *   Response to API request
    */
-  public function get($node, $params = array()) {
-    $nodeParts = explode('?', $node);
-    if (count($nodeParts) == 2) {
-      $node = $nodeParts[0];
-    }
-
-    if (isset($nodeParts[1])) {
-      $node .= '?' . $nodeParts[1];
-    }
-
-    if (!empty($params)) {
-      if (FALSE !== strpos($node, '?')) {
-        $node .= '&';
-      }
-      else {
-        $node .= '?';
-      }
-      $node .= http_build_query($params);
-    }
-
+  public function get($node, $getParams = array()) {
     $url = "{$this->apiUri}/{$node}";
-    return $this->http($url, 'GET');
+    return $this->http($url, 'GET', array(), $getParams);
   }
 
   /**
    * POST wrapper for HTTP request
    *
+   * @param string $node
+   *   API node
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   GET parameters
+   *
    * @return array
+   *   Response to API request
    */
-  public function post($node, $params) {
+  public function post($node, $postParams = array(), $getParams = array()) {
     $url = "{$this->apiUri}/{$node}";
-    return $this->http($url, 'POST', $params);
+    return $this->http($url, 'POST', $postParams, $getParams);
   }
 
   /**
    * Make a HTTP request
    *
-   * @param string $url
-   *   Request URL
-   * @param array $params
-   *   Request parameters
+   * @param string $node
+   *   API node
    * @param string $method
-   *   Request method
+   *   HTTP request method
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   GET parameters
    *
    * @return array
-   *   Response from API
+   *   Response to API request
    */
-  public function http($url, $method = 'GET', $postFields = NULL) {
-    $this->httpInfo = array();
-    $ci = curl_init();
+  public function http($url, $method, $postParams = array(), $getParams = array()) {
+    $url = $this->appendQueryString($url, $getParams);
 
+    $ci = curl_init();
     curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
     curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);
     curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
@@ -271,19 +268,17 @@ class CRM_Civisocial_OAuthProvider {
     curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'setHeader'));
     curl_setopt($ci, CURLOPT_HEADER, FALSE);
 
-    switch ($method) {
-      case 'POST':
-        curl_setopt($ci, CURLOPT_POST, TRUE);
-        if (!empty($postFields)) {
-          curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postFields));
-        }
-        break;
-
-      case 'DELETE':
-        curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
-        if (!empty($postFields)) {
-          $url = "{$url}?{$postFields}";
-        }
+    if ('POST' == $method) {
+      curl_setopt($ci, CURLOPT_POST, TRUE);
+      if (!empty($postParams)) {
+        curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postParams));
+      }
+    }
+    elseif ('DELETE' == $method ) {
+      curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
+      if (!empty($postParams)) {
+        $url = $this->appendQueryString($url, $postParams);
+      }
     }
 
     curl_setopt($ci, CURLOPT_URL, $url);
@@ -308,6 +303,33 @@ class CRM_Civisocial_OAuthProvider {
       $this->httpHeader[$key] = $value;
     }
     return strlen($header);
+  }
+
+  /**
+   * Append query string to the URL
+   *
+   * @param string $url
+   * @param array $query
+   *
+   * @return string
+   */
+  private function appendQueryString($url, $query) {
+    if (!empty($query)) {
+      $urlParts = explode('?', $url);
+      $url = $urlParts[0];
+
+      if (isset($urlParts[1])) {
+        $url .= '?' . $urlParts[1];
+      }
+      if (FALSE !== strpos($url, '?')) {
+        $url .= '&';
+      }
+      else {
+        $url .= '?';
+      }
+      $url .= http_build_query($query);
+    }
+    return $url;
   }
 
 }

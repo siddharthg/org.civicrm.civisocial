@@ -105,7 +105,6 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       'code' => CRM_Utils_Array::value('code', $_GET),
       'redirect_uri' => $this->getCallbackUri($this->alias),
     );
-
     $response = $this->get('oauth/access_token', $params);
     $this->token = CRM_Utils_Array::value('access_token', $response);
 
@@ -234,21 +233,11 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
    *
    * @return array
    */
-  public function http($url, $method = 'GET', $postFields = array()) {
-    $params = array();
+  public function http($url, $method, $postParams = array(), $getParams = array()) {
     if ($this->token) {
-      $params['access_token'] = $this->token;
+      $getParams['access_token'] = $this->token;
     }
-    if (!empty($params)) {
-      if (FALSE !== strpos($url, '?')) {
-        $url .= '&';
-      }
-      else {
-        $url .= '?';
-      }
-      $url .= http_build_query($params);
-    }
-    $responseJson = parent::http($url, $method, $postFields);
+    $responseJson = parent::http($url, $method, $postParams, $getParams);
     $response = json_decode($responseJson, TRUE);
     if (isset($response['error'])) {
       if ($response['error']['type'] == 'OAuthException') {
