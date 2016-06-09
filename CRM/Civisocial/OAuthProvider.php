@@ -83,6 +83,13 @@ class CRM_Civisocial_OAuthProvider {
   protected $httpInfo = array();
 
   /**
+   * Contains the HTTP header from the last request
+   *
+   * @var string
+   */
+  protected $httpHeader;
+
+  /**
    * Get social user information
    *
    * @return array
@@ -132,6 +139,15 @@ class CRM_Civisocial_OAuthProvider {
    * Authorization URI that user will be redirected to for login
    */
   public function getLoginUri() {
+  }
+
+  /**
+   * Get header from the last request
+   *
+   * @return array
+   */
+  public function getHeader() {
+    return $this->httpHeader;
   }
 
   /**
@@ -194,70 +210,126 @@ class CRM_Civisocial_OAuthProvider {
   /**
    * GET wrapper for HTTP request
    *
+   * @param $node
+   *   API node
+   * @param $getParams
+   *   GET parameters
+   *
    * @return array
+   *   Response to API request
    */
-  public function get($node, $params = array()) {
-    return $this->http($node, $params, 'GET');
+  public function get($node, $getParams = array()) {
+    $url = "{$this->apiUri}/{$node}";
+    return $this->http($url, 'GET', array(), $getParams);
   }
 
   /**
    * POST wrapper for HTTP request
    *
+   * @param string $node
+   *   API node
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   GET parameters
+   *
    * @return array
+   *   Response to API request
    */
-  public function post($node, $params = array()) {
-    return $this->http($node, $params, 'POST');
+  public function post($node, $postParams = array(), $getParams = array()) {
+    $url = "{$this->apiUri}/{$node}";
+    return $this->http($url, 'POST', $postParams, $getParams);
   }
 
   /**
-   * Make HTTP requests
+   * Make a HTTP request
    *
    * @param string $node
-   *      API node
-   * @param array $params
-   *      GET/POST parameters
+   *   API node
    * @param string $method
-   *      HTTP method (GET/POST)
+   *   HTTP request method
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   GET parameters
    *
    * @return array
-   *      JSON response decoded to an array
-   * @todo Refactor the method to merge with Twitter
+   *   Response to API request
    */
-  public function http($node, $params, $method = 'GET') {
-    $nodeParts = explode('?', $node);
-    if (count($nodeParts) == 2) {
-      $node = $nodeParts[0];
-    }
+  public function http($url, $method, $postParams = array(), $getParams = array()) {
+    $url = $this->appendQueryString($url, $getParams);
 
-    $paramsStr = http_build_query($params);
+    $ci = curl_init();
+    curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
+    curl_setopt($ci, CURLOPT_TIMEOUT, $this->timeout);
+    curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ci, CURLOPT_HTTPHEADER, array('Expect:'));
+    curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, $this->sslVerifyPeer);
+    curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'setHeader'));
+    curl_setopt($ci, CURLOPT_HEADER, FALSE);
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
-    curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->sslVerifyPeer);
-    curl_setopt($ch, CURLOPT_HEADER, FALSE);
-
-    if ($method == 'POST') {
-      curl_setopt($ch, CURLOPT_POST, TRUE);
-      if (!empty($paramsStr)) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $paramsStr);
+    if ('POST' == $method) {
+      curl_setopt($ci, CURLOPT_POST, TRUE);
+      if (!empty($postParams)) {
+        curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postParams));
       }
-      $node = implode('?', $nodeParts);
     }
-    elseif ($method == 'GET') {
-      $node .= '?' . $paramsStr;
-      if (isset($nodeParts[1])) {
-        $node .= '&' . $nodeParts[1];
+    elseif ('DELETE' == $method ) {
+      curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
+      if (!empty($postParams)) {
+        $url = $this->appendQueryString($url, $postParams);
       }
     }
 
-    $uri = $this->apiUri . '/' . $node;
-    curl_setopt($ch, CURLOPT_URL, $uri);
-    $response = curl_exec($ch);
-    $this->httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    return json_decode($response, TRUE);
+    curl_setopt($ci, CURLOPT_URL, $url);
+    $response = curl_exec($ci);
+    $this->httpCode = curl_getinfo($ci, CURLINFO_HTTP_CODE);
+    $this->httpInfo = array_merge($this->httpInfo, curl_getinfo($ci));
+    $this->url = $url;
+    curl_close($ci);
+    return $response;
+  }
+
+  /**
+   * Get the header info to store.
+   *
+   * @return array
+   */
+  public function setHeader($ci, $header) {
+    $i = strpos($header, ':');
+    if (!empty($i)) {
+      $key = str_replace('-', '_', strtolower(substr($header, 0, $i)));
+      $value = trim(substr($header, $i + 2));
+      $this->httpHeader[$key] = $value;
+    }
+    return strlen($header);
+  }
+
+  /**
+   * Append query string to the URL
+   *
+   * @param string $url
+   * @param array $query
+   *
+   * @return string
+   */
+  private function appendQueryString($url, $query) {
+    if (!empty($query)) {
+      $urlParts = explode('?', $url);
+      $url = $urlParts[0];
+
+      if (isset($urlParts[1])) {
+        $url .= '?' . $urlParts[1];
+      }
+      if (FALSE !== strpos($url, '?')) {
+        $url .= '&';
+      }
+      else {
+        $url .= '?';
+      }
+      $url .= http_build_query($query);
+    }
+    return $url;
   }
 
 }

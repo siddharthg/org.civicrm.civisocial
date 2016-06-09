@@ -105,12 +105,7 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       'code' => CRM_Utils_Array::value('code', $_GET),
       'redirect_uri' => $this->getCallbackUri($this->alias),
     );
-
     $response = $this->get('oauth/access_token', $params);
-    if (isset($response['error'])) {
-      exit($response['error']);
-    }
-
     $this->token = CRM_Utils_Array::value('access_token', $response);
 
     // Check if all basic perimissions have been granted
@@ -227,22 +222,23 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
   }
 
   /**
-   * GET wrapper for Facebook HTTP request
+   * Appends an access token, makes HTTP request and handles the repsonse
    *
-   * @param string $node
-   *   API node
+   * @param string $url
+   *   Request URL
    * @param array $params
-   *   GET/POST parameters
+   *   Request parameters
    * @param string $method
-   *   HTTP method (GET/POST)
+   *   HTTP method
    *
    * @return array
    */
-  public function http($node, $params = array(), $method = 'GET') {
+  public function http($url, $method, $postParams = array(), $getParams = array()) {
     if ($this->token) {
-      $params['access_token'] = $this->token;
+      $getParams['access_token'] = $this->token;
     }
-    $response = parent::http($node, $params, $method);
+    $responseJson = parent::http($url, $method, $postParams, $getParams);
+    $response = json_decode($responseJson, TRUE);
     if (isset($response['error'])) {
       if ($response['error']['type'] == 'OAuthException') {
         // Invalid access token

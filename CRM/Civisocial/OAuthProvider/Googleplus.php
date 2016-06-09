@@ -110,11 +110,7 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
       'grant_type' => 'authorization_code',
     );
 
-    $response = $this->http('token', $params, 'POST');
-    if (isset($response['error'])) {
-      exit($response['error']);
-    }
-
+    $response = $this->post('token', $params);
     $this->token = CRM_Utils_Array::value('access_token', $response);
 
     // Authentication is successful. Fetch user profile
@@ -187,22 +183,25 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
   }
 
   /**
-   * GET wrapper for Google's HTTP request
+   * Appends an access token, makes HTTP request and handles the repsonse
+   *
    * @param string $node
-   *   API node
+   *   Request URL
    * @param array $params
-   *   GET/POST parameters
+   *   Request parameters
    * @param string $method
-   *   HTTP method (GET/POST)
+   *   HTTP method
    *
    * @return array
    */
-  public function http($node, $params = array(), $method = 'GET') {
-    $params['alt'] = 'json';
+  // public function http($url, $method = 'GET', $postParams = array()) {
+  public function http($url, $method, $postParams = array(), $getParams = array()) {
+    $getParams['alt'] = 'json';
     if ($this->token) {
-      $params['access_token'] = $this->token;
+      $getParams['access_token'] = $this->token;
     }
-    $response = parent::http($node, $params, $method);
+    $responseJson = parent::http($url, $method, $postParams, $getParams);
+    $response = json_decode($responseJson, TRUE);
     if (isset($response['error'])) {
       if ($response['error'] == 'invalid_token' || $response['error'] == 'invalid_request') {
         // Invalid access token
