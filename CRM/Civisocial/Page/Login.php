@@ -45,6 +45,10 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
       if (!$isEnabled) {
         exit("OAuth Provider either doesn't exist or not enabled.");
       }
+      // Save redirect
+      if (isset($_GET['continue'])) {
+        $session->set('civisocial_redirect', $_GET['continue']);
+      }
       $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($OAuthProvider);
       $oap = new $classname();
       $redirectTo = $oap->getLoginUri();

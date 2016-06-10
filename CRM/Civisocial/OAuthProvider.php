@@ -269,8 +269,12 @@ class CRM_Civisocial_OAuthProvider {
    * Redirect to the request origin
    */
   public function redirect() {
+    if (isset($_GET['continue'])) {
+      CRM_Utils_System::redirect($_GET['continue']);
+    }
     $session = CRM_Core_Session::singleton();
-    $requestOrigin = $session->get("civisocialredirect");
+    $requestOrigin = $session->get("civisocial_redirect");
+    $session->set('civisocial_redirect', NULL);
     if (!$requestOrigin) {
       $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
     }

@@ -158,8 +158,8 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   // @todo: Add this to head
   CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css');
 
-  $currentUrl = CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE);
-  $session->set('civisocialredirect', $currentUrl);
+  $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
+  $smarty->assign('currentUrl', $currentUrl);
 
   if ($session->get('civisocial_logged_in')) {
     // User is connected to some social network
