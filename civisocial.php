@@ -171,8 +171,21 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => "LoggedIn.tpl",
       ));
+      
+      // Populate fields
+      $defaults = array();
+      $defaults['email-5'] = $oAuthUser['email'];
+      $defaults['email-Primary'] = $oAuthUser['email'];
+      $defaults['first_name'] = $oAuthUser['first_name'];
+      $defaults['billing_first_name'] = $oAuthUser['first_name'];
+      if ($oAuthUser['last_name']) {
+        $defaults['last_name'] = $oAuthUser['last_name'];
+        $defaults['billing_last_name'] = $oAuthUser['last_name'];
+      }
+
+      $form->setDefaults($defaults);
+      return;
     }
-    return;
   }
 
   // User is not connected to any network
