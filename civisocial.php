@@ -145,6 +145,13 @@ function civisocial_civicrm_navigationMenu(&$params) {
  * logged in.
  */
 function civisocial_civicrm_buildForm($formName, &$form) {
+  // Don't include social buttons on Admin/Settings Form
+  if (preg_match("/Form.*Settings/", $formName)
+    || preg_match("/Admin.*Form/", $formName)
+  ) {
+    return;
+  }
+
   $session = CRM_Core_Session::singleton();
   $smarty = CRM_Core_Smarty::singleton();
 
