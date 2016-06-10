@@ -148,6 +148,9 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   $session = CRM_Core_Session::singleton();
   $smarty = CRM_Core_Smarty::singleton();
 
+  // @todo: Add this to head
+  CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css');
+
   $currentUrl = CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE);
   $session->set('civisocialredirect', $currentUrl);
 
@@ -195,6 +198,4 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   CRM_Core_Region::instance('page-body')->add(array(
     'template' => "SocialButtons.tpl",
   ));
-  // @todo: Add this to head
-  CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css');
 }
