@@ -19,7 +19,7 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
     $path = explode('/', $path);
 
     if (count($path) == 3 && $path[2] == 'logout') {
-      $oap->login();
+      $oap->logout();
       $oap->redirect();
     }
     elseif (count($path) == 4 && $path[2] == 'login') {

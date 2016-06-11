@@ -221,7 +221,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       // User is not authorized because access token expired or
       // the user revoked permissions to the app
       // Logout so that user can login again
-      $oap->login();
+      $oap->logout();
     }
   }
 

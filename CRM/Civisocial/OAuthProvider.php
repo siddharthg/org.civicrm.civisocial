@@ -220,6 +220,13 @@ class CRM_Civisocial_OAuthProvider {
   }
 
   /**
+   * Clear the social user information form the session.
+   */
+  public function logout() {
+    $this->login();
+  }
+
+  /**
    * Save OAuth Provider information to the session.
    * Acts as a logout if no parameters is passed.
    *
@@ -230,6 +237,7 @@ class CRM_Civisocial_OAuthProvider {
    * @param int $contactId
    *   Contact ID of the social user
    *
+   * @return bool
    */
   public function login($OAuthProvider = NULL, $OAuthProviderId = NULL, $contactId = NULL) {
     $session = CRM_Core_Session::singleton();
@@ -237,12 +245,16 @@ class CRM_Civisocial_OAuthProvider {
     if ($OAuthProvider == NULL && $OAuthProviderId == NULL && $contactId == NULL) {
       $session->set('civisocial_logged_in', FALSE);
     }
-    else {
+    elseif ($OAuthProvider != NULL && $OAuthProviderId != NULL && $contactId != NULL) {
       $session->set('civisocial_logged_in', TRUE);
+    }
+    else {
+      return FALSE;
     }
     $session->set('civisocial_oauth_provider', $OAuthProvider);
     $session->set('civisocial_social_user_id', $OAuthProviderId);
     $session->set('civisocial_contact_id', $contactId);
+    return TRUE;
   }
 
   /**
