@@ -145,11 +145,30 @@ function civisocial_civicrm_navigationMenu(&$params) {
  * logged in.
  */
 function civisocial_civicrm_buildForm($formName, &$form) {
-  // Don't include social buttons on Admin/Settings Form
-  if (preg_match("/Form.*Settings/", $formName)
-    || preg_match("/Admin.*Form/", $formName)
-  ) {
-    return;
+  // Don't include social buttons on Admin/Settings forms
+  // Admin page filters
+  $ignorePatterns = array(
+    '/Form.*Settings/',
+    '/Admin.*Form/',
+    '/Form.*Search/',
+    '/Contact.*Form/',
+    '/Activity.*Form/',
+    '/Group_Form/',
+    '/Contribute.*Form(?!.*Contribution_Main)/',
+    '/Event.*Form(?!.*Registration_Register)/',
+    '/Member.*Form/',
+    '/Campaign.*Form(?!.*Petition_Signature)/',
+    '/Custom_Form/',
+    '/Case_Form/',
+    '/Grant_Form/',
+    '/PCP_Form/',
+    '/Price_Form/',
+  );
+
+  foreach ($ignorePatterns as $pattern) {
+    if (preg_match($pattern, $formName)) {
+      return;
+    }
   }
 
   $session = CRM_Core_Session::singleton();
@@ -160,6 +179,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
 
   $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
   $smarty->assign('currentUrl', $currentUrl);
+  $smarty->assign('formName', $formName);
 
   if ($session->get('civisocial_logged_in')) {
     // User is connected to some social network
@@ -181,8 +201,9 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => "LoggedIn.tpl",
       ));
-      
+
       // Populate fields
+      // @todo: Come up with a more general solution
       $defaults = array();
       $defaults['email-5'] = $oAuthUser['email'];
       $defaults['email-Primary'] = $oAuthUser['email'];
