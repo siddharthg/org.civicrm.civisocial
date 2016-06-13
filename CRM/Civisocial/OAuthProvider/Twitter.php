@@ -64,8 +64,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     // If the oauth_token is not what we expect, bail
     if (isset($_REQUEST['oauth_token']) && $requestToken['oauth_token'] !== $_REQUEST['oauth_token']) {
       // Not a valid callback.
-      CRM_Utils_System::redirect($requestOrigin);
-      // @todo: Find a way to show the error message
+      $this->redirect();
     }
 
     $this->token = new OAuthConsumer($requestToken['oauth_token'], $requestToken['oauth_token_secret']);
@@ -113,7 +112,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
         'gender'      => NULL,
         'locale'      => CRM_Utils_Array::value('lang', $response),
         'email'       => CRM_Utils_Array::value('email', $response),
-        'profile_url' => CRM_Utils_Array::value('url', $response),
+        'profile_url' => 'https://twitter.com/' . CRM_Utils_Array::value('screen_name', $response),
         'picture_url' => CRM_Utils_Array::value('profile_image_url', $response),
       );
       return TRUE;
