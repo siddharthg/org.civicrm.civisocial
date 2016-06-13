@@ -104,17 +104,11 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
    */
   public $social_user_id;
   /**
-   * Access Token Secret Provided by OAuth Provider
-   *
-   * @var string
-   */
-  public $oauth_token;
-  /**
    * Access Token Provided by OAuth Provider
    *
    * @var string
    */
-  public $oauth_secret;
+  public $access_token;
   /**
    * When was the civisocial user was created.
    *
@@ -205,8 +199,8 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
           'dataPattern' => '',
           'default' => 'NULL',
         ),
-        'oauth_token' => array(
-          'name' => 'oauth_token',
+        'access_token' => array(
+          'name' => 'access_token',
           'type' => CRM_Utils_Type::T_STRING,
           'title' => ts('Access Token Secret provided by OAuth Provider'),
           'description' => 'Access Token Secret Provided by OAuth Provider',
@@ -214,21 +208,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
           'maxlength' => 511,
           'size' => 511,
           'export' => TRUE,
-          'where' => 'civicrm_civisocial_user.oauth_token',
-          'headerPattern' => '',
-          'dataPattern' => '',
-          'default' => 'NULL',
-        ),
-        'oauth_secret' => array(
-          'name' => 'oauth_secret',
-          'type' => CRM_Utils_Type::T_STRING,
-          'title' => ts('Serialized Object returned by OAuth Provider'),
-          'description' => 'Access Token Provided by OAuth Provider',
-          'required' => FALSE,
-          'maxlength' => 1023,
-          'size' => 1023,
-          'export' => TRUE,
-          'where' => 'civicrm_civisocial_user.oauth_secret',
+          'where' => 'civicrm_civisocial_user.access_token',
           'headerPattern' => '',
           'dataPattern' => '',
           'default' => 'NULL',
@@ -274,8 +254,7 @@ class CRM_Civisocial_DAO_CivisocialUser extends CRM_Core_DAO {
         'contact_id' => 'contact_id',
         'oauth_provider' => 'oauth_provider',
         'social_user_id' => 'social_user_id',
-        'oauth_token' => 'oauth_token',
-        'oauth_secret' => 'oauth_secret',
+        'access_token' => 'access_token',
         'created_date' => 'created_date',
         'modified_date' => 'modified_date',
       );

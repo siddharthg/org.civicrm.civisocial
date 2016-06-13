@@ -75,18 +75,6 @@
   </field>
 
   <field>
-    <name>oauth_token</name>
-    <title>Access Token Secret provided by OAuth Provider</title>
-    <type>varchar</type>
-    <length>1023</length>
-    <export>true</export>
-    <required>false</required>
-    <default>NULL</default>
-    <comment>Access Token Secret Provided by OAuth Provider</comment>
-    <add>4.6</add>
-  </field>
-
-  <field>
     <name>created_date</name>
     <type>timestamp</type>
     <comment>When was the civisocial user was created.</comment>

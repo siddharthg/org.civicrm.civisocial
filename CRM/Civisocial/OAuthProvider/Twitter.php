@@ -50,26 +50,16 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
   public function handleCallback() {
     parent::handleCallback();
     $session = CRM_Core_Session::singleton();
-    $requestOrigin = $session->get("civisocialredirect");
-    if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
-      // @todo: What if the user is not logged in? Make it home url?
-    }
 
     // Check if the user denied acccess
     if (isset($_GET['denied'])) {
-      CRM_Utils_System::redirect($requestOrigin);
+      $this->redirect();
     }
 
     // Get temporary credentials from the session
     $requestToken = array();
     $requestToken['oauth_token'] = $session->get('oauth_token');
     $requestToken['oauth_token_secret'] = $session->get('oauth_token_secret');
-
-    if (isset($_REQUEST['denied'])) {
-      CRM_Utils_System::redirect($requestOrigin);
-      // @todo: Find a way to show the error message
-    }
 
     // If the oauth_token is not what we expect, bail
     if (isset($_REQUEST['oauth_token']) && $requestToken['oauth_token'] !== $_REQUEST['oauth_token']) {
@@ -82,8 +72,9 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
 
     // Request Access Token from twitter
     $accessToken = $this->getAccessToken($_REQUEST['oauth_verifier']);
-    // @todo: Check HTTP code
-
+    unset($accessToken['user_id']);
+    unset($accessToken['screen_name']);
+    unset($accessToken['x_auth_expires']);
     $session->set('access_token', $accessToken);
 
     // Remove no longer needed request tokens
@@ -93,53 +84,13 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
 
     $this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
 
-    $userProfile = array();
     if ($this->isAuthorized()) {
-      $userProfile = $this->getUserProfile();
+      $this->saveSocialUser($this->alias, $this->getUserProfile());
     }
     else {
       // Start over
       CRM_Utils_System::redirect($this->getLoginUri());
     }
-
-    $twitterUserId = CRM_Utils_Array::value("id", $userProfile);
-    $contactId = civicrm_api3(
-      'CivisocialUser',
-      'socialuserexists',
-      array(
-        'social_user_id' => $twitterUserId,
-        'oauth_provider' => $this->alias,
-      )
-    );
-
-    if (!$contactId) {
-      $user = array(
-        'first_name' => CRM_Utils_Array::value("name", $userProfile),
-        'last_name' => '',
-        'display_name' => CRM_Utils_Array::value("name", $userProfile),
-        'preffered_language' => CRM_Utils_Array::value("lang", $userProfile),
-        'gender' => NULL,
-        'email' => CRM_Utils_Array::value("email", $userProfile),
-        'contact_type' => 'Individual',
-      );
-
-      // Find/create contact to map with social user
-      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
-
-      // Create social user
-      $socialUser = array(
-        'contact_id' => $contactId,
-        'social_user_id' => $twitterUserId,
-        'oauth_token' => $accessToken['oauth_token'],
-        'oauth_secret' => $accessToken['oauth_token_secret'],
-        'oauth_provider' => $this->alias,
-        'created_date' => time(), // @todo: Created Date not being recorded
-      );
-
-      civicrm_api3('CivisocialUser', 'create', $socialUser);
-    }
-    $this->login($this->alias, $accessToken, $twitterUserId, $contactId);
-    CRM_Utils_System::redirect($requestOrigin);
   }
 
   /**
@@ -148,13 +99,23 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    * @return bool
    */
   public function isAuthorized() {
-    if ($this->token && isset($this->userProfile)) {
+    if ($this->token && !empty($this->userProfile)) {
       return TRUE;
     }
-    $getParams = array('include_email' => 'true' );
-    $userProfile = $this->get('account/verify_credentials', $getParams);
+    $getParams = array('include_email' => 'true');
+    $response = $this->get('account/verify_credentials', $getParams);
     if (200 == $this->httpCode) {
-      $this->userProfile = $userProfile;
+      $this->userProfile = array(
+        'id'          => CRM_Utils_Array::value('id', $response),
+        'first_name'  => CRM_Utils_Array::value('name', $response),
+        'last_name'   => NULL,
+        'name'  => CRM_Utils_Array::value('name', $response),
+        'gender'      => NULL,
+        'locale'      => CRM_Utils_Array::value('lang', $response),
+        'email'       => CRM_Utils_Array::value('email', $response),
+        'profile_url' => CRM_Utils_Array::value('url', $response),
+        'picture_url' => CRM_Utils_Array::value('profile_image_url', $response),
+      );
       return TRUE;
     }
     return FALSE;
@@ -164,7 +125,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    * Check if the connected app has certain permission.
    * Requires isAuthorized() have been called first.
    *
-   * @param array $permission
+   * @param array $permissions
    *   Possible values: read, write, directmessages
    *
    * @return bool
@@ -190,7 +151,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    *
    * @param string $oauthCallback
    *   URI that will be redirected to after the user authorizes the app
-   * 
+   *
    * @return array
    *   A key/value array containing oauth_token and oauth_token_secret
    */

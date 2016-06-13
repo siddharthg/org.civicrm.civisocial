@@ -84,14 +84,10 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
   public function handleCallback() {
     parent::handleCallback();
     $session = CRM_Core_Session::singleton();
-    $requestOrigin = $session->get("civisocialredirect");
-    if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
-    }
 
     // Check if the user denied acccess
     if (isset($_GET['error']) && $_GET['error'] = 'access_denied') {
-      CRM_Utils_System::redirect($requestOrigin);
+      $this->redirect();
     }
 
     // Google sends a code to the callback url, this is further used to acquire
@@ -112,56 +108,16 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
 
     $response = $this->post('token', $params);
     $this->token = CRM_Utils_Array::value('access_token', $response);
+    $session->set('access_token', $this->token);
 
     // Authentication is successful. Fetch user profile
-    $userProfile = array();
     if ($this->isAuthorized()) {
-      $userProfile = $this->getUserProfile();
+      $this->saveSocialUser($this->alias, $this->getUserProfile());
     }
     else {
       // Start over
       CRM_Utils_System::redirect($this->getLoginUri());
     }
-
-    $googleplusUserId = CRM_Utils_Array::value("sub", $userProfile);
-    $contactId = civicrm_api3(
-      'CivisocialUser',
-      'socialuserexists',
-      array(
-        'social_user_id' => $googleplusUserId,
-        'oauth_provider' => $this->alias,
-      )
-    );
-
-    if (!$contactId) {
-      $user = array(
-        'first_name' => CRM_Utils_Array::value("given_name", $userProfile),
-        'last_name' => CRM_Utils_Array::value("family_name", $userProfile),
-        'display_name' => CRM_Utils_Array::value("name", $userProfile),
-        'preffered_language' => CRM_Utils_Array::value("locale", $userProfile),
-        'gender' => CRM_Utils_Array::value("gender", $userProfile),
-        'contact_type' => 'Individual',
-      );
-      if ($userProfile['email_verified']) {
-        $user['email'] = CRM_Utils_Array::value("email", $userProfile);
-      }
-
-      // Find/create contact to map with social user
-      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
-
-      // Create social user
-      $socialUser = array(
-        'contact_id' => $contactId,
-        'social_user_id' => $googleplusUserId,
-        'oauth_token' => $this->token,
-        'oauth_provider' => $this->alias,
-        'created_date' => time(), // @todo: Created Date not being recorded
-      );
-
-      civicrm_api3('CivisocialUser', 'create', $socialUser);
-    }
-    $this->login($this->alias, $this->token, $googleplusUserId, $contactId);
-    CRM_Utils_System::redirect($requestOrigin);
   }
 
   /**
@@ -171,30 +127,42 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
    * @return bool
    */
   public function isAuthorized() {
-    if ($this->token && isset($this->userProfile)) {
+    if ($this->token && !empty($this->userProfile)) {
       return TRUE;
     }
     $response = $this->get('userinfo');
     if (!$response) {
       return FALSE;
     }
-    $this->userProfile = $response;
+    $this->userProfile = array(
+      'id'          => CRM_Utils_Array::value('sub', $response),
+      'first_name'  => CRM_Utils_Array::value('given_name', $response),
+      'last_name'   => CRM_Utils_Array::value('family_name', $response),
+      'name'   => CRM_Utils_Array::value('name', $response),
+      'gender'      => CRM_Utils_Array::value('gender', $response),
+      'locale'      => CRM_Utils_Array::value('locale', $response),
+      'email'       => CRM_Utils_Array::value('email', $response),
+      'profile_url' => CRM_Utils_Array::value('profile', $response),
+      'picture_url' => CRM_Utils_Array::value('picture', $response),
+    );
     return TRUE;
   }
 
   /**
-   * Appends an access token, makes HTTP request and handles the repsonse
+   * Make a HTTP request
    *
-   * @param string $node
-   *   Request URL
-   * @param array $params
-   *   Request parameters
+   * @param string $url
+   *   API request URL
    * @param string $method
-   *   HTTP method
+   *   HTTP request method
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   GET parameters
    *
    * @return array
+   *   Response to API request
    */
-  // public function http($url, $method = 'GET', $postParams = array()) {
   public function http($url, $method, $postParams = array(), $getParams = array()) {
     $getParams['alt'] = 'json';
     if ($this->token) {

@@ -45,7 +45,7 @@ class CRM_Civisocial_OAuthProvider {
    *
    * @var array
    */
-  protected $userProfile;
+  protected $userProfile = array();
 
   /**
    * HTTP Status code of last API request
@@ -93,6 +93,16 @@ class CRM_Civisocial_OAuthProvider {
    * Get social user information
    *
    * @return array
+   *   Returns array with keys:
+   *    - id
+   *    - first_name
+   *    - last_name
+   *    - full_name
+   *    - gender
+   *    - locale
+   *    - email
+   *    - profile_url
+   *    - picture_url
    */
   public function getUserProfile() {
     return $this->userProfile;
@@ -160,31 +170,91 @@ class CRM_Civisocial_OAuthProvider {
   }
 
   /**
+   * Save social user to the database
+   *
+   * @param string $oAuthProvider
+   *   Shortname for OAuth provider
+   * @param array $userProfile
+   *   Social user information
+   */
+  public function saveSocialUser($oAuthProvider, $userProfile) {
+    $session = CRM_Core_Session::singleton();
+
+    $socialUserId = CRM_Utils_Array::value("id", $userProfile);
+    $contactId = civicrm_api3(
+      'CivisocialUser',
+      'socialuserexists',
+      array(
+        'social_user_id' => $socialUserId,
+        'oauth_provider' => $oAuthProvider,
+      )
+    );
+
+    if (!$contactId) {
+      $user = array(
+        'first_name' => CRM_Utils_Array::value('first_name', $userProfile),
+        'last_name' => CRM_Utils_Array::value('last_name', $userProfile),
+        'display_name' => CRM_Utils_Array::value("name", $userProfile),
+        'preffered_language' => CRM_Utils_Array::value("locale", $userProfile),
+        'gender' => CRM_Utils_Array::value('gender', $userProfile),
+        'email' => CRM_Utils_Array::value("email", $userProfile),
+        'contact_type' => 'Individual',
+      );
+
+      // Find/create contact to map with social user
+      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
+
+      // Create social user
+      $socialUser = array(
+        'contact_id' => $contactId,
+        'social_user_id' => $socialUserId,
+        'access_token' => serialize($session->get('access_token')),
+        'oauth_provider' => $oAuthProvider,
+        'created_date' => time(), // @todo: Created Date not being recorded
+      );
+
+      civicrm_api3('CivisocialUser', 'create', $socialUser);
+    }
+    $this->login($oAuthProvider, $socialUserId, $contactId);
+    $this->redirect();
+  }
+
+  /**
+   * Clear the social user information form the session.
+   */
+  public function logout() {
+    $this->login();
+  }
+
+  /**
    * Save OAuth Provider information to the session.
    * Acts as a logout if no parameters is passed.
    *
    * @param string $OAuthProvider
    *   Shortname for OAuth provider
-   * @param string $accessToken
-   *   Access Token provided by OAuth provider after successfull authentication
    * @param string $OAuthProviderId
    *   Unique user ID to OAuthProvider
    * @param int $contactId
    *   Contact ID of the social user
    *
+   * @return bool
    */
-  public function login($OAuthProvider = NULL, $accessToken = NULL, $OAuthProviderId = NULL, $contactId = NULL) {
+  public function login($OAuthProvider = NULL, $OAuthProviderId = NULL, $contactId = NULL) {
     $session = CRM_Core_Session::singleton();
 
-    if ($OAuthProvider == NULL && $accessToken == NULL && $OAuthProviderId == NULL && $contactId == NULL) {
+    if ($OAuthProvider == NULL && $OAuthProviderId == NULL && $contactId == NULL) {
       $session->set('civisocial_logged_in', FALSE);
-    } else {
+    }
+    elseif ($OAuthProvider != NULL && $OAuthProviderId != NULL && $contactId != NULL) {
       $session->set('civisocial_logged_in', TRUE);
+    }
+    else {
+      return FALSE;
     }
     $session->set('civisocial_oauth_provider', $OAuthProvider);
     $session->set('civisocial_social_user_id', $OAuthProviderId);
     $session->set('civisocial_contact_id', $contactId);
-    $session->set('access_token', $accessToken);
+    return TRUE;
   }
 
   /**
@@ -205,6 +275,22 @@ class CRM_Civisocial_OAuthProvider {
    * It can also be used to validate access tokens after setting one.
    */
   public function isAuthorized() {
+  }
+
+  /**
+   * Redirect to the request origin
+   */
+  public function redirect() {
+    if (isset($_GET['continue'])) {
+      CRM_Utils_System::redirect($_GET['continue']);
+    }
+    $session = CRM_Core_Session::singleton();
+    $requestOrigin = $session->get("civisocial_redirect");
+    $session->set('civisocial_redirect', NULL);
+    if (!$requestOrigin) {
+      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
+    }
+    CRM_Utils_System::redirect($requestOrigin);
   }
 
   /**
@@ -244,8 +330,8 @@ class CRM_Civisocial_OAuthProvider {
   /**
    * Make a HTTP request
    *
-   * @param string $node
-   *   API node
+   * @param string $url
+   *   API request URL
    * @param string $method
    *   HTTP request method
    * @param array $postParams
@@ -253,7 +339,7 @@ class CRM_Civisocial_OAuthProvider {
    * @param array $getParams
    *   GET parameters
    *
-   * @return array
+   * @return string
    *   Response to API request
    */
   public function http($url, $method, $postParams = array(), $getParams = array()) {
@@ -274,7 +360,7 @@ class CRM_Civisocial_OAuthProvider {
         curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postParams));
       }
     }
-    elseif ('DELETE' == $method ) {
+    elseif ('DELETE' == $method) {
       curl_setopt($ci, CURLOPT_CUSTOMREQUEST, 'DELETE');
       if (!empty($postParams)) {
         $url = $this->appendQueryString($url, $postParams);

@@ -1,0 +1,156 @@
+/* Buttons Wrapper */
+.civisocial-wrapper {
+  /*outline: 1px solid green;*/
+}
+
+.civisocial-wrapper .status {
+  padding: 0.6em ;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+  color: #245269;
+}
+
+.civisocial-wrapper .status a {
+}
+
+/* Social Buttons Style */
+.civisocial-wrapper a.btn {
+  display: inline-block;
+  background-position: 1em;
+  background-repeat: no-repeat;
+  background-size: 1.8em;
+  border-radius: 0.5em;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+  height: 2.5em;
+  line-height: 2.5em;
+  vertical-align: center;
+  padding: 0 1em 0 4em;
+  text-decoration: none;
+  color: #fff;
+  margin: 0.3em;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.6);
+  text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+}
+
+/* Facebook */
+.btn-facebook {
+  background-color: #3b5998;
+  background-image: url("../img/facebook.svg");
+}
+.btn-facebook:hover {
+  background-color: #4c70ba;
+}
+.btn-facebook:active {
+  background-color: #2d4373;
+}
+
+/* Google Plus */
+.btn-googleplus {
+  background-color: #dd4b39;
+  background-image: url("../img/googleplus.svg");
+}
+.btn-googleplus:hover {
+  background-color: #e47365;
+}
+.btn-googleplus:active {
+  background-color: #c23321;
+}
+
+/* Twitter */
+.btn-twitter {
+  background-color: #00aced;
+  background-image: url("../img/twitter.svg");
+}
+.btn-twitter:hover {
+  background-color: #21c2ff;
+}
+.btn-twitter:active {
+  background-color: #0087ba;
+}
+
+/* Microsoft */
+.btn-microsoft {
+  background-color: #e3b30d;
+  background-image: url("../img/microsoft.svg");
+}
+.btn-microsoft:hover {
+  background-color: #f3c730;
+}
+.btn-microsoft:active {
+  background-color: #b38d0a;
+}
+
+/* Github*/
+.btn-github {
+  background-color: #2a2a2a;
+  background-image: url("../img/github.svg");
+}
+.btn-github:hover {
+  background-color: #444444;
+}
+.btn-github:active {
+  background-color: #101010;
+}
+
+/* Foursquare*/
+.btn-foursquare {
+  background-color: #95c330;
+  background-image: url("../img/foursquare.svg");
+}
+.btn-foursquare:hover {
+  background-color: #abd452;
+}
+.btn-foursquare:active {
+  background-color: #769a26;
+}
+
+/* Instagram */
+.btn-instagram {
+  background-color: #906248;
+  background-image: url("../img/instagram.svg");
+}
+.btn-instagram:hover {
+  background-color: #ae7a5d;
+}
+.btn-instagram:active {
+  background-color: #6e4b37;
+}
+
+/* LinkedIn */
+.btn-linkedin {
+  background-color: #0b5ea3;
+  background-image: url("../img/linkedin.svg");
+}
+.btn-linkedin:hover {
+  background-color: #0e7ad3;
+}
+.btn-linkedin:active {
+  background-color: #084273;
+}
+
+/* Dropbox */
+.btn-dropbox {
+  background-color: #1b73d1;
+  background-image: url("../img/dropbox.svg");
+}
+.btn-dropbox:hover {
+  background-color: #3a8de5;
+}
+.btn-dropbox:active {
+  background-color: #155aa4;
+}
+
+/* BitBucket*/
+.btn-bitbucket {
+  background-color: #205081;
+  background-image: url("../img/bitbucket.svg");
+}
+.btn-bitbucket:hover {
+  background-color: #3572B0;
+}
+.btn-bitbucket:active {
+  background-color: ##4E8AC7;
+}

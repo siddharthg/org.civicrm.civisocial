@@ -81,14 +81,11 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
   public function handleCallback() {
     parent::handleCallback();
     $session = CRM_Core_Session::singleton();
-    $requestOrigin = $session->get("civisocialredirect");
-    if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
-    }
 
     // Check if the user denied acccess
+    // @todo: Put deny handling in the base class as well
     if (isset($_GET['error']) && $_GET['error'] = 'access_denied') {
-      CRM_Utils_System::redirect($requestOrigin);
+      $this->redirect();
     }
 
     // Facebook sends a code to the callback url, this is further used to acquire
@@ -116,54 +113,16 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       // @todo:	It would be better if we inform first (eg. You need to provide
       //			email to continue) and then provide a link to re-authorize
     }
+    $session->set('access_token', $this->token);
 
     // Authentication is successful. Fetch user profile
-    $userProfile = array();
     if ($this->isAuthorized()) {
-      $userProfile = $this->getUserProfile();
+      $this->saveSocialUser($this->alias, $this->getUserProfile());
     }
     else {
       // Start over
       CRM_Utils_System::redirect($this->getLoginUri());
     }
-
-    $facebookUserId = CRM_Utils_Array::value("id", $userProfile);
-    $contactId = civicrm_api3(
-      'CivisocialUser',
-      'socialuserexists',
-      array(
-        'social_user_id' => $facebookUserId,
-        'oauth_provider' => $this->alias,
-      )
-    );
-
-    if (!$contactId) {
-      $user = array(
-        'first_name' => CRM_Utils_Array::value('first_name', $userProfile),
-        'last_name' => CRM_Utils_Array::value('last_name', $userProfile),
-        'display_name' => CRM_Utils_Array::value("name", $userProfile),
-        'preffered_language' => CRM_Utils_Array::value("locale", $userProfile),
-        'gender' => CRM_Utils_Array::value('gender', $userProfile),
-        'email' => CRM_Utils_Array::value("email", $userProfile),
-        'contact_type' => 'Individual',
-      );
-
-      // Find/create contact to map with social user
-      $contactId = civicrm_api3('CivisocialUser', 'createcontact', $user);
-
-      // Create social user
-      $socialUser = array(
-        'contact_id' => $contactId,
-        'social_user_id' => $facebookUserId,
-        'oauth_token' => $this->token,
-        'oauth_provider' => $this->alias,
-        'created_date' => time(), // @todo: Created Date not being recorded
-      );
-
-      civicrm_api3('CivisocialUser', 'create', $socialUser);
-    }
-    $this->login($this->alias, $this->token, $facebookUserId, $contactId);
-    CRM_Utils_System::redirect($requestOrigin);
   }
 
   /**
@@ -173,14 +132,24 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
    * @return bool
    */
   public function isAuthorized() {
-    if ($this->token && isset($this->userProfile)) {
+    if ($this->token && !empty($this->userProfile)) {
       return TRUE;
     }
     $response = $this->get('me?fields=id,first_name,last_name,name,locale,gender,email');
     if (!$response) {
       return FALSE;
     }
-    $this->userProfile = $response;
+    $this->userProfile = array(
+      'id'          => CRM_Utils_Array::value('id', $response),
+      'first_name'  => CRM_Utils_Array::value('first_name', $response),
+      'last_name'   => CRM_Utils_Array::value('last_name', $response),
+      'name'   => CRM_Utils_Array::value('name', $response),
+      'gender'      => CRM_Utils_Array::value('gender', $response),
+      'locale'      => CRM_Utils_Array::value('locale', $response),
+      'email'       => CRM_Utils_Array::value('email', $response),
+      'profile_url' => "https://www.facebook.com/{$response['id']}",
+      'picture_url' => "https://graph.facebook.com/{$response['id']}/picture",
+    );
     return TRUE;
   }
 
@@ -222,16 +191,19 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
   }
 
   /**
-   * Appends an access token, makes HTTP request and handles the repsonse
+   * Make a HTTP request
    *
    * @param string $url
-   *   Request URL
-   * @param array $params
-   *   Request parameters
+   *   API request URL
    * @param string $method
-   *   HTTP method
+   *   HTTP request method
+   * @param array $postParams
+   *   POST parameters
+   * @param array $getParams
+   *   GET parameters
    *
    * @return array
+   *   Response to API request
    */
   public function http($url, $method, $postParams = array(), $getParams = array()) {
     if ($this->token) {

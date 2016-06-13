@@ -140,33 +140,96 @@ function civisocial_civicrm_navigationMenu(&$params) {
   );
 }
 
-// function civisocial_civicrm_buildForm($formName, &$form) {
-//   // @todo: Link with Login
-//   $session = CRM_Core_Session::singleton();
-//   $smarty = CRM_Core_Smarty::singleton();
-//   $userId = $session->get('civisocial_contact_id');
-//   if ($session->get('civisocial_logged_in')) {
-//       // If there is no user logged in.
-//       $id = $form->get('id');
-//       $redirecturl = CRM_Utils_System::url(CRM_Utils_System::currentPath(), array('id' => $id, 'reset' => 1), FALSE, NULL, FALSE, TRUE);
-//       $smarty->assign("redirecturl", $redirecturl);
+/**
+ * Include the social buttons. Show the logged in user information if already
+ * logged in.
+ */
+function civisocial_civicrm_buildForm($formName, &$form) {
+  // Don't include social buttons on Admin/Settings forms
+  // Admin page filters
+  $ignorePatterns = array(
+    '/Form.*Settings/',
+    '/Admin.*Form/',
+    '/Form.*Search/',
+    '/Contact.*Form/',
+    '/Activity.*Form/',
+    '/Group_Form/',
+    '/Contribute.*Form(?!.*Contribution_Main)/',
+    '/Event.*Form(?!.*Registration_Register)/',
+    '/Member.*Form/',
+    '/Campaign.*Form(?!.*Petition_Signature)/',
+    '/Custom_Form/',
+    '/Case_Form/',
+    '/Grant_Form/',
+    '/PCP_Form/',
+    '/Price_Form/',
+  );
 
-//       CRM_Core_Region::instance('page-body')->add(array(
-//         'template' => 'socialbutton.tpl',
-//       ));
-//   }
-//   else {
-//     // Get name of the Logged in User
-//     $user = civicrm_api3('contact', 'get', array("id" => $userId));
-//     $smarty->assign("name", $user["values"][$userId]["display_name"]);
+  foreach ($ignorePatterns as $pattern) {
+    if (preg_match($pattern, $formName)) {
+      return;
+    }
+  }
 
-//     // Get the OAuth Provider which is saved in the session
+  $session = CRM_Core_Session::singleton();
+  $smarty = CRM_Core_Smarty::singleton();
 
-//     $OAuthProvider = CRM_Core_Session::singleton()->get("civisocial_oauth_provider");
+  // @todo: Add this to head
+  CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css');
 
-//     $smarty->assign("OAuthProvider", $OAuthProvider);
-//     CRM_Core_Region::instance('page-body')->add(array(
-//       'template' => "loggedin.tpl",
-//     ));
-//   }
-// }
+  $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
+  $smarty->assign('currentUrl', $currentUrl);
+  $smarty->assign('formName', $formName);
+
+  if ($session->get('civisocial_logged_in')) {
+    // User is connected to some social network
+    $oAuthProvider = ucwords($session->get('civisocial_oauth_provider'));
+    $token = $session->get('access_token');
+    $className = "CRM_Civisocial_OAuthProvider_" . $oAuthProvider;
+    $oap = new $className($token);
+
+    // Check if the user is still authorized
+    if ($oap->isAuthorized()) {
+      $oAuthUser = $oap->getUserProfile();
+      $smarty->assign("oAuthProvider", $oAuthProvider);
+      $smarty->assign("name", $oAuthUser['name']);
+      $smarty->assign("profileUrl", $oAuthUser['profile_url']);
+
+      CRM_Core_Region::instance('page-header')->add(array(
+        'template' => "LoggedIn.tpl",
+      ));
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => "LoggedIn.tpl",
+      ));
+
+      // Populate fields
+      // @todo: Come up with a more general solution
+      $defaults = array();
+      $defaults['email-5'] = $oAuthUser['email'];
+      $defaults['email-Primary'] = $oAuthUser['email'];
+      $defaults['first_name'] = $oAuthUser['first_name'];
+      $defaults['billing_first_name'] = $oAuthUser['first_name'];
+      if ($oAuthUser['last_name']) {
+        $defaults['last_name'] = $oAuthUser['last_name'];
+        $defaults['billing_last_name'] = $oAuthUser['last_name'];
+      }
+
+      $form->setDefaults($defaults);
+      return;
+    }
+    else {
+      // User is not authorized because access token expired or
+      // the user revoked permissions to the app
+      // Logout so that user can login again
+      $oap->logout();
+    }
+  }
+
+  // User is not connected to any network
+  CRM_Core_Region::instance('page-header')->add(array(
+    'template' => "SocialButtons.tpl",
+  ));
+  CRM_Core_Region::instance('page-body')->add(array(
+    'template' => "SocialButtons.tpl",
+  ));
+}
