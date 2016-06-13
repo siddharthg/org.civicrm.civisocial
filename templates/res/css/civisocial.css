@@ -1,16 +1,61 @@
-/* Buttons Wrapper */
 .civisocial-wrapper {
-  /*outline: 1px solid green;*/
 }
 
-.civisocial-wrapper .status {
-  padding: 0.6em ;
-  background-color: #d9edf7;
+.civisocial-wrapper .login-status {
+  padding: 0.4em ;
+  padding-left: 45px;
   border-color: #bce8f1;
-  color: #245269;
+  color: #fff;
+  height: 100%;
+  overflow: hidden;
+  background-size: 25px 25px;
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  border: 1px solid;
+  border-radius: 5px;
+  margin: 0.5em 0;
+  font-weight: normal;
+  text-shadow: 0 -1px 1px rgba(0,0,0,0.20);
+  position: relative;
 }
 
-.civisocial-wrapper .status a {
+.civisocial-wrapper .login-status a.picture {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  margin-right: 10px;
+  float: left;
+}
+
+.civisocial-wrapper .login-status a.picture img {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.civisocial-wrapper .login-status p {
+  display: inline-block;
+  margin: 0;
+  line-height: 25px;
+  vertical-align: middle;
+  float: left;
+}
+
+.civisocial-wrapper .login-status p a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.civisocial-wrapper .login-status p a:hover {
+  text-decoration: none;
+}
+
+.civisocial-wrapper .login-status p.logout {
+  display: block;
+  position: absolute;
+  right: 10px;
+
 }
 
 /* Social Buttons Style */
@@ -36,7 +81,7 @@
 }
 
 /* Facebook */
-.btn-facebook {
+.bg-facebook {
   background-color: #3b5998;
   background-image: url("../img/facebook.svg");
 }
@@ -48,7 +93,7 @@
 }
 
 /* Google Plus */
-.btn-googleplus {
+.bg-googleplus {
   background-color: #dd4b39;
   background-image: url("../img/googleplus.svg");
 }
@@ -60,7 +105,7 @@
 }
 
 /* Twitter */
-.btn-twitter {
+.bg-twitter {
   background-color: #00aced;
   background-image: url("../img/twitter.svg");
 }
@@ -72,7 +117,7 @@
 }
 
 /* Microsoft */
-.btn-microsoft {
+.bg-microsoft {
   background-color: #e3b30d;
   background-image: url("../img/microsoft.svg");
 }
@@ -84,7 +129,7 @@
 }
 
 /* Github*/
-.btn-github {
+.bg-github {
   background-color: #2a2a2a;
   background-image: url("../img/github.svg");
 }
@@ -96,7 +141,7 @@
 }
 
 /* Foursquare*/
-.btn-foursquare {
+.bg-foursquare {
   background-color: #95c330;
   background-image: url("../img/foursquare.svg");
 }
@@ -108,7 +153,7 @@
 }
 
 /* Instagram */
-.btn-instagram {
+.bg-instagram {
   background-color: #906248;
   background-image: url("../img/instagram.svg");
 }
@@ -120,7 +165,7 @@
 }
 
 /* LinkedIn */
-.btn-linkedin {
+.bg-linkedin {
   background-color: #0b5ea3;
   background-image: url("../img/linkedin.svg");
 }
@@ -132,7 +177,7 @@
 }
 
 /* Dropbox */
-.btn-dropbox {
+.bg-dropbox {
   background-color: #1b73d1;
   background-image: url("../img/dropbox.svg");
 }
@@ -144,7 +189,7 @@
 }
 
 /* BitBucket*/
-.btn-bitbucket {
+.bg-bitbucket {
   background-color: #205081;
   background-image: url("../img/bitbucket.svg");
 }

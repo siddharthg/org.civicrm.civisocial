@@ -183,9 +183,9 @@ function civisocial_civicrm_buildForm($formName, &$form) {
 
   if ($session->get('civisocial_logged_in')) {
     // User is connected to some social network
-    $oAuthProvider = ucwords($session->get('civisocial_oauth_provider'));
+    $oAuthProvider = $session->get('civisocial_oauth_provider');
     $token = $session->get('access_token');
-    $className = "CRM_Civisocial_OAuthProvider_" . $oAuthProvider;
+    $className = "CRM_Civisocial_OAuthProvider_" . ucwords($oAuthProvider);
     $oap = new $className($token);
 
     // Check if the user is still authorized
@@ -194,6 +194,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       $smarty->assign("oAuthProvider", $oAuthProvider);
       $smarty->assign("name", $oAuthUser['name']);
       $smarty->assign("profileUrl", $oAuthUser['profile_url']);
+      $smarty->assign("pictureUrl", $oAuthUser['picture_url']);
 
       CRM_Core_Region::instance('page-header')->add(array(
         'template' => "LoggedIn.tpl",
