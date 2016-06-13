@@ -203,15 +203,18 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       ));
 
       // Populate fields
-      // @todo: Come up with a more general solution
       $defaults = array();
-      $defaults['email-5'] = $oAuthUser['email'];
-      $defaults['email-Primary'] = $oAuthUser['email'];
-      $defaults['first_name'] = $oAuthUser['first_name'];
-      $defaults['billing_first_name'] = $oAuthUser['first_name'];
-      if ($oAuthUser['last_name']) {
-        $defaults['last_name'] = $oAuthUser['last_name'];
-        $defaults['billing_last_name'] = $oAuthUser['last_name'];
+      $formFields = array(
+        'first_name',
+        'last_name',
+        'email',
+      );
+      $elements = array_keys($form->_elementIndex);
+      foreach ($formFields as $formField) {
+        $matches = preg_grep("/{$formField}/", $elements);
+        foreach ($matches as $elementName) {
+          $defaults[$elementName] = $oAuthUser[$formField];
+        }
       }
 
       $form->setDefaults($defaults);
