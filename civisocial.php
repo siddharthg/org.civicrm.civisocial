@@ -175,7 +175,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   $smarty = CRM_Core_Smarty::singleton();
 
   // @todo: Add this to head
-  CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css');
+  CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css', 0, 'html-header');
 
   $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
   $smarty->assign('currentUrl', $currentUrl);
