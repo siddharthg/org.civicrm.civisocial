@@ -140,11 +140,22 @@ function civisocial_civicrm_navigationMenu(&$params) {
   );
 }
 
-/**
- * Include the social buttons. Show the logged in user information if already
- * logged in.
- */
 function civisocial_civicrm_buildForm($formName, &$form) {
+  // Facebook Event Field
+  if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
+    addFacebookEventField($form);
+    return;
+  }
+
+  // Autofill form
+  autofillForm($formName, $form);
+}
+
+/**
+ * Autofill public forms if already logged in. Include social buttons
+ * otherwise.
+ */
+function autofillForm($formName, &$form) {
   // Don't include social buttons on Admin/Settings forms
   // Admin page filters
   $ignorePatterns = array(
@@ -174,12 +185,10 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   $session = CRM_Core_Session::singleton();
   $smarty = CRM_Core_Smarty::singleton();
 
-  // @todo: Add this to head
   CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css', 0, 'html-header');
 
   $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
   $smarty->assign('currentUrl', $currentUrl);
-  $smarty->assign('formName', $formName);
 
   if ($session->get('civisocial_logged_in')) {
     // User is connected to some social network
@@ -236,4 +245,17 @@ function civisocial_civicrm_buildForm($formName, &$form) {
   CRM_Core_Region::instance('page-body')->add(array(
     'template' => "SocialButtons.tpl",
   ));
+}
+
+/**
+ * Add Facebook Event filed to Add New Event form
+ */
+function addFacebookEventField(&$form) {
+  $form->add('text', 'facebook_event_id', ts('Facebook Event ID'));
+
+  CRM_Core_Region::instance('page-body')->add(array(
+    'template' => 'FacebookEventIdField.tpl',
+  ));
+
+  CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/facebook-event.js');
 }
