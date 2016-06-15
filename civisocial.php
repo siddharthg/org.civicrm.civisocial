@@ -174,6 +174,7 @@ function autofillForm($formName, &$form) {
     '/Grant_Form/',
     '/PCP_Form/',
     '/Price_Form/',
+    '/UF_Form_Field/',
   );
 
   foreach ($ignorePatterns as $pattern) {
