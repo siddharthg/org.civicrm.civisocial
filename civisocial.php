@@ -141,12 +141,22 @@ function civisocial_civicrm_navigationMenu(&$params) {
 }
 
 function civisocial_civicrm_buildForm($formName, &$form) {
-  // Facebook Event Field
   if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
+    // Add Facebook Event field on Add New Event admin page
     addFacebookEventField($form);
     return;
   }
+  elseif (is_a($form, 'CRM_Event_Form_Registration_Confirm')) {
+    $oap = new CRM_Civisocial_OAuthProvider();
+    $session = CRM_Core_Session::singleton();
 
+    if ($oap->isLoggedIn() && 'facebook' == $session->get('civisocial_oauth_provider')) {
+      $form->add('checkbox', 'facebook_rsvp_event', ts('RSVP event on Facebook?'));
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'OAuthProvider/Facebook/RegistrationConfirm.tpl',
+      ));
+    }
+  }
   // Autofill form
   autofillForm($formName, $form);
 }
