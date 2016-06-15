@@ -152,6 +152,43 @@ function civisocial_civicrm_buildForm($formName, &$form) {
 }
 
 /**
+ * Validate Facbeook Event Id field.
+ */
+function civisocial_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
+  if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
+    // @todo: Check if the facebook event exist.
+    // This requires an admin facebook user to be logged in
+    // Do this after Civisocial Admin Connect page is done
+  }
+}
+
+/**
+ * Save Facebook Event ID
+ */
+function civisocial_civicrm_postProcess($formName, &$form) {
+  if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
+    if (isset($form->_submitValues['facebook_event_id'])) {
+      // Check if the reocord for the given event already exists.
+      $fbEventId = $form->_submitValues['facebook_event_id'];
+      $params = array(
+        'event_id' => $form->get('id'),
+      );
+
+      $defaults = array();
+      CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+
+      if (!empty($defaults)) {
+        // Record already exists
+        $params['id'] = $defaults['id'];
+      }
+
+      $params['facebook_event_id'] = $fbEventId;
+      CRM_Civisocial_BAO_FacebookEvent::create($params);
+    }
+  }
+}
+
+/**
  * Autofill public forms if already logged in. Include social buttons
  * otherwise.
  */
@@ -252,11 +289,26 @@ function autofillForm($formName, &$form) {
  * Add Facebook Event filed to Add New Event form
  */
 function addFacebookEventField(&$form) {
+  // Add facebook event field to the form.
   $form->add('text', 'facebook_event_id', ts('Facebook Event ID'));
+  $form->addRule('facebook_event_id', ts('Please enter a valid Facebook event Id.'), 'numeric');
+
+  if (CRM_Core_Action::UPDATE == $form->getAction()) {
+    // Load the saved value of the facebook event field
+    $params = array(
+      'event_id' => $form->get('id'),
+    );
+
+    $defaults = array();
+    CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+
+    if (!empty($defaults)) {
+      $form->setDefaults(array('facebook_event_id' => $defaults['facebook_event_id']));
+    }
+  }
 
   CRM_Core_Region::instance('page-body')->add(array(
     'template' => 'FacebookEventIdField.tpl',
   ));
-
   CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/facebook-event.js');
 }
