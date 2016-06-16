@@ -10,12 +10,12 @@
 	  </div>
 	  <div class="crm-section">
 	    <div class="label">{$form.facebook_api_key.label}</div>
-	    <div class="content">{$form.facebook_api_key.html|crmAddClass:big}</div>
+	    <div class="content">{$form.facebook_api_key.html|crmAddClass:huge}</div>
 	    <div class="clear"></div>
 	  </div>
 	  <div class="crm-section">
 	    <div class="label">{$form.facebook_api_secret.label}</div>
-	    <div class="content">{$form.facebook_api_secret.html|crmAddClass:big}</div>
+	    <div class="content">{$form.facebook_api_secret.html|crmAddClass:huge}</div>
 	    <div class="clear"></div>
 	  </div>
 	</fieldset>
@@ -27,12 +27,12 @@
 	  </div>
   	  <div class="crm-section">
 	    <div class="label">{$form.googleplus_api_key.label}</div>
-	    <div class="content">{$form.googleplus_api_key.html|crmAddClass:big}</div>
+	    <div class="content">{$form.googleplus_api_key.html|crmAddClass:huge}</div>
 	    <div class="clear"></div>
 	  </div>
 	  <div class="crm-section">
 	    <div class="label">{$form.googleplus_api_secret.label}</div>
-	    <div class="content">{$form.googleplus_api_secret.html|crmAddClass:big}</div>
+	    <div class="content">{$form.googleplus_api_secret.html|crmAddClass:huge}</div>
 	    <div class="clear"></div>
 	  </div>
 	</fieldset>
@@ -44,12 +44,12 @@
 	  </div>
 	  <div class="crm-section">
 	    <div class="label">{$form.twitter_api_key.label}</div>
-	    <div class="content">{$form.twitter_api_key.html|crmAddClass:big}</div>
+	    <div class="content">{$form.twitter_api_key.html|crmAddClass:huge}</div>
 	    <div class="clear"></div>
 	  </div>
 	  <div class="crm-section">
 	    <div class="label">{$form.twitter_api_secret.label}</div>
-	    <div class="content">{$form.twitter_api_secret.html|crmAddClass:big}</div>
+	    <div class="content">{$form.twitter_api_secret.html|crmAddClass:huge}</div>
 	    <div class="clear"></div>
 	  </div>
 	</fieldset>
