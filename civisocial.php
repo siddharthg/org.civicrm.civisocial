@@ -187,7 +187,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
 
       if (!empty($defaults)) {
-        $form->add('checkbox', 'facebook_rsvp_event', ts('RSVP event on Facebook'));
+        $form->add('checkbox', 'facebook_rsvp_event', ts('RSVP on Facebook'));
         CRM_Core_Region::instance('page-body')->add(array(
           'template' => 'OAuthProvider/Facebook/RegistrationConfirm.tpl',
         ));
@@ -213,7 +213,8 @@ function civisocial_civicrm_validateForm($formName, &$fields, &$files, &$form, &
  * Save Facebook Event ID
  */
 function civisocial_civicrm_postProcess($formName, &$form) {
-  if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
+  if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
+    // Save Facebook Event ID to the database
     if (isset($form->_submitValues['facebook_event_id']) && !empty($form->_submitValues['facebook_event_id'])) {
       // Check if the reocord for the given event already exists.
       $fbEventId = $form->_submitValues['facebook_event_id'];
@@ -231,6 +232,16 @@ function civisocial_civicrm_postProcess($formName, &$form) {
 
       $params['facebook_event_id'] = $fbEventId;
       CRM_Civisocial_BAO_FacebookEvent::create($params);
+    }
+  }
+  elseif ('CRM_Event_Form_Registration_Confirm' == $formName) {
+    // Check if user chose to RSVP on Facebook
+    if (isset($form->_submitValues['facebook_rsvp_event'])) {
+      $eventId = $form->get('id');
+      $qfKey = $form->get('qfKey');
+      $thankyouUrl = rawurlencode(CRM_Utils_System::url("civicrm/event/register?_qf_ThankYou_display=true&qfKey={$qfKey}", NULL, TRUE));
+      $redirectUrl = CRM_Utils_System::url("civicrm/civisocial/event/rsvpfacebookevent?event_id={$eventId}&thankyou_url={$thankyouUrl}", NULL, TRUE);
+      CRM_Utils_System::redirect($redirectUrl);
     }
   }
 }
