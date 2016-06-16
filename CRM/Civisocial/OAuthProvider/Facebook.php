@@ -85,7 +85,7 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
     // Check if the user denied acccess
     // @todo: Put deny handling in the base class as well
     if (isset($_GET['error']) && $_GET['error'] = 'access_denied') {
-      $this->redirect();
+      $this->redirect(TRUE);
     }
 
     // Facebook sends a code to the callback url, this is further used to acquire

@@ -87,7 +87,7 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
 
     // Check if the user denied acccess
     if (isset($_GET['error']) && $_GET['error'] = 'access_denied') {
-      $this->redirect();
+      $this->redirect(TRUE);
     }
 
     // Google sends a code to the callback url, this is further used to acquire

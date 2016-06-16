@@ -279,18 +279,26 @@ class CRM_Civisocial_OAuthProvider {
 
   /**
    * Redirect to the request origin
+   * 
+   * @param  boolean $accessDenied
+   *   If the access to the requested permissions was denied
    */
-  public function redirect() {
+  public function redirect($accessDenied = FALSE) {
     if (isset($_GET['continue'])) {
-      CRM_Utils_System::redirect($_GET['continue']);
+      $continueUrl = rawurldecode(CRM_Utils_Array::value('continue', $_GET));
     }
-    $session = CRM_Core_Session::singleton();
-    $requestOrigin = $session->get("civisocial_redirect");
-    $session->set('civisocial_redirect', NULL);
-    if (!$requestOrigin) {
-      $requestOrigin = CRM_Utils_System::url('', NULL, TRUE);
+    else {
+      $session = CRM_Core_Session::singleton();
+      $continueUrl = $session->get("civisocial_redirect");
+      $session->set('civisocial_redirect', NULL);
+      if (!$continueUrl) {
+        $continueUrl = CRM_Utils_System::url('', NULL, TRUE);
+      }
     }
-    CRM_Utils_System::redirect($requestOrigin);
+    if ($accessDenied) {
+      $continueUrl = $this->appendQueryString($continueUrl, array('error' => 'access_denied'));
+    }
+    CRM_Utils_System::redirect($continueUrl);
   }
 
   /**

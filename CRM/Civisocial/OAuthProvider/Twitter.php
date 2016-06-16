@@ -53,7 +53,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
 
     // Check if the user denied acccess
     if (isset($_GET['denied'])) {
-      $this->redirect();
+      $this->redirect(TRUE);
     }
 
     // Get temporary credentials from the session
