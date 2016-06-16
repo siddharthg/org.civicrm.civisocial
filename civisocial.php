@@ -214,7 +214,7 @@ function civisocial_civicrm_validateForm($formName, &$fields, &$files, &$form, &
  */
 function civisocial_civicrm_postProcess($formName, &$form) {
   if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
-    if (isset($form->_submitValues['facebook_event_id'])) {
+    if (isset($form->_submitValues['facebook_event_id']) && !empty($form->_submitValues['facebook_event_id'])) {
       // Check if the reocord for the given event already exists.
       $fbEventId = $form->_submitValues['facebook_event_id'];
       $params = array(
