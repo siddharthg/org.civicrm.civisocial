@@ -8,12 +8,6 @@
     <is_public>true</is_public>
   </item>
   <item>
-    <path>civicrm/admin/setting/preferences/civisocial</path>
-    <page_callback>CRM_Civisocial_Form_Settings</page_callback>
-    <title>Settings</title>
-    <access_arguments>administer CiviCRM</access_arguments>
-  </item>
-  <item>
     <path>civicrm/civisocial/callback</path>
     <page_callback>CRM_Civisocial_Page_OAuthCallback</page_callback>
     <title>OAuthCallback</title>
@@ -28,10 +22,15 @@
     <is_public>true</is_public>
   </item>
   <item>
-    <path>civicrm/civisocial/test</path>
-    <page_callback>CRM_Civisocial_Page_Test</page_callback>
-    <title>Test</title>
-    <access_callback>1</access_callback>
-    <is_public>true</is_public>
+    <path>civicrm/admin/civisocial/appcredentials</path>
+    <page_callback>CRM_Civisocial_Form_Settings_AppCredentials</page_callback>
+    <title>App Credentials</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/admin/civisocial/socialmedia</path>
+    <page_callback>CRM_Civisocial_Form_Settings_SocialMedia</page_callback>
+    <title>Social Media Settings</title>
+    <access_arguments>administer CiviCRM</access_arguments>
   </item>
 </menu>

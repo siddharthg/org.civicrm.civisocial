@@ -4,8 +4,8 @@
  *
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
-class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
-  private $_settingFilter = array('group' => 'civisocial');
+class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
+  private $_settingFilter = array('group' => 'appcredentials');
 
   private $_submittedValues = array();
   private $_settings = array();
@@ -14,7 +14,7 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
    * Preprocess the form.
    */
   public function preProcess() {
-    CRM_Utils_System::setTitle(ts('CiviSocial OAuth Credentials'));
+    CRM_Utils_System::setTitle(ts('App Credentials'));
   }
 
   /**
@@ -57,7 +57,7 @@ class CRM_Civisocial_Form_Settings extends CRM_Core_Form {
   public function postProcess() {
     $this->_submittedValues = $this->exportValues();
     if ($this->saveSettings()) {
-      CRM_Core_Session::setStatus(ts('CiviSocial preferences have been saved.'), ts('Saved'), 'success');
+      CRM_Core_Session::setStatus(ts('App Credentials have been saved.'), ts('Saved'), 'success');
       // @todo: Flush Settings cache
     }
   }

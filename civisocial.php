@@ -121,15 +121,12 @@ function civisocial_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 function civisocial_civicrm_navigationMenu(&$params) {
   $maxID = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation") + 300;
 
-  $civisocial_settings_url = "civicrm/admin/setting/preferences/civisocial";
-
   $administerMenuID = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'Administer', 'id', 'name');
-
   $params[$administerMenuID]['child'][$maxID + 1] = array(
     'attributes' => array(
-      'label' => 'Civisocial Credentials',
-      'name' => 'Civisocial Credentials',
-      'url' => $civisocial_settings_url,
+      'label' => 'CiviSocial',
+      'name' => 'CiviSocial',
+      'url' => NULL,
       'permission' => 'administer CiviReport',
       'operator' => NULL,
       'separator' => NULL,
@@ -137,7 +134,38 @@ function civisocial_civicrm_navigationMenu(&$params) {
       'navID' => $maxID + 1,
       'active' => 1,
     ),
+    'child' => array(
+      '1' => array(
+        'attributes' => array(
+          // @todo: Better name?
+          'label' => 'App Credentials',
+          'name' => 'App Credentials',
+          'url' => 'civicrm/admin/civisocial/appcredentials',
+          'permission' => 'administer CiviReport',
+          'operator' => NULL,
+          'separator' => NULL,
+          'parentID' => $maxID + 1,
+          'navID' => 1,
+          'active' => 1,
+        ),
+      ),
+      '2' => array(
+        'attributes' => array(
+          // @todo: Better name?
+          'label' => 'Social Media Settings',
+          'name' => 'Social Media',
+          'url' => 'civicrm/admin/civisocial/socialmedia',
+          'permission' => 'administer CiviReport',
+          'operator' => NULL,
+          'separator' => NULL,
+          'parentID' => $maxID + 1,
+          'navID' => 2,
+          'active' => 1,
+        ),
+      ),
+    ),
   );
+
 }
 
 function civisocial_civicrm_buildForm($formName, &$form) {
