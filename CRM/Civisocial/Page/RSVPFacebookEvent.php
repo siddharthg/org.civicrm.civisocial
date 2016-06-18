@@ -1,7 +1,7 @@
 <?php
-require_once 'CRM/Core/Page.php';
-require_once 'CRM/Civisocial/OAuthProvider/Facebook.php';
-
+/**
+ * Sets the RSVP to "Going" on a corresponding Facbeook event.
+ */
 class CRM_Civisocial_Page_RSVPFacebookEvent extends CRM_Core_Page {
 
   public function run() {

@@ -165,7 +165,23 @@ function civisocial_civicrm_navigationMenu(&$params) {
       ),
     ),
   );
+}
 
+function civisocial_civicrm_preProcess($formName, &$form) {
+  if ('CRM_Event_Form_Registration_ThankYou' == $formName) {
+    // Check if user chose to RSVP on Facebook
+    $session = CRM_Core_Session::singleton();
+    $rsvpEvent = $session->get('facebook_rsvp_event');
+    if ($rsvpEvent) {
+      $eventId = $form->get('id');
+      $qfKey = $form->get('qfKey');
+      $thankyouUrl = rawurlencode(CRM_Utils_System::url("civicrm/event/register?_qf_ThankYou_display=true&qfKey={$qfKey}", NULL, TRUE));
+      $redirectUrl = CRM_Utils_System::url("civicrm/civisocial/event/rsvpfacebookevent?event_id={$eventId}&thankyou_url={$thankyouUrl}", NULL, TRUE);
+
+      $session->set('facebook_rsvp_event', NULL);
+      CRM_Utils_System::redirect($redirectUrl);
+    }
+  }
 }
 
 function civisocial_civicrm_buildForm($formName, &$form) {
@@ -237,11 +253,8 @@ function civisocial_civicrm_postProcess($formName, &$form) {
   elseif ('CRM_Event_Form_Registration_Confirm' == $formName) {
     // Check if user chose to RSVP on Facebook
     if (isset($form->_submitValues['facebook_rsvp_event'])) {
-      $eventId = $form->get('id');
-      $qfKey = $form->get('qfKey');
-      $thankyouUrl = rawurlencode(CRM_Utils_System::url("civicrm/event/register?_qf_ThankYou_display=true&qfKey={$qfKey}", NULL, TRUE));
-      $redirectUrl = CRM_Utils_System::url("civicrm/civisocial/event/rsvpfacebookevent?event_id={$eventId}&thankyou_url={$thankyouUrl}", NULL, TRUE);
-      CRM_Utils_System::redirect($redirectUrl);
+      $session = CRM_Core_Session::singleton();
+      $session->set('facebook_rsvp_event', TRUE);
     }
   }
 }
