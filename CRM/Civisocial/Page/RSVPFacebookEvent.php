@@ -58,7 +58,10 @@ class CRM_Civisocial_Page_RSVPFacebookEvent extends CRM_Core_Page {
     $facebookEventId = $defaults['facebook_event_id'];
     if ($facebook->get($facebookEventId)) {
       // Event exists. Set the RSPV to 'Attending
-      $facebook->post("{$facebookEventId}/attending");
+      $response = $facebook->post("{$facebookEventId}/attending");
+      if ($response) {
+        $session->set('facbeook_rsvp_set', TRUE);
+      }
     }
 
     $this->redirect();

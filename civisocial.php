@@ -210,6 +210,40 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       }
     }
   }
+  elseif ('CRM_Event_Form_Registration_ThankYou' == $formName) {
+    $session = CRM_Core_Session::singleton();
+    $oap = new CRM_Civisocial_OAuthProvider();
+    if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
+      // Check if the Facebook user is authorized
+      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+      if ($facebook->isAuthorized()) {
+        // Check if the facebook event map exists
+        // $form->get('eventId') didn't work.
+        $eventId = $form->_eventId;
+        $params = array(
+          'event_id' => $eventId,
+        );
+        $defaults = array();
+        CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+        if (!empty($defaults)) {
+          // Facebook event map exists
+          // Get facebook event information
+          $facebookEventId = $defaults['facebook_event_id'];
+          $facebookEvent = $facebook->get($facebookEventId);
+          if ($facebookEvent) {
+            $smarty = CRM_Core_Smarty::singleton();
+            $smarty->assign('facebook_event_name', $facebookEvent['name']);
+            $smarty->assign('facebook_event_url', "https://www.facebook.com/{$facebookEventId}/");
+
+            CRM_Core_Region::instance('page-body')->add(array(
+              'template' => 'OAuthProvider/Facebook/RegistrationThankYou.tpl',
+            ));
+            $session->set('facbeook_rsvp_set', NULL);
+          }
+        }
+      }
+    }
+  }
   // Autofill form
   autofillForm($formName, $form);
 }
