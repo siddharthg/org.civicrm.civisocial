@@ -125,6 +125,20 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
   }
 
   /**
+   * Check if the user is logged into Facebook
+   *
+   * @return bool
+   */
+  public function isLoggedIn() {
+    $session = CRM_Core_Session::singleton();
+    $oAuthProvider = $session->get('civisocial_oauth_provider');
+    if ($oAuthProvider && $oAuthProvider == $this->alias) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Check if the user is connected to Facebook and authorized.
    * It can also be used to validate access tokens after setting one.
    *

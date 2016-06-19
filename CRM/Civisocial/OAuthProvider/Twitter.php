@@ -93,6 +93,20 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
   }
 
   /**
+   * Check if the user is logged into Twitter
+   *
+   * @return bool
+   */
+  public function isLoggedIn() {
+    $session = CRM_Core_Session::singleton();
+    $oAuthProvider = $session->get('civisocial_oauth_provider');
+    if ($oAuthProvider && $oAuthProvider == $this->alias) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Get if the user is connected to OAuth provider and authorized
    *
    * @return bool
@@ -118,6 +132,17 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Set Access Token to the current OAuthProvider object to be able to make
+   * API requests. Validity of the passed access token should be checked
+   * using isAuthorized() method.
+   *
+   * @param array $accessToken
+   */
+  public function setAccessToken($accessToken) {
+    $this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
   }
 
   /**
