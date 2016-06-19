@@ -48,7 +48,16 @@ class CRM_Civisocial_Form_Settings_SocialMedia extends CRM_Core_Form {
         );
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());
+    CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css', 0, 'html-header');
+    CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/social-media-setting.js');
     parent::buildQuickForm();
+  }
+
+  /**
+   * Server side validation 
+   */
+  public function validate() {
+    parent::validate();
   }
 
   /**

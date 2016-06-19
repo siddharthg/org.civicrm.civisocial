@@ -199,3 +199,8 @@
 .btn-bitbucket:active {
   background-color: ##4E8AC7;
 }
+
+/* Admin Page */
+.label-social label {
+  line-height: 2.5em;
+}
