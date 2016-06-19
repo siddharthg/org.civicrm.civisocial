@@ -79,7 +79,6 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
    * Process authentication information returned by OAuth provider after login
    */
   public function handleCallback() {
-    parent::handleCallback();
     $session = CRM_Core_Session::singleton();
 
     // Check if the user denied acccess
@@ -110,8 +109,8 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
 
     if (!empty($deniedPermissions)) {
       CRM_Utils_System::redirect($this->getLoginUri($deniedPermissions, TRUE));
-      // @todo:	It would be better if we inform first (eg. You need to provide
-      //			email to continue) and then provide a link to re-authorize
+      // @todo: It would be better if we inform first (eg. You need to provide
+      //      email to continue) and then provide a link to re-authorize
     }
     $session->set('access_token', $this->token);
 
@@ -214,6 +213,10 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
     if (isset($response['error'])) {
       if ($response['error']['type'] == 'OAuthException') {
         // Invalid access token
+        return FALSE;
+      }
+      elseif ($response['error']['type'] == 'GraphMethodException') {
+        // Unsupported get/post request
         return FALSE;
       }
       else {
