@@ -164,9 +164,6 @@ class CRM_Civisocial_OAuthProvider {
    * Process information returned by OAuth provider after login
    */
   public function handleCallback() {
-    if ($this->isLoggedIn()) {
-      CRM_Utils_System::redirect(CRM_Utils_System::url('', NULL, TRUE));
-    }
   }
 
   /**

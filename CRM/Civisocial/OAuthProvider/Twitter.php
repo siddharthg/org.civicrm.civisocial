@@ -48,7 +48,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    * Process information returned by OAuth provider after login
    */
   public function handleCallback() {
-    parent::handleCallback();
     $session = CRM_Core_Session::singleton();
 
     // Check if the user denied acccess
