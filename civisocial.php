@@ -152,9 +152,9 @@ function civisocial_civicrm_navigationMenu(&$params) {
       '2' => array(
         'attributes' => array(
           // @todo: Better name?
-          'label' => 'Social Media Settings',
-          'name' => 'Social Media',
-          'url' => 'civicrm/admin/civisocial/socialmedia',
+          'label' => 'Social Networks',
+          'name' => 'Social Newtorks',
+          'url' => 'civicrm/admin/civisocial/networks',
           'permission' => 'administer CiviReport',
           'operator' => NULL,
           'separator' => NULL,
