@@ -102,7 +102,19 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
       'redirect_uri' => $this->getCallbackUri($this->alias),
     );
     $response = $this->get('oauth/access_token', $params);
-    $this->token = CRM_Utils_Array::value('access_token', $response);
+    $accessToken = CRM_Utils_Array::value('access_token', $response);
+
+    // Get long-lived access token
+    // Long-lived token live upto 60 days.
+    $params = array(
+      'grant_type' => 'fb_exchange_token',
+      'client_id' => $this->apiKey,
+      'client_secret' => $this->apiSecret,
+      'fb_exchange_token' => $accessToken,
+    );
+    $response = $this->get('oauth/access_token', $params);
+    $accessToken = CRM_Utils_Array::value('access_token', $response);
+    $this->setAccessToken($accessToken);
 
     // Check if all basic perimissions have been granted
     $deniedPermissions = $this->checkPermissions($this->getBasicPermissions());
