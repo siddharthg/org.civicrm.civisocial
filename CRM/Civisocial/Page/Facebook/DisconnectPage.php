@@ -11,6 +11,7 @@ class CRM_Civisocial_Page_Facebook_DisconnectPage extends CRM_Core_Page {
       // Clear settings and sessions
       civicrm_api3('Setting', 'create', array('facebook_page_access_token' => NULL));
       civicrm_api3('Setting', 'create', array('facebook_page_id' => NULL));
+      civicrm_api3('Setting', 'create', array('integrate_facebook_events' => FALSE));
       $session->set('facebook_page_access_token', NULL);
       $session->set('facebook_page_id', NULL);
     }

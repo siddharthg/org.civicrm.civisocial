@@ -10,8 +10,7 @@
 
 .civisocial-box .box-item {
   display: inline-block;
-  margin: 1.5em 0;
-  /*outline: 1px solid green;*/
+  margin: 0.3em 0;
 }
 
 .box-item .content,
@@ -274,4 +273,10 @@
 
 .select select::-ms-expand {
   display: none;
+}
+
+/* Checkbox */
+label.input,
+input[type="checkbox"] {
+  cursor: pointer;
 }

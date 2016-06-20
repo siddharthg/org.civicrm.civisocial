@@ -74,11 +74,13 @@ class CRM_Civisocial_Form_Settings_SocialNetworks extends CRM_Core_Form {
         $this->assign('facebookPageUrl', "https://www.facebook.com/{$pageId}/");
         $this->assign('facebookPagePicture', $pageInfo['picture']['data']['url']);
         $this->assign('disconnectUrl', CRM_Utils_System::url("civicrm/admin/civisocial/network/disconnect/facebookpage?continue={$currentUrl}", NULL, TRUE));
+      CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/social-networks-setting.js');
       }
       else {
         // Remove the stored access token. A new token needs to be retrieved.
         civicrm_api3('Setting', 'create', array('facebook_page_access_token' => NULL));
         civicrm_api3('Setting', 'create', array('facebook_page_id' => NULL));
+        civicrm_api3('Setting', 'create', array('integrate_facebook_events' => FALSE));
         $session->set('facebook_page_access_token', NULL);
         $session->set('facebook_page_id', NULL);
       }
