@@ -1,6 +1,55 @@
 .civisocial-wrapper {
 }
 
+.civisocial-wrapper .civisocial-box {
+  max-width: 500px;
+  display: block;
+  margin: 1.5em auto;
+  text-align: center;
+}
+
+.civisocial-box .box-item {
+  display: inline-block;
+  margin: 0.3em 0;
+}
+
+.box-item .content,
+.box-item .image {
+  float: left;
+}
+.box-item .content {
+  text-align: left;
+  padding-left: 1em;
+}
+.box-item .image {
+  position: relative;
+
+}
+
+.box-item .image,
+.box-item .image img {
+  height: 50px;
+  width: 50px;
+  border-radius: 3px;
+}
+
+.box-item .image .logo {
+  position: absolute;
+  display: block;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  left: 0;
+  background-size: 18px 18px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.box-item .name {
+  font-size: 20px;
+  margin: 5px 0;
+}
+
 .civisocial-wrapper .login-status {
   padding: 0.4em ;
   padding-left: 45px;
@@ -59,7 +108,7 @@
 }
 
 /* Social Buttons Style */
-.civisocial-wrapper a.btn {
+.btn, .civisocial-wrapper a.btn {
   display: inline-block;
   background-position: 1em;
   background-repeat: no-repeat;
@@ -198,4 +247,36 @@
 }
 .btn-bitbucket:active {
   background-color: ##4E8AC7;
+}
+
+/* Admin Page */
+.label-social label {
+  line-height: 2.5em;
+}
+
+/* Select Style */
+.select {
+  position: relative;
+  display: inline-block;
+}
+
+.select select {
+  font-size: 14px;
+  display: inline-block;
+  width: 100%;
+  padding: 8px 15px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+}
+
+.select select::-ms-expand {
+  display: none;
+}
+
+/* Checkbox */
+label.input,
+input[type="checkbox"] {
+  cursor: pointer;
 }

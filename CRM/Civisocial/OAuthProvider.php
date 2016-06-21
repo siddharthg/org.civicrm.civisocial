@@ -392,7 +392,6 @@ class CRM_Civisocial_OAuthProvider {
         $url = $this->appendQueryString($url, $postParams);
       }
     }
-
     curl_setopt($ci, CURLOPT_URL, $url);
     $response = curl_exec($ci);
     $this->httpCode = curl_getinfo($ci, CURLINFO_HTTP_CODE);

@@ -4,8 +4,8 @@
  *
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
-class CRM_Civisocial_Form_Settings_SocialMedia extends CRM_Core_Form {
-  private $_settingFilter = array('group' => 'socialmedia');
+class CRM_Civisocial_Form_Settings_SocialNetworks extends CRM_Core_Form {
+  private $_settingFilter = array('group' => 'socialnetworks');
 
   private $_submittedValues = array();
   private $_settings = array();
@@ -14,7 +14,14 @@ class CRM_Civisocial_Form_Settings_SocialMedia extends CRM_Core_Form {
    * Preprocess the form.
    */
   public function preProcess() {
-    CRM_Utils_System::setTitle(ts('Social Media Settings'));
+    CRM_Utils_System::setTitle(ts('Social Networks'));
+    $session = CRM_Core_Session::singleton();
+
+    $fbPermsDenied = $session->get('facebook_page_perms_denied');
+    if ($fbPermsDenied) {
+      $session->set('facebook_page_perms_denied', NULL);
+      $session->setStatus(ts('Required permissions to connect page were denied.'), ts('Couldn\'t connect to Facebook page'), 'error');
+    }
   }
 
   /**
@@ -46,20 +53,45 @@ class CRM_Civisocial_Form_Settings_SocialMedia extends CRM_Core_Form {
             ),
           )
         );
+
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());
-    parent::buildQuickForm();
-  }
 
-  /**
-   * Process the form submission.
-   */
-  public function postProcess() {
-    $this->_submittedValues = $this->exportValues();
-    if ($this->saveSettings()) {
-      CRM_Core_Session::setStatus(ts('Social Media settings have been saved.'), ts('Saved'), 'success');
-      // @todo: Flush Settings cache
+    $session = CRM_Core_Session::singleton();
+    $currentUrl = rawurlencode(CRM_Utils_System::url('civicrm/admin/civisocial/networks', NULL, TRUE));
+
+    // FACEBOOK PAGE
+    $pageId = $session->get('facebook_page_id');
+    if ($pageId) {
+      // Connected to page
+      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('facebook_page_access_token'));
+      // Check if token is still valid
+      $pageInfo = $facebook->get("{$pageId}?fields=name,picture");
+      if ($pageInfo) {
+        // Token valid
+        $this->assign('facebookPageConnected', TRUE);
+        $this->assign('facebookPageName', $pageInfo['name']);
+        $this->assign('facebookPageUrl', "https://www.facebook.com/{$pageId}/");
+        $this->assign('facebookPagePicture', $pageInfo['picture']['data']['url']);
+        $this->assign('disconnectUrl', CRM_Utils_System::url("civicrm/admin/civisocial/network/disconnect/facebookpage?continue={$currentUrl}", NULL, TRUE));
+      CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/social-networks-setting.js');
+      }
+      else {
+        // Remove the stored access token. A new token needs to be retrieved.
+        civicrm_api3('Setting', 'create', array('facebook_page_access_token' => NULL));
+        civicrm_api3('Setting', 'create', array('facebook_page_id' => NULL));
+        civicrm_api3('Setting', 'create', array('integrate_facebook_events' => FALSE));
+        $session->set('facebook_page_access_token', NULL);
+        $session->set('facebook_page_id', NULL);
+      }
     }
+
+    // TWITTER
+
+    $this->assign('currentUrl', $currentUrl);
+
+    CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css', 0, 'html-header');
+    parent::buildQuickForm();
   }
 
   /**
