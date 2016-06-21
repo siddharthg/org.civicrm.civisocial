@@ -167,6 +167,120 @@ function civisocial_civicrm_navigationMenu(&$params) {
   );
 }
 
+function civisocial_civicrm_buildForm($formName, &$form) {
+  $fbEventEnabled = civicrm_api3('Setting', 'getvalue', array('name' => 'integrate_facebook_events'));
+  if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
+    if ($fbEventEnabled) {
+      // Add facebook event field to the form.
+      $form->add('text', 'facebook_event_url', ts('Facebook Event URL'));
+
+      if (CRM_Core_Action::UPDATE == $form->getAction()) {
+        // Load the saved value of the facebook event field
+        $params = array(
+          'event_id' => $form->get('id'),
+        );
+
+        $defaults = array();
+        CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+        $eventUrl = "https://www.facebook.com/events/{$defaults['facebook_event_id']}/";
+        if (!empty($defaults)) {
+          $form->setDefaults(array('facebook_event_url' => $eventUrl));
+        }
+      }
+    }
+    else {
+      $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
+      $form->assign('currentUrl', $currentUrl);
+    }
+    $form->assign('fbEventEnabled', ($fbEventEnabled) ? TRUE : FALSE);
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'OAuthProvider/Facebook/FacebookEventURLField.tpl',
+    ));
+    CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/facebook-event.js');
+  }
+  elseif ('CRM_Event_Form_Registration_ThankYou' == $formName) {
+    if ($fbEventEnabled) {
+      $session = CRM_Core_Session::singleton();
+      $oap = new CRM_Civisocial_OAuthProvider();
+      if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
+        // Check if the Facebook user is authorized
+        $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+        if ($facebook->isAuthorized()) {
+          // Check if the facebook event map exists
+          // $form->get('eventId') didn't work.
+          $eventId = $form->_eventId;
+          $params = array(
+            'event_id' => $form->get('id'),
+          );
+          $defaults = array();
+          CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+
+          if (!empty($defaults)) {
+            $form->add('checkbox', 'facebook_rsvp_event', ts('RSVP on Facebook'));
+            CRM_Core_Region::instance('page-body')->add(array(
+              'template' => 'OAuthProvider/Facebook/RegistrationConfirm.tpl',
+            ));
+          }
+        }
+      }
+    }
+  }
+  elseif ('CRM_Event_Form_Registration_ThankYou' == $formName) {
+    if ($fbEventEnabled) {
+      $session = CRM_Core_Session::singleton();
+      $oap = new CRM_Civisocial_OAuthProvider();
+      if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
+        // Check if the Facebook user is authorized
+        $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+        if ($facebook->isAuthorized()) {
+          // Check if the facebook event map exists
+          // $form->get('eventId') didn't work.
+          $eventId = $form->_eventId;
+          $params = array(
+            'event_id' => $eventId,
+          );
+          $defaults = array();
+          CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+          if (!empty($defaults)) {
+            // Facebook event map exists
+            // Get facebook event information
+            $facebookEventId = $defaults['facebook_event_id'];
+            $facebookEvent = $facebook->get($facebookEventId);
+            if ($facebookEvent) {
+              $smarty = CRM_Core_Smarty::singleton();
+              $smarty->assign('facebook_event_name', $facebookEvent['name']);
+              $smarty->assign('facebook_event_url', "https://www.facebook.com/{$facebookEventId}/");
+              CRM_Core_Region::instance('page-body')->add(array(
+                'template' => 'OAuthProvider/Facebook/RegistrationThankYou.tpl',
+              ));
+              $session->set('facbeook_rsvp_set', NULL);
+            }
+          }
+        }
+      }
+    }
+  }
+  autofillForm($formName, $form);
+}
+
+/**
+ * Validate Facbeook Event Id field.
+ */
+function civisocial_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
+  if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
+    // Server side validation
+    if (isset($form->_submitValues['facebook_event_url']) && !empty($form->_submitValues['facebook_event_url'])) {
+      // Check if the reocord for the given event already exists.
+      $fbEventUrl = $form->_submitValues['facebook_event_url'];
+      $matches = array();
+      preg_match('#(?:https?://)?(?:www\.)?facebook\.com/events/(\d+)/?#', $fbEventUrl, $matches);
+      if (empty($matches)) {
+        $errors['facebook_event_url'] = ts('Please enter a valid Facebook event URL');
+      }
+    }
+  }
+}
+
 function civisocial_civicrm_preProcess($formName, &$form) {
   if ('CRM_Event_Form_Registration_ThankYou' == $formName) {
     // Check if user chose to RSVP on Facebook
@@ -184,94 +298,19 @@ function civisocial_civicrm_preProcess($formName, &$form) {
   }
 }
 
-function civisocial_civicrm_buildForm($formName, &$form) {
-  if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
-    // Add Facebook Event field on Add New Event admin page
-    addFacebookEventField($form);
-    return;
-  }
-  elseif ('CRM_Event_Form_Registration_Confirm' == $formName) {
-    $oap = new CRM_Civisocial_OAuthProvider();
-    $session = CRM_Core_Session::singleton();
-
-    if ($oap->isLoggedIn() && 'facebook' == $session->get('civisocial_oauth_provider')) {
-      // Check if the event is mapped to facebook event
-      $params = array(
-        'event_id' => $form->get('id'),
-      );
-      $defaults = array();
-      CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
-
-      if (!empty($defaults)) {
-        $form->add('checkbox', 'facebook_rsvp_event', ts('RSVP on Facebook'));
-        CRM_Core_Region::instance('page-body')->add(array(
-          'template' => 'OAuthProvider/Facebook/RegistrationConfirm.tpl',
-        ));
-      }
-    }
-  }
-  elseif ('CRM_Event_Form_Registration_ThankYou' == $formName) {
-    $session = CRM_Core_Session::singleton();
-    $oap = new CRM_Civisocial_OAuthProvider();
-    if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
-      // Check if the Facebook user is authorized
-      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('facebook_access_token'));
-      if ($facebook->isAuthorized()) {
-        // Check if the facebook event map exists
-        // $form->get('eventId') didn't work.
-        $eventId = $form->_eventId;
-        $params = array(
-          'event_id' => $eventId,
-        );
-        $defaults = array();
-        CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
-        if (!empty($defaults)) {
-          // Facebook event map exists
-          // Get facebook event information
-          $facebookEventId = $defaults['facebook_event_id'];
-          $facebookEvent = $facebook->get($facebookEventId);
-          if ($facebookEvent) {
-            $smarty = CRM_Core_Smarty::singleton();
-            $smarty->assign('facebook_event_name', $facebookEvent['name']);
-            $smarty->assign('facebook_event_url', "https://www.facebook.com/{$facebookEventId}/");
-
-            CRM_Core_Region::instance('page-body')->add(array(
-              'template' => 'OAuthProvider/Facebook/RegistrationThankYou.tpl',
-            ));
-            $session->set('facbeook_rsvp_set', NULL);
-          }
-        }
-      }
-    }
-  }
-  // Autofill form
-  autofillForm($formName, $form);
-}
-
-/**
- * Validate Facbeook Event Id field.
- */
-function civisocial_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
-  if (is_a($form, 'CRM_Event_Form_ManageEvent_EventInfo')) {
-    // @todo: Check if the facebook event exist.
-    // This requires an admin facebook user to be logged in
-    // Do this after Civisocial Admin Connect page is done
-  }
-}
-
-/**
- * Save Facebook Event ID
- */
 function civisocial_civicrm_postProcess($formName, &$form) {
   if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
     // Save Facebook Event ID to the database
-    if (isset($form->_submitValues['facebook_event_id']) && !empty($form->_submitValues['facebook_event_id'])) {
+    if (isset($form->_submitValues['facebook_event_url']) && !empty($form->_submitValues['facebook_event_url'])) {
       // Check if the reocord for the given event already exists.
-      $fbEventId = $form->_submitValues['facebook_event_id'];
+      $fbEventUrl = $form->_submitValues['facebook_event_url'];
+      $matches = array();
+      preg_match('#(?:https?://)?(?:www\.)?facebook\.com/events/(\d+)/?#', $fbEventUrl, $matches);
+      $fbEventId = $matches[1];
+
       $params = array(
         'event_id' => $form->get('id'),
       );
-
       $defaults = array();
       CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
 
@@ -279,7 +318,8 @@ function civisocial_civicrm_postProcess($formName, &$form) {
         // Record already exists
         $params['id'] = $defaults['id'];
       }
-
+      // var_dump($fbEventUrl);
+      // var_dump($fbEventId); exit;
       $params['facebook_event_id'] = $fbEventId;
       CRM_Civisocial_BAO_FacebookEvent::create($params);
     }
@@ -389,32 +429,4 @@ function autofillForm($formName, &$form) {
   CRM_Core_Region::instance('page-body')->add(array(
     'template' => "SocialButtons.tpl",
   ));
-}
-
-/**
- * Add Facebook Event filed to Add New Event form
- */
-function addFacebookEventField(&$form) {
-  // Add facebook event field to the form.
-  $form->add('text', 'facebook_event_id', ts('Facebook Event ID'));
-  $form->addRule('facebook_event_id', ts('Please enter a valid Facebook event Id.'), 'numeric');
-
-  if (CRM_Core_Action::UPDATE == $form->getAction()) {
-    // Load the saved value of the facebook event field
-    $params = array(
-      'event_id' => $form->get('id'),
-    );
-
-    $defaults = array();
-    CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
-
-    if (!empty($defaults)) {
-      $form->setDefaults(array('facebook_event_id' => $defaults['facebook_event_id']));
-    }
-  }
-
-  CRM_Core_Region::instance('page-body')->add(array(
-    'template' => 'FacebookEventIdField.tpl',
-  ));
-  CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/facebook-event.js');
 }
