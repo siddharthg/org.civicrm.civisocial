@@ -4,10 +4,12 @@
     '<div class="crm-group">' +
       '<div class="header-dark">Facebook</div>' +
       '<div class="crm-section no-label">' +
-        '<div class="content"><input type="checkbox" name="facebook_rsvp_event" checked="checked"> {$form.facebook_rsvp_event.label}</div>' +
+        '<div class="content">' +
+          'Going to <a href="{$facebook_event_url}">{$facebook_event_name}</a>' +
+        '</div>' +
       '</div>' +
     '</div>' +
     '<div class="spacer"></div>' +
   	'';
-  cj(html).insertBefore('div.continue_message-section');
+  cj(html).insertBefore('#footer_text');
 </script>

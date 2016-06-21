@@ -33,4 +33,11 @@
     <title>Social Media Settings</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/civisocial/event/rsvpfacebookevent</path>
+    <page_callback>CRM_Civisocial_Page_RSVPFacebookEvent</page_callback>
+    <title>RSVP on Facebook</title>
+    <access_callback>1</access_callback>
+    <is_public>true</is_public>
+  </item>
 </menu>
