@@ -177,6 +177,7 @@ class CRM_Civisocial_OAuthProvider {
    *   Access token provided by OAuth provider
    */
   public function saveSocialUser($oAuthProvider, $userProfile, $accessToken) {
+    CRM_Core_Error::debug_var('args', func_get_args());
     $session = CRM_Core_Session::singleton();
     $socialUserId = CRM_Utils_Array::value('id', $userProfile);
     $contactId = civicrm_api3(
@@ -214,7 +215,11 @@ class CRM_Civisocial_OAuthProvider {
       civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
     $session->set("{$oAuthProvider}_access_token", $accessToken);
-    if (!$this->getSkipLogin()) {
+    if ($this->getSkipLogin()) {
+      // Do not login but clear skipLogin
+      $this->setSkipLogin();
+    }
+    else {
       $this->login($oAuthProvider, $socialUserId, $contactId);
     }
     $this->redirect();
@@ -245,8 +250,6 @@ class CRM_Civisocial_OAuthProvider {
    * @return bool
    */
   public function login($oAuthProvider = NULL, $oAuthProviderId = NULL, $contactId = NULL) {
-    CRM_Core_Error::debug_var('args', func_get_args());
-
     $session = CRM_Core_Session::singleton();
     if (($oAuthProvider == NULL && $oAuthProviderId == NULL && $contactId == NULL)
       || ($oAuthProvider != NULL && $oAuthProviderId != NULL && $contactId != NULL)) {
