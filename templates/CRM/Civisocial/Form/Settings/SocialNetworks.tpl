@@ -15,7 +15,7 @@
         </div>
         <div class="content">
           <div class="name">{$facebookPageName}</div>
-          <div><a href="{$disconnectUrl}">Disconnect</a></div>
+          <div><a href="{crmURL p='civicrm/admin/civisocial/network/disconnect/facebookpage'}?continue={$currentUrl}">Disconnect</a></div>
         </div>
       </div>
       <div class="spacer"></div>
@@ -31,8 +31,20 @@
 
   {* Twitter Section *}
   <div class="civisocial-box">
-    <div class="crm-section">
-        <a class="btn btn-twitter bg-twitter" href="#">Connect Twitter</a>
-    </div>
+    {if $twitterConnected eq '1'}
+      <div class="box-item">
+        <div class="image">
+          <img src="{$twitterPicture}">
+          <div class="logo bg-twitter"></div>
+        </div>
+        <div class="content">
+          <div class="name">{$twitterName}</div>
+          <div><a href="{crmURL p='civicrm/admin/civisocial/network/disconnect/twitter'}?continue={$currentUrl}">Disconnect</a></div>
+        </div>
+      </div>
+    {else}
+      <div class="crm-section">
+          <a class="btn btn-twitter bg-twitter" href="{crmURL p='civicrm/admin/civisocial/network/connect/twitter'}?continue={$currentUrl}">Connect Twitter</a>
+      </div>
+    {/if}
   </div>
-</div>

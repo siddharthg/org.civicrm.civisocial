@@ -62,35 +62,53 @@ class CRM_Civisocial_Form_Settings_SocialNetworks extends CRM_Core_Form {
 
     // FACEBOOK PAGE
     $pageId = $session->get('facebook_page_id');
-    if ($pageId) {
+    $fbAccessToken = $session->get('facebook_page_access_token');
+    if ($pageId && $fbAccessToken) {
       // Connected to page
-      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('facebook_page_access_token'));
+      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
       // Check if token is still valid
       $pageInfo = $facebook->get("{$pageId}?fields=name,picture");
       if ($pageInfo) {
         // Token valid
+        // exit('valid');
         $this->assign('facebookPageConnected', TRUE);
         $this->assign('facebookPageName', $pageInfo['name']);
         $this->assign('facebookPageUrl', "https://www.facebook.com/{$pageId}/");
         $this->assign('facebookPagePicture', $pageInfo['picture']['data']['url']);
-        $this->assign('disconnectUrl', CRM_Utils_System::url("civicrm/admin/civisocial/network/disconnect/facebookpage?continue={$currentUrl}", NULL, TRUE));
-      CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/social-networks-setting.js');
       }
       else {
         // Remove the stored access token. A new token needs to be retrieved.
-        civicrm_api3('Setting', 'create', array('facebook_page_access_token' => NULL));
-        civicrm_api3('Setting', 'create', array('facebook_page_id' => NULL));
-        civicrm_api3('Setting', 'create', array('integrate_facebook_events' => FALSE));
         $session->set('facebook_page_access_token', NULL);
         $session->set('facebook_page_id', NULL);
       }
     }
 
     // TWITTER
+    $twitterId = $session->get('twitter_id');
+    $twitterAccessToken = $session->get('twitter_access_token');
+    if ($twitterId && $twitterAccessToken) {
+      // Connected to Twitter
+      $twitter = new CRM_Civisocial_OAuthProvider_Twitter($twitterAccessToken);
+      // Check if token is still valid
+      if ($twitter->isAuthorized()) {
+        // Token valid
+        $twitterInfo = $twitter->getUserProfile();
+        $this->assign('twitterConnected', TRUE);
+        $this->assign('twitterName', $twitterInfo['name']);
+        $this->assign('twitterUrl', $twitterInfo['profile_url']);
+        $this->assign('twitterPicture', $twitterInfo['picture_url']);
+      }
+      else {
+        // Remove the stored access token. A new token needs to be retrieved.
+        $session->set('twitter_access_token', NULL);
+        $session->set('twitter_id', NULL);
+      }
+    }
 
     $this->assign('currentUrl', $currentUrl);
 
     CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css', 0, 'html-header');
+    CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/social-networks-setting.js');
     parent::buildQuickForm();
   }
 

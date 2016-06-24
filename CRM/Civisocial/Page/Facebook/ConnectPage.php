@@ -55,14 +55,13 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
         $session->set('facebook_page_id', $pageId);
       }
       $session->set('facebook_page_list_requested', NULL);
+      $this->redirect();
     }
     else {
       $session->set('facebook_page_list_requested', TRUE);
       $currentUrl = rawurlencode(CRM_Utils_System::url('civicrm/admin/civisocial/network/connect/facebookpage', NULL, TRUE));
       CRM_Utils_System::redirect(CRM_Utils_System::url("civicrm/admin/civisocial/network/connect/facebookpage/list?continue={$currentUrl}", NULL, TRUE));
     }
-
-    $this->redirect();
   }
 
   /**
@@ -90,7 +89,7 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
   }
 
   /**
-   * Login and get necessary permissions to connect to and manage page
+   * Get necessary permissions to connect to and manage page
    */
   private function getPermissions($permissions = array()) {
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
