@@ -215,8 +215,10 @@ class CRM_Civisocial_OAuthProvider {
       civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
     $session->set("{$oAuthProvider}_access_token", $accessToken);
+    CRM_Core_Error::debug_var('a', 'Set acccess token');
     if ($this->getSkipLogin()) {
       // Do not login but clear skipLogin
+      CRM_Core_Error::debug_var('b', 'Skipped login');
       $this->setSkipLogin();
     }
     else {
@@ -339,6 +341,7 @@ class CRM_Civisocial_OAuthProvider {
     if ($accessDenied) {
       $continueUrl = $this->appendQueryString($continueUrl, array('error' => 'access_denied'));
     }
+    CRM_Core_Error::debug_var('redirectUrl', $continueUrl);
     CRM_Utils_System::redirect($continueUrl);
   }
 

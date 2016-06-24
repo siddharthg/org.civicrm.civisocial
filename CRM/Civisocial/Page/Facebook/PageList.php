@@ -22,8 +22,9 @@ class CRM_Civisocial_Page_Facebook_PageList extends CRM_Core_Page {
     }
 
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
-    if ($facebook->isLoggedIn()) {
-      $facebook->setAccessToken($session->get('facebook_access_token'));
+    $accessToken = $session->get('facebook_access_token');
+    if ($accessToken) {
+      $facebook->setAccessToken($accessToken);
       if (!$facebook->isAuthorized()) {
         $this->redirect();
       }
@@ -59,7 +60,7 @@ class CRM_Civisocial_Page_Facebook_PageList extends CRM_Core_Page {
    * Redirect to saved URL if any
    */
   private function redirect() {
-    if (isset($redirectUrl)) {
+    if (isset($this->redirectUrl)) {
       $redirectUrl = $this->redirectUrl;
     }
     else {

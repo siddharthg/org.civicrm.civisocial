@@ -5,6 +5,8 @@
 class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
 
   public function run() {
+    // @todo: Check if already connected
+    // Create a FacebookPage class extending Facebook class
     if (isset($_GET['continue'])) {
       $this->saveRedirect(rawurldecode($_GET['continue']));
     }
@@ -12,8 +14,9 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
     $session = CRM_Core_Session::singleton();
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
 
-    if ($facebook->isLoggedIn()) {
-      $facebook->setAccessToken($session->get('facebook_access_token'));
+    $accessToken = $session->get('facebook_access_token');
+    if ($accessToken) {
+      $facebook->setAccessToken($accessToken);
       if (!$facebook->isAuthorized()) {
         $this->getPermissions();
       }
@@ -48,9 +51,6 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
       if ($response && isset($response['access_token'])) {
         // Page access token retrieval successfull
         $accessToken = $response['access_token'];
-
-        civicrm_api3('Setting', 'create', array('facebook_page_access_token' => $accessToken));
-        civicrm_api3('Setting', 'create', array('facebook_page_id' => $pageId));
         $session->set('facebook_page_access_token', $response['access_token']);
         $session->set('facebook_page_id', $pageId);
       }
@@ -96,6 +96,7 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
     $currentUrl = CRM_Utils_System::url('civicrm/admin/civisocial/network/connect/facebookpage', NULL, TRUE);
     $facebook->saveRedirect($currentUrl);
+    $facebook->setSkipLogin(TRUE);
     if (empty($permissions)) {
       CRM_Utils_System::redirect($facebook->getLoginUri(array('manage_pages', 'publish_pages')));
     }
