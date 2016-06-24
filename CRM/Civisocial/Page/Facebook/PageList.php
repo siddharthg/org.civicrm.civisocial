@@ -23,7 +23,7 @@ class CRM_Civisocial_Page_Facebook_PageList extends CRM_Core_Page {
 
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
     if ($facebook->isLoggedIn()) {
-      $facebook->setAccessToken($session->get('access_token'));
+      $facebook->setAccessToken($session->get('facebook_access_token'));
       if (!$facebook->isAuthorized()) {
         $this->redirect();
       }
@@ -40,14 +40,15 @@ class CRM_Civisocial_Page_Facebook_PageList extends CRM_Core_Page {
       $this->assign('pageList', $pageList['data']);
       $this->assign('postUrl', $this->redirectUrl);
       CRM_Core_Resources::singleton()->addStyleFile('org.civicrm.civisocial', 'templates/res/css/civisocial.css', 0, 'html-header');
-    } else {
+    }
+    else {
       $this->redirect();
     }
     parent::run();
   }
 
   /**
-   * @param  string redirectUrl
+   * @param string $redirectUrl
    *   URL to be redirected to after connecting to facebook page.
    */
   private function saveRedirect($redirectUrl) {
@@ -56,16 +57,15 @@ class CRM_Civisocial_Page_Facebook_PageList extends CRM_Core_Page {
 
   /**
    * Redirect to saved URL if any
-   *
-   * @param bool $accessDenied
-   *   If acccess to the required permissions were denied
    */
   private function redirect() {
     if (isset($redirectUrl)) {
       $redirectUrl = $this->redirectUrl;
-    } else {
+    }
+    else {
       $redirectUrl = CRM_Utils_System::url('', NULL, TRUE);
     }
     CRM_Utils_System::redirect($redirectUrl);
   }
+
 }

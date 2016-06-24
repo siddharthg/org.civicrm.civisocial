@@ -23,9 +23,6 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
       $oap->redirect();
     }
     elseif (count($path) == 4 && $path[2] == 'login') {
-      // Check if already logged in
-      $oap->handleCallback();
-
       $OAuthProvider = CRM_Utils_Array::value(3, $path);
       if (!$OAuthProvider) {
         exit("Bad Request");
@@ -49,8 +46,13 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
       if (isset($_GET['continue'])) {
         $session->set('civisocial_redirect', $_GET['continue']);
       }
+
       $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($OAuthProvider);
       $oap = new $classname();
+
+      if (isset($_GET['skip_login']) && $_GET['skip_login']) {
+        $oap->setSkipLogin(TRUE);
+      }
       $redirectTo = $oap->getLoginUri();
       if ($redirectTo) {
         return CRM_Utils_System::redirect($redirectTo);

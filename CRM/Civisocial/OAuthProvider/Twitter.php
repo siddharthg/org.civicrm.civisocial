@@ -73,7 +73,6 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     unset($accessToken['user_id']);
     unset($accessToken['screen_name']);
     unset($accessToken['x_auth_expires']);
-    $session->set('access_token', $accessToken);
 
     // Remove no longer needed request tokens
     $session->set('oauth_token', NULL);
@@ -83,7 +82,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
 
     if ($this->isAuthorized()) {
-      $this->saveSocialUser($this->alias, $this->getUserProfile());
+      $this->saveSocialUser($this->alias, $this->getUserProfile(), $accessToken);
     }
     else {
       // Start over

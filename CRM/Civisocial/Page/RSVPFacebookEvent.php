@@ -29,7 +29,7 @@ class CRM_Civisocial_Page_RSVPFacebookEvent extends CRM_Core_Page {
     }
 
     // Check if the Facebook user is authorized
-    $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+    $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('facebook_access_token'));
     if (!$facebook->isAuthorized()) {
       $this->redirect();
     }

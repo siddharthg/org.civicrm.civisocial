@@ -215,7 +215,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
     $oap = new CRM_Civisocial_OAuthProvider();
     if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
       // Check if the Facebook user is authorized
-      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+      $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('facebook_access_token'));
       if ($facebook->isAuthorized()) {
         // Check if the facebook event map exists
         // $form->get('eventId') didn't work.
@@ -333,10 +333,11 @@ function autofillForm($formName, &$form) {
   $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
   $smarty->assign('currentUrl', $currentUrl);
 
-  if ($session->get('civisocial_logged_in')) {
+  $oap = new CRM_Civisocial_OAuthProvider();
+  $oAuthProvider = $oap->isLoggedIn();
+  if ($oAuthProvider) {
     // User is connected to some social network
-    $oAuthProvider = $session->get('civisocial_oauth_provider');
-    $token = $session->get('access_token');
+    $token = $session->get("{$oAuthProvider}_access_token");
     $className = "CRM_Civisocial_OAuthProvider_" . ucwords($oAuthProvider);
     $oap = new $className($token);
 

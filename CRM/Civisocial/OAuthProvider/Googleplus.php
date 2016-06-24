@@ -106,12 +106,14 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
     );
 
     $response = $this->post('token', $params);
-    $this->token = CRM_Utils_Array::value('access_token', $response);
-    $session->set('access_token', $this->token);
+    $accessToken = CRM_Utils_Array::value('access_token', $response);
+    $this->token = $accessToken;
+
+    // @todo: Get long-lived token
 
     // Authentication is successful. Fetch user profile
     if ($this->isAuthorized()) {
-      $this->saveSocialUser($this->alias, $this->getUserProfile());
+      $this->saveSocialUser($this->alias, $this->getuserProfile(), $accessToken);
     }
     else {
       // Start over

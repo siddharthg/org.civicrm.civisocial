@@ -167,17 +167,18 @@ class CRM_Civisocial_OAuthProvider {
   }
 
   /**
-   * Save social user to the database
+   * Save social user to the database and login
    *
    * @param string $oAuthProvider
    *   Shortname for OAuth provider
    * @param array $userProfile
    *   Social user information
+   * @param mixed $accessToken
+   *   Access token provided by OAuth provider
    */
-  public function saveSocialUser($oAuthProvider, $userProfile) {
+  public function saveSocialUser($oAuthProvider, $userProfile, $accessToken) {
     $session = CRM_Core_Session::singleton();
-
-    $socialUserId = CRM_Utils_Array::value("id", $userProfile);
+    $socialUserId = CRM_Utils_Array::value('id', $userProfile);
     $contactId = civicrm_api3(
       'CivisocialUser',
       'socialuserexists',
@@ -205,22 +206,29 @@ class CRM_Civisocial_OAuthProvider {
       $socialUser = array(
         'contact_id' => $contactId,
         'social_user_id' => $socialUserId,
-        'access_token' => serialize($session->get('access_token')),
+        'access_token' => serialize($accessToken),
         'oauth_provider' => $oAuthProvider,
         'created_date' => date('YmdHis'), // @todo: Created Date not being recorded
       );
 
       civicrm_api3('CivisocialUser', 'create', $socialUser);
     }
-    $this->login($oAuthProvider, $socialUserId, $contactId);
+    $session->set("{$oAuthProvider}_access_token", $accessToken);
+    if (!$this->getSkipLogin()) {
+      $this->login($oAuthProvider, $socialUserId, $contactId);
+    }
     $this->redirect();
   }
 
   /**
-   * Clear the social user information form the session.
+   * Clear the social user information from the session.
+   *
+   * @return bool
    */
   public function logout() {
-    $this->login();
+    $session = CRM_Core_Session::singleton();
+    $session->set('access_token', NULL);
+    return $this->login();
   }
 
   /**
@@ -237,13 +245,11 @@ class CRM_Civisocial_OAuthProvider {
    * @return bool
    */
   public function login($oAuthProvider = NULL, $oAuthProviderId = NULL, $contactId = NULL) {
-    $session = CRM_Core_Session::singleton();
+    CRM_Core_Error::debug_var('args', func_get_args());
 
-    if ($oAuthProvider == NULL && $oAuthProviderId == NULL && $contactId == NULL) {
-      $session->set('civisocial_oauth_provider', NULL);
-      return TRUE;
-    }
-    elseif ($oAuthProvider != NULL && $oAuthProviderId != NULL && $contactId != NULL) {
+    $session = CRM_Core_Session::singleton();
+    if (($oAuthProvider == NULL && $oAuthProviderId == NULL && $contactId == NULL)
+      || ($oAuthProvider != NULL && $oAuthProviderId != NULL && $contactId != NULL)) {
       $session->set('civisocial_oauth_provider', $oAuthProvider);
       $session->set('civisocial_social_user_id', $oAuthProviderId);
       $session->set('civisocial_contact_id', $contactId);
@@ -257,6 +263,9 @@ class CRM_Civisocial_OAuthProvider {
    *
    * @return string|bool
    *   Return alias of OAuthProvider if logged in, FALSE otherwise
+   *
+   * @todo : Rename to getLoggedInOAuthProvider() and unset access token
+   *       on logout
    */
   public function isLoggedIn() {
     $session = CRM_Core_Session::singleton();
@@ -286,6 +295,27 @@ class CRM_Civisocial_OAuthProvider {
   }
 
   /**
+   * Get if login is to be skipped
+   *
+   * @return bool
+   */
+  public function getSkipLogin() {
+    $session = CRM_Core_Session::singleton();
+    $skipLogin = $session->get('civisocial_skip_login');
+    return $skipLogin;
+  }
+
+  /**
+   * Set if login is to be skipped on next login flow
+   *
+   * @param bool $skipLogin
+   */
+  public function setSkipLogin($skipLogin = NULL) {
+    $session = CRM_Core_Session::singleton();
+    $session->set('civisocial_skip_login', $skipLogin);
+  }
+
+  /**
    * Redirect to the request origin
    *
    * @param  bool $accessDenied
@@ -311,7 +341,7 @@ class CRM_Civisocial_OAuthProvider {
 
   /**
    * Save URL to be redirected to later
-   * 
+   *
    * @param string $redirectUrl
    */
   public function saveRedirect($redirectUrl) {
