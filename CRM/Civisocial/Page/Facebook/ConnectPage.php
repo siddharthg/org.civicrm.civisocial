@@ -13,7 +13,7 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
 
     if ($facebook->isLoggedIn()) {
-      $facebook->setAccessToken($session->get('access_token'));
+      $facebook->setAccessToken($session->get('facebook_access_token'));
       if (!$facebook->isAuthorized()) {
         $this->getPermissions();
       }
@@ -66,7 +66,7 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
   }
 
   /**
-   * @param  string redirectUrl
+   * @param string $redirectUrl
    *   URL to be redirected to after connecting to facebook page.
    */
   private function saveRedirect($redirectUrl) {
@@ -76,16 +76,14 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
 
   /**
    * Redirect to saved URL if any
-   *
-   * @param bool $accessDenied
-   *   If acccess to the required permissions were denied
    */
   private function redirect() {
     $session = CRM_Core_Session::singleton();
     $redirectUrl = $session->get('connectfacebookpage_redirect');
     if ($redirectUrl) {
       $session->set('connectfacebookpage_redirect', NULL);
-    } else {
+    }
+    else {
       $redirectUrl = CRM_Utils_System::url('', NULL, TRUE);
     }
     CRM_Utils_System::redirect($redirectUrl);
