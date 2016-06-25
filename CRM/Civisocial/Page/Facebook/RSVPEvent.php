@@ -2,7 +2,7 @@
 /**
  * Sets the RSVP to "Going" on a corresponding Facbeook event.
  */
-class CRM_Civisocial_Page_RSVPFacebookEvent extends CRM_Core_Page {
+class CRM_Civisocial_Page_Facebook_RSVPEvent extends CRM_Core_Page {
 
   public function run() {
     $session = CRM_Core_Session::singleton();

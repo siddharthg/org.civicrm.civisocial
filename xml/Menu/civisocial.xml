@@ -35,7 +35,7 @@
   </item>
   <item>
     <path>civicrm/civisocial/event/rsvpfacebookevent</path>
-    <page_callback>CRM_Civisocial_Page_RSVPFacebookEvent</page_callback>
+    <page_callback>CRM_Civisocial_Page_Facebook_RSVPEvent</page_callback>
     <title>RSVP on Facebook</title>
     <access_callback>1</access_callback>
     <is_public>true</is_public>
@@ -69,12 +69,5 @@
     <page_callback>CRM_Civisocial_Page_Twitter_Disconnect</page_callback>
     <title>Disconnect Twitter</title>
     <access_arguments>administer CiviCRM</access_arguments>
-  </item>
-  <item>
-    <path>civicrm/civisocial/test</path>
-    <page_callback>CRM_Civisocial_Page_Test</page_callback>
-    <title>Test</title>
-    <access_callback>1</access_callback>
-    <is_public>true</is_public>
   </item>
 </menu>
