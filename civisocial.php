@@ -168,43 +168,60 @@ function civisocial_civicrm_navigationMenu(&$params) {
 }
 
 function civisocial_civicrm_buildForm($formName, &$form) {
+  $session = CRM_Core_Session::singleton();
+  $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
   $fbEventEnabled = civicrm_api3('Setting', 'getvalue', array('name' => 'integrate_facebook_events'));
+
   if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
     if ($fbEventEnabled) {
-      // Add facebook event field to the form.
-      $form->add('text', 'facebook_event_url', ts('Facebook Event URL'));
+      // Check if connected to facebook
+      $fbAccessToken = $session->get('facebook_access_token');
+      if ($fbAccessToken) {
+        $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
+        if ($facebook->isAuthorized()) {
+          $form->assign('fbConnected', TRUE);
 
-      if (CRM_Core_Action::UPDATE == $form->getAction()) {
-        // Load the saved value of the facebook event field
-        $params = array(
-          'event_id' => $form->get('id'),
-        );
+          // Add facebook event field to the form.
+          $form->add('text', 'facebook_event_url', ts('Facebook Event URL'));
 
-        $defaults = array();
-        CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
-        $eventUrl = "https://www.facebook.com/events/{$defaults['facebook_event_id']}/";
-        if (!empty($defaults)) {
-          $form->setDefaults(array('facebook_event_url' => $eventUrl));
+          if (CRM_Core_Action::UPDATE == $form->getAction()) {
+            // Load the saved value of the facebook event field
+            $params = array(
+              'event_id' => $form->get('id'),
+            );
+
+            $defaults = array();
+            CRM_Civisocial_BAO_FacebookEvent::retrieve($params, $defaults);
+            $eventUrl = "https://www.facebook.com/events/{$defaults['facebook_event_id']}/";
+            if (!empty($defaults)) {
+              $form->setDefaults(array('facebook_event_url' => $eventUrl));
+            }
+          }
+        }
+        else {
+          $form->assign('fbConnected', FALSE);
         }
       }
+      else {
+        $form->assign('fbConnected', FALSE);
+      }
+
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'OAuthProvider/Facebook/FacebookEventURLField.tpl',
+      ));
+      CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/facebook-event.js');
+
     }
-    else {
-      $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
-      $form->assign('currentUrl', $currentUrl);
-    }
+
+    $form->assign('currentUrl', $currentUrl);
     $form->assign('fbEventEnabled', ($fbEventEnabled) ? TRUE : FALSE);
-    CRM_Core_Region::instance('page-body')->add(array(
-      'template' => 'OAuthProvider/Facebook/FacebookEventURLField.tpl',
-    ));
-    CRM_Core_Resources::singleton()->addScriptFile('org.civicrm.civisocial', 'templates/res/js/facebook-event.js');
   }
-  elseif ('CRM_Event_Form_Registration_ThankYou' == $formName) {
+  elseif ('CRM_Event_Form_Registration_Confirm' == $formName) {
     if ($fbEventEnabled) {
-      $session = CRM_Core_Session::singleton();
-      $oap = new CRM_Civisocial_OAuthProvider();
-      if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
+      $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
+      if ($facebook->isLoggedIn()) {
         // Check if the Facebook user is authorized
-        $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+        $facebook->setAccessToken($session->get('facebook_access_token'));
         if ($facebook->isAuthorized()) {
           // Check if the facebook event map exists
           // $form->get('eventId') didn't work.
@@ -226,12 +243,11 @@ function civisocial_civicrm_buildForm($formName, &$form) {
     }
   }
   elseif ('CRM_Event_Form_Registration_ThankYou' == $formName) {
-    if ($fbEventEnabled) {
-      $session = CRM_Core_Session::singleton();
-      $oap = new CRM_Civisocial_OAuthProvider();
-      if ($oap->isLoggedIn() || 'facebook' == $session->get('civisocial_oauth_provider')) {
-        // Check if the Facebook user is authorized
-        $facebook = new CRM_Civisocial_OAuthProvider_Facebook($session->get('access_token'));
+    $rsvpSet = $session->get('facbeook_rsvp_set');
+    if ($fbEventEnabled && $rsvpSet) {
+      $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
+      if ($facebook->isLoggedIn()) {
+        $facebook->setAccessToken($session->get('facebook_access_token'));
         if ($facebook->isAuthorized()) {
           // Check if the facebook event map exists
           // $form->get('eventId') didn't work.
@@ -253,7 +269,7 @@ function civisocial_civicrm_buildForm($formName, &$form) {
               CRM_Core_Region::instance('page-body')->add(array(
                 'template' => 'OAuthProvider/Facebook/RegistrationThankYou.tpl',
               ));
-              $session->set('facbeook_rsvp_set', NULL);
+              $session->set('facebook_rsvp_set', NULL);
             }
           }
         }
@@ -267,15 +283,42 @@ function civisocial_civicrm_buildForm($formName, &$form) {
  * Validate Facbeook Event Id field.
  */
 function civisocial_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
+  $session = CRM_Core_Session::singleton();
   if ('CRM_Event_Form_ManageEvent_EventInfo' == $formName) {
     // Server side validation
     if (isset($form->_submitValues['facebook_event_url']) && !empty($form->_submitValues['facebook_event_url'])) {
-      // Check if the reocord for the given event already exists.
-      $fbEventUrl = $form->_submitValues['facebook_event_url'];
-      $matches = array();
-      preg_match('#(?:https?://)?(?:www\.)?facebook\.com/events/(\d+)/?#', $fbEventUrl, $matches);
-      if (empty($matches)) {
-        $errors['facebook_event_url'] = ts('Please enter a valid Facebook event URL');
+      // Adding Facebook event requires user to be logged in to Facebook
+      // or connected to Facebook page
+      $fbAccessToken = $session->get('facebook_access_token');
+      if ($fbAccessToken) {
+        $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
+        if ($facebook->isAuthorized()) {
+          // Check if the reocord for the given event already exists.
+          $fbEventUrl = $form->_submitValues['facebook_event_url'];
+          $matches = array();
+          preg_match('#^(?:https?://)?(?:www\.)?facebook\.com/events/(\d+)/?$#', $fbEventUrl, $matches);
+          if (empty($matches)) {
+            $errors['facebook_event_url'] = ts('Please enter a valid Facebook event URL');
+          }
+          else {
+            // Check if the event exists
+            $matches = array();
+            preg_match('#(?:https?://)?(?:www\.)?facebook\.com/events/(\d+)/?#', $fbEventUrl, $matches);
+            $fbEventId = $matches[1];
+            $response = $facebook->get($fbEventId);
+            if (!$response || !array_key_exists('start_time', $response)) {
+              $errors['facebook_event_url'] = ts('The event either doesn\'t exist or is not set to public.');
+            }
+          }
+        }
+        else {
+          $session->setStatus(ts('Please login with Facebook with to integrate Facebook event.'), ts('Not logged in with Facebook'), 'error');
+          $errors['facebook_event_url'] = '';
+        }
+      }
+      else {
+        $session->setStatus(ts('Please login with Facebook with to integrate Facebook event.'), ts('Not logged in with Facebook'), 'error');
+        $errors['facebook_event_url'] = '';
       }
     }
   }
@@ -318,8 +361,6 @@ function civisocial_civicrm_postProcess($formName, &$form) {
         // Record already exists
         $params['id'] = $defaults['id'];
       }
-      // var_dump($fbEventUrl);
-      // var_dump($fbEventId); exit;
       $params['facebook_event_id'] = $fbEventId;
       CRM_Civisocial_BAO_FacebookEvent::create($params);
     }

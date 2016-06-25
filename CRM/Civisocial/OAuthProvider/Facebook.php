@@ -190,6 +190,7 @@ class CRM_Civisocial_OAuthProvider_Facebook extends CRM_Civisocial_OAuthProvider
     if (count($permissions) > count($grantedPermissions)) {
       return FALSE;
     }
+    CRM_Core_Error::debug_var('grantedPermissions', $grantedPermissions);
     return array_diff($permissions, $grantedPermissions);
   }
 
