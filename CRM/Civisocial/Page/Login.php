@@ -23,8 +23,8 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
       $oap->redirect();
     }
     elseif (count($path) == 4 && $path[2] == 'login') {
-      $OAuthProvider = CRM_Utils_Array::value(3, $path);
-      if (!$OAuthProvider) {
+      $oAuthProvider = CRM_Utils_Array::value(3, $path);
+      if (!$oAuthProvider) {
         exit("Bad Request");
         // @todo: Redirect to home or show Page not found?
       }
@@ -35,24 +35,29 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
         "getvalue",
         array(
           "group" => "CiviSocial Account Credentials",
-          "name" => "enable_{$OAuthProvider}",
+          "name" => "enable_{$oAuthProvider}",
         )
       );
 
       if (!$isEnabled) {
-        exit("OAuth Provider either doesn't exist or not enabled.");
-      }
-      // Save redirect
-      if (isset($_GET['continue'])) {
-        $session->set('civisocial_redirect', $_GET['continue']);
+        $oap->redirect();
       }
 
-      $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($OAuthProvider);
+      // Save redirect
+      if (isset($_GET['continue'])) {
+        $oap->saveRedirect(rawurldecode($_GET['continue']));
+      }
+
+      $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($oAuthProvider);
       $oap = new $classname();
 
       if (isset($_GET['skip_login']) && $_GET['skip_login']) {
         $oap->setSkipLogin(TRUE);
       }
+
+      // Check if a user is already logged into CMS
+      $oap->handleCallback();
+
       $redirectTo = $oap->getLoginUri();
       if ($redirectTo) {
         return CRM_Utils_System::redirect($redirectTo);
