@@ -15,6 +15,19 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
    */
   public function preProcess() {
     CRM_Utils_System::setTitle(ts('App Credentials'));
+
+    $submitValues =& $this->_submitValues;
+    if (!empty($submitValues)) {
+      $aliases = array(
+        'facebook',
+        'googleplus',
+        'twitter',
+      );
+      foreach ($aliases as $alias) {
+        $submitValues["{$alias}_api_key"] = trim($submitValues["{$alias}_api_key"]);
+        $submitValues["{$alias}_api_secret"] = trim($submitValues["{$alias}_api_secret"]);
+      }
+    }
   }
 
   /**
@@ -52,13 +65,34 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
   }
 
   /**
+   * Validate teh form submision
+   */
+  public function validate() {
+    $submitValues =& $this->_submitValues;
+    $aliases = array(
+      'facebook',
+      'googleplus',
+      'twitter',
+    );
+    foreach ($aliases as $alias) {
+      if ($submitValues["enable_{$alias}"]) {
+        if (empty($submitValues["{$alias}_api_key"])) {
+          $this->_errors["{$alias}_api_key"] = "This is required.";
+        }
+        if (empty($submitValues["{$alias}_api_secret"])) {
+          $this->_errors["{$alias}_api_secret"] = "This is required.";
+        }
+      }
+    }
+  }
+
+  /**
    * Process the form submission.
    */
   public function postProcess() {
     $this->_submittedValues = $this->exportValues();
     if ($this->saveSettings()) {
       CRM_Core_Session::setStatus(ts('App Credentials have been saved.'), ts('Saved'), 'success');
-      // @todo: Flush Settings cache
     }
   }
 
