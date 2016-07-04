@@ -5,15 +5,28 @@
 class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
 
   public function run() {
-    // @todo: Check if already connected
-    // Create a FacebookPage class extending Facebook class
+    // @todo: Create a FacebookPage class extending Facebook class
+
     if (isset($_GET['continue'])) {
-      $this->saveRedirect(rawurldecode($_GET['continue']));
+      $this->saveRedirect(rawurldecode(CRM_Utils_Array::value('continue', $_GET)));
     }
 
     $session = CRM_Core_Session::singleton();
-    $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
 
+    // Check if Facebok app credentials are set
+    $isEnabled = civicrm_api3('setting', 'getvalue', array('name' => 'enable_facebook'));
+    if (!$isEnabled) {
+      $session->setStatus(
+        ts('To connect Facebook page, please enable Facebook and set App Credentials.'),
+        ts('Facebook not enabled'),
+        ts('error')
+      );
+      $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
+      $redirectUrl = CRM_Utils_System::url("civicrm/admin/civisocial/appcredentials?continue={$currentUrl}", NULL, TRUE);
+      CRM_Utils_System::redirect($redirectUrl);
+    }
+
+    $facebook = new CRM_Civisocial_OAuthProvider_Facebook();
     $accessToken = $session->get('facebook_access_token');
     if ($accessToken) {
       $facebook->setAccessToken($accessToken);

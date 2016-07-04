@@ -6,10 +6,23 @@ class CRM_Civisocial_Page_Twitter_Connect extends CRM_Core_Page {
 
   public function run() {
     if (isset($_GET['continue'])) {
-      $this->saveRedirect(rawurldecode($_GET['continue']));
+      $this->saveRedirect(rawurldecode(CRM_Utils_Array::value('continue', $_GET)));
     }
 
     $session = CRM_Core_Session::singleton();
+    // Check if Twitter is enabled and credentials are set
+    $isEnabled = civicrm_api3('setting', 'getvalue', array('name' => 'enable_twitter'));
+    if (!$isEnabled) {
+      $session->setStatus(
+        ts('To connect Twitter, please enable Twitter and set App Credentials.'),
+        ts('Twitter not enabled'),
+        ts('error')
+      );
+      $currentUrl = rawurlencode(CRM_Utils_System::url(ltrim($_SERVER['REQUEST_URI'], '/'), NULL, TRUE, NULL, FALSE));
+      $redirectUrl = CRM_Utils_System::url("civicrm/admin/civisocial/appcredentials?continue={$currentUrl}", NULL, TRUE);
+      CRM_Utils_System::redirect($redirectUrl);
+    }
+
     $currentUrl = CRM_Utils_System::url('civicrm/admin/civisocial/network/connect/twitter', NULL, TRUE);
     $twitter = new CRM_Civisocial_OAuthProvider_Twitter();
 
@@ -38,7 +51,7 @@ class CRM_Civisocial_Page_Twitter_Connect extends CRM_Core_Page {
   }
 
   /**
-   * @param  string redirectUrl
+   * @param  string $redirectUrl
    *   URL to be redirected to after connecting to facebook page.
    */
   private function saveRedirect($redirectUrl) {

@@ -16,6 +16,11 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
   public function preProcess() {
     CRM_Utils_System::setTitle(ts('App Credentials'));
 
+    if (isset($_GET['continue'])) {
+      $session = CRM_Core_Session::singleton();
+      $session->set('appcredentials_redirect', CRM_Utils_Array::value('continue', $_GET));
+    }
+
     $submitValues =& $this->_submitValues;
     if (!empty($submitValues)) {
       $aliases = array(
@@ -64,6 +69,28 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
     parent::buildQuickForm();
   }
 
+  // public function validate() {
+  //   parent::validate();
+  //   $submitValues =& $this->_submitValues;
+  //   if (!empty($submitValues)) {
+  //     $aliases = array(
+  //       'facebook',
+  //       'googleplus',
+  //       'twitter',
+  //     );
+  //     foreach ($aliases as $alias) {
+  //       if ($submitValues["enable_{$alias}"]) {
+  //         if (empty($submitValues["{$alias}_api_key"])) {
+  //           $this->_errors["{$alias}_api_key"] = "This is required.";
+  //         }
+  //         if (empty($submitValues["{$alias}_api_secret"])) {
+  //           $this->_errors["{$alias}_api_secret"] = "This is required.";
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
   /**
    * Validate teh form submision
    */
@@ -92,7 +119,15 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
   public function postProcess() {
     $this->_submittedValues = $this->exportValues();
     if ($this->saveSettings()) {
-      CRM_Core_Session::setStatus(ts('App Credentials have been saved.'), ts('Saved'), 'success');
+      $session = CRM_Core_Session::singleton();
+      $redirectUrl = $session->get('appcredentials_redirect');
+      if ($redirectUrl) {
+        $session->set('appcredentials_redirect', NULL);
+        CRM_Utils_System::redirect($redirectUrl);
+      }
+      else {
+        CRM_Core_Session::setStatus(ts('App Credentials have been saved.'), ts('Saved'), 'success');
+      }
     }
   }
 
@@ -125,8 +160,6 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
     if (empty($this->_settings)) {
       $settings = civicrm_api3('setting', 'getfields', array('filters' => $this->_settingFilter));
     }
-    // $extraSettings = civicrm_api3('setting', 'getfields', array('filters' => array('group' => 'accountsync')));
-    // $settings = $settings['values'] + $extraSettings['values'];
     return $settings['values'];
   }
 
