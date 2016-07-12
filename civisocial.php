@@ -276,7 +276,11 @@ function civisocial_civicrm_buildForm($formName, &$form) {
       }
     }
   }
-  autofillForm($formName, $form);
+
+  $loggedInUserId = $session->get('userID');
+  if (!$loggedInUserId) {
+    autofillForm($formName, $form);
+  }
 }
 
 /**

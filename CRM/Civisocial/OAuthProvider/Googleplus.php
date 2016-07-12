@@ -82,6 +82,8 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
    * Process information returned by OAuth provider after login
    */
   public function handleCallback() {
+    parent::handleCallback();
+
     $session = CRM_Core_Session::singleton();
 
     // Check if the user denied acccess

@@ -164,6 +164,12 @@ class CRM_Civisocial_OAuthProvider {
    * Process information returned by OAuth provider after login
    */
   public function handleCallback() {
+    // Restrict login if user is already logged into CMS
+    $session = CRM_Core_Session::singleton();
+    $loggedInUserId = $session->get('userID');
+    if ($loggedInUserId && !$this->getSkipLogin()) {
+      $this->redirect();
+    }
   }
 
   /**

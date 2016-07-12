@@ -6,7 +6,6 @@ class CRM_Civisocial_Page_Facebook_ConnectPage extends CRM_Core_Page {
 
   public function run() {
     // @todo: Create a FacebookPage class extending Facebook class
-
     if (isset($_GET['continue'])) {
       $this->saveRedirect(rawurldecode(CRM_Utils_Array::value('continue', $_GET)));
     }
