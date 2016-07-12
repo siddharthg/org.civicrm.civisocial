@@ -38,7 +38,6 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
           "name" => "enable_{$oAuthProvider}",
         )
       );
-
       if (!$isEnabled) {
         $oap->redirect();
       }
@@ -48,19 +47,18 @@ class CRM_Civisocial_Page_Login extends CRM_Core_Page {
         $oap->saveRedirect(rawurldecode($_GET['continue']));
       }
 
+      // Check if a user is already logged into CMS
+      $oap->handleCallback();
+
       $classname = "CRM_Civisocial_OAuthProvider_" . ucwords($oAuthProvider);
       $oap = new $classname();
-
       if (isset($_GET['skip_login']) && $_GET['skip_login']) {
         $oap->setSkipLogin(TRUE);
       }
 
-      // Check if a user is already logged into CMS
-      $oap->handleCallback();
-
       $redirectTo = $oap->getLoginUri();
       if ($redirectTo) {
-        return CRM_Utils_System::redirect($redirectTo);
+        CRM_Utils_System::redirect($redirectTo);
       }
     }
   }

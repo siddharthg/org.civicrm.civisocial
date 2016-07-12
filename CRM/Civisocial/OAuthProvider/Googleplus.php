@@ -92,7 +92,7 @@ class CRM_Civisocial_OAuthProvider_Googleplus extends CRM_Civisocial_OAuthProvid
     }
 
     // Google sends a code to the callback url, this is further used to acquire
-    // access token from facebook, which is needed to get all the data from Google
+    // access token from Google, which is needed to get all the data from Google
     if (!isset($_GET['code'])) {
       exit("Invalid request.");
     }

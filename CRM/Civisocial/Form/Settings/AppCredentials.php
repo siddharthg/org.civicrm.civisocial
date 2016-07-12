@@ -92,28 +92,6 @@ class CRM_Civisocial_Form_Settings_AppCredentials extends CRM_Core_Form {
   // }
 
   /**
-   * Validate teh form submision
-   */
-  public function validate() {
-    $submitValues =& $this->_submitValues;
-    $aliases = array(
-      'facebook',
-      'googleplus',
-      'twitter',
-    );
-    foreach ($aliases as $alias) {
-      if ($submitValues["enable_{$alias}"]) {
-        if (empty($submitValues["{$alias}_api_key"])) {
-          $this->_errors["{$alias}_api_key"] = "This is required.";
-        }
-        if (empty($submitValues["{$alias}_api_secret"])) {
-          $this->_errors["{$alias}_api_secret"] = "This is required.";
-        }
-      }
-    }
-  }
-
-  /**
    * Process the form submission.
    */
   public function postProcess() {
