@@ -120,8 +120,63 @@ function civisocial_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  */
 function civisocial_civicrm_navigationMenu(&$params) {
   $maxID = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation") + 300;
-
   $administerMenuID = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'Administer', 'id', 'name');
+
+  $params[] = array(
+    'attributes' => array(
+      'label'      => 'Social',
+      'name'       => 'Social',
+      'url'        => NULL,
+      'permission' => NULL,
+      'operator'   => NULL,
+      'separator'  => NULL,
+      'parentID'   => NULL,
+      'navID'      => 0,
+      'active'     => 1,
+    ),
+    'child' => array(
+      '1' => array(
+        'attributes' => array(
+          'label'      => 'Dashboard',
+          'name'       => 'Dashboard',
+          'url'        => 'civicrm/civisocial/dashboard',
+          'permission' => 'access CiviReport',
+          'operator'   => NULL,
+          'separator'  => 1,
+          'parentID'   => 0,
+          'navID'      => 1,
+          'active'     => 1,
+        ),
+      ),
+      '2' => array(
+        'attributes' => array(
+          'label'      => 'Facebook',
+          'name'       => 'Facebook',
+          'url'        => '#',
+          'permission' => 'access CiviReport',
+          'operator'   => NULL,
+          'separator'  => NULL,
+          'parentID'   => 0,
+          'navID'      => 1,
+          'active'     => 1,
+        ),
+      ),
+      '3' => array(
+        'attributes' => array(
+          'label'      => 'Twitter',
+          'name'       => 'Twitter',
+          'url'        => '#',
+          'permission' => 'access CiviReport',
+          'operator'   => NULL,
+          'separator'  => NULL,
+          'parentID'   => 0,
+          'navID'      => 1,
+          'active'     => 1,
+        ),
+      ),
+    ),
+  );
+
   $params[$administerMenuID]['child'][$maxID + 1] = array(
     'attributes' => array(
       'label' => 'CiviSocial',

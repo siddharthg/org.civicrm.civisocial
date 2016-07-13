@@ -22,6 +22,12 @@
     <is_public>true</is_public>
   </item>
   <item>
+    <path>civicrm/civisocial/dashboard</path>
+    <page_callback>CRM_Civisocial_Page_Dashboard</page_callback>
+    <title>Civisocial Dashboard</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
     <path>civicrm/admin/civisocial/appcredentials</path>
     <page_callback>CRM_Civisocial_Form_Settings_AppCredentials</page_callback>
     <title>App Credentials</title>
@@ -58,7 +64,7 @@
     <title>Facebook Page List</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
-    <item>
+  <item>
     <path>civicrm/admin/civisocial/network/connect/twitter</path>
     <page_callback>CRM_Civisocial_Page_Twitter_Connect</page_callback>
     <title>Connect Twitter</title>
