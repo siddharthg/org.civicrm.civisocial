@@ -152,7 +152,7 @@ function civisocial_civicrm_navigationMenu(&$params) {
         'attributes' => array(
           'label'      => 'Facebook',
           'name'       => 'Facebook',
-          'url'        => '#',
+          'url'        => 'civicrm/civisocial/dashboard/facebook',
           'permission' => 'access CiviReport',
           'operator'   => NULL,
           'separator'  => NULL,

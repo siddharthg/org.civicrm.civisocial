@@ -72,15 +72,25 @@
   fill: red;
 }
 
-.activity .logo {
+.activity .logo,
+.activity .avatar {
   margin-right: 10px;
   float: left;
   display: inline-block;
+}
+
+.activity .logo {
   width: 20px;
   height: 20px;
   background-size: 18px 18px;
   background-position: center center;
   background-repeat: no-repeat;
+}
+
+.activity .avatar,
+.activity .avatar img {
+  width: 40px;
+  height: 40px;
 }
 
 .activity .message {
@@ -105,4 +115,11 @@ ul.actions li:after {
 
 ul.actions li:last-child:after {
   content: '';
+}
+
+.message span.activity-status {
+  display: block;
+  color: #999;
+  font-size: 12px;
+  margin-top: 5px;
 }
