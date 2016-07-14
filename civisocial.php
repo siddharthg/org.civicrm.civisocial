@@ -165,7 +165,7 @@ function civisocial_civicrm_navigationMenu(&$params) {
         'attributes' => array(
           'label'      => 'Twitter',
           'name'       => 'Twitter',
-          'url'        => '#',
+          'url'        => 'civicrm/civisocial/dashboard/twitter',
           'permission' => 'access CiviReport',
           'operator'   => NULL,
           'separator'  => NULL,

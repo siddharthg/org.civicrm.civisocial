@@ -30,7 +30,13 @@
   <item>
     <path>civicrm/civisocial/dashboard/facebook</path>
     <page_callback>CRM_Civisocial_Page_Dashboard_Facebook</page_callback>
-    <title>Civisocial Facebook Dashboard</title>
+    <title>Facebook Dashboard</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/civisocial/dashboard/twitter</path>
+    <page_callback>CRM_Civisocial_Page_Dashboard_Twitter</page_callback>
+    <title>Twitter Dashboard</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
   <item>
