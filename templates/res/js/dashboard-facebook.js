@@ -1,7 +1,7 @@
 CRM.$(function($) {
   cj('#tabs').tabs();
 
-	cj('#post-content').keydown(function() {
+	cj('#post-content').keyup(function() {
 		var post_char_left = 500 - cj('#post-content').val().length;
     cj('#chars-left').html(post_char_left);
 	});

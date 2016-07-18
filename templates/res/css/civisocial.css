@@ -1,11 +1,20 @@
 .civisocial-wrapper {
 }
 
-.civisocial-wrapper .civisocial-box {
+.civisocial-box {
   max-width: 500px;
   display: block;
   margin: 1.5em auto;
   text-align: center;
+}
+
+.stats > * {
+  vertical-align: top;
+}
+
+.civisocial-box-inline {
+  display: inline-block;
+  margin-right: 1em;
 }
 
 .civisocial-box .box-item {
