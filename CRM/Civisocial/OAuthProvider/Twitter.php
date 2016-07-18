@@ -128,6 +128,9 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
         'email'       => CRM_Utils_Array::value('email', $response),
         'profile_url' => 'https://twitter.com/' . CRM_Utils_Array::value('screen_name', $response),
         'picture_url' => CRM_Utils_Array::value('profile_image_url', $response),
+        'followers_count' => CRM_Utils_Array::value('followers_count', $response),
+        'friends_count' => CRM_Utils_Array::value('friends_count', $response),
+        'favourites_count' => CRM_Utils_Array::value('favourites_count', $response),
       );
       return TRUE;
     }
