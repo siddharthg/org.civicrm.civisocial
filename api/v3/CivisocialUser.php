@@ -48,15 +48,7 @@ function civicrm_api3_civisocial_user_getFacebookEventInfo($params) {
       $eventId = $params['event_id'];
       $eventInfo = $facebook->get($eventId, array('fields' => 'name,description,place,start_time,end_time'));
       if ($eventInfo) {
-        $startTime = strtotime($eventInfo['start_time']);
-        $endTime = strtotime($eventInfo['end_time']);
-        unset($eventInfo['start_time']);
-        unset($eventInfo['end_time']);
-
-        $eventInfo['start_date'] = date('m/d/Y', $startTime);
-        $eventInfo['start_time'] = date('h:iA', $startTime);
-        $eventInfo['end_date'] = date('m/d/Y', $endTime);
-        $eventInfo['end_time'] = date('h:iA', $endTime);
+        $eventInfo['description'] = nl2br($eventInfo['description']);
         return $eventInfo;
       }
       else {
