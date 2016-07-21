@@ -81,7 +81,7 @@
               <div><span id="chars-left">{if $twitterConnected eq '1'}140{else}500{/if}</span> chars left</div>
           </div>
           <div class="container">
-              <input class="crm-form-submit" type="submit" name="submit" value="Post">
+              <input id="post-button" class="crm-form-submit" type="submit" name="submit" value="Post">
           </div>
       </form>
     </div>

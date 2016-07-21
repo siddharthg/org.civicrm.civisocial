@@ -289,3 +289,11 @@ label.input,
 input[type="checkbox"] {
   cursor: pointer;
 }
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
