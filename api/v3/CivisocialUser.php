@@ -34,8 +34,7 @@ function civicrm_api3_civisocial_user_create($params) {
  *   Contact id of created/existing contact
  */
 function civicrm_api3_civisocial_user_createContact($params) {
-  // @todo: Add `email` after fixing Twitter's email retrieval
-  civicrm_api3_verify_mandatory($params, NULL, array('contact_type'));
+  civicrm_api3_verify_mandatory($params, NULL, array('email, contact_type'));
   return CRM_Civisocial_BAO_CivisocialUser::createContact($params);
 }
 
