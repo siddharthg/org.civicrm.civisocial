@@ -398,7 +398,7 @@ class CRM_Civisocial_OAuthProvider {
    *   API request URL
    * @param string $method
    *   HTTP request method
-   * @param array $postParams
+   * @param array|string $postParams
    *   POST parameters
    * @param array $getParams
    *   GET parameters
@@ -421,7 +421,12 @@ class CRM_Civisocial_OAuthProvider {
     if ('POST' == $method) {
       curl_setopt($ci, CURLOPT_POST, TRUE);
       if (!empty($postParams)) {
-        curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postParams));
+        if (is_array($postParams)) {
+          curl_setopt($ci, CURLOPT_POSTFIELDS, http_build_query($postParams));
+        }
+        else {
+          curl_setopt($ci, CURLOPT_POSTFIELDS, $postParams);
+        }
       }
     }
     elseif ('DELETE' == $method) {
