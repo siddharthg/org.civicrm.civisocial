@@ -90,9 +90,11 @@ CRM.$(function($) {
       return;
     }
 
-    if (!$('#post-to-facebook').is(':checked') && !$('#post-to-twitter').is(':checked')) {
-      showError('Please check at least one social network.');
-      return;
+    if ($('#post-to-facebook').length && $('#post-to-twitter').length) {
+      if (!$('#post-to-facebook').is(':checked') && !$('#post-to-twitter').is(':checked')) {
+        showError('Please check at least one social network.');
+        return;
+      }
     }
   }
 

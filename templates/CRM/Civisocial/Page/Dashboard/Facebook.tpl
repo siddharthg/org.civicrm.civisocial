@@ -36,11 +36,12 @@
       <h2>Post an update</h2>
       <form id="make-post" action="#" method="post">
           <textarea id="post-content" name="post_content"></textarea>
+          <input type="hidden" name="facebook" value="On">
           <div class="container post-to">
               <div><span id="chars-left">500</span> chars left</div>
           </div>
           <div class="container">
-              <input class="crm-form-submit" type="submit" name="submit" value="Post">
+              <input id="post-button" class="crm-form-submit" type="submit" name="submit" value="Post">
           </div>
       </form>
     </div>
@@ -115,5 +116,13 @@
       </a>
 
     </div>
+
+    {literal}
+      <script>
+        CRM.$(function($) {
+          $('#tabs').tabs();
+        });
+      </script>
+    {/literal}
   {/if}
 </div>
