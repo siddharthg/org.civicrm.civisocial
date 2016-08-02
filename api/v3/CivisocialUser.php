@@ -42,12 +42,26 @@ function civicrm_api3_civisocial_user_createContact($params) {
  * Fetches Facebook event information
  *
  * @param array $params
+ */
+function civicrm_api3_civisocial_user_getFacebookEventInfo_spec($params) {
+  $params['event_id']['api.required'] = 1;
+  $params['event_id'] = array(
+    'title' => 'Facebook Event ID',
+    'description' => 'Facebook Event ID',
+    'type' => CRM_Utils_Type::T_STRING,
+  );
+}
+
+/**
+ * Fetches Facebook event information
+ *
+ * @param array $params
  *
  * @return array
  *   Array of Facebook event information or error messgaes
  */
 function civicrm_api3_civisocial_user_getFacebookEventInfo($params) {
-  civicrm_api3_verify_mandatory($params, NULL, array('event_id'));
+  // civicrm_api3_verify_mandatory($params, NULL, array('event_id'));
 
   $session = CRM_Core_Session::singleton();
   $fbAccessToken = $session->get('facebook_access_token');
@@ -58,7 +72,7 @@ function civicrm_api3_civisocial_user_getFacebookEventInfo($params) {
       $eventInfo = $facebook->get($eventId, array('fields' => 'name,description,place,start_time,end_time'));
       if ($eventInfo) {
         $eventInfo['description'] = nl2br($eventInfo['description']);
-        return $eventInfo;
+        return civicrm_api3_create_success($eventInfo);
       }
       else {
         return civicrm_api3_create_error("The facebook event either doesn't exist or is private.");
@@ -69,6 +83,20 @@ function civicrm_api3_civisocial_user_getFacebookEventInfo($params) {
 }
 
 /**
+ * Updates status accross different social network
+ *
+ * @param array $params
+ */
+function civicrm_api3_civisocial_user_updateStatus_spec($params) {
+  $params['post_content']['api.required'] = 1;
+  $params['post_content'] = array(
+    'title' => 'Status/tweet to update',
+    'description' => 'Post/Tweet/Status to be updated across different social networks.',
+    'type' => CRM_Utils_Type::T_STRING,
+  );
+}
+
+/**
  * Makes a post to Facebook and/or Twitter
  *
  * @param array $params
@@ -76,8 +104,6 @@ function civicrm_api3_civisocial_user_getFacebookEventInfo($params) {
  * @return array
  */
 function civicrm_api3_civisocial_user_updateStatus($params) {
-  civicrm_api3_verify_mandatory($params, NULL, array('post_content'));
-
   $session = CRM_Core_Session::singleton();
   $response = array();
 
@@ -96,11 +122,11 @@ function civicrm_api3_civisocial_user_updateStatus($params) {
         $response['facebook']['post_id'] = $result['id'];
       }
       else {
-        return civicrm_api3_create_error("Invalid Facebook access token.");
+        return civicrm_api3_create_error(ts('Invalid Facebook access token.'));
       }
     }
     else {
-      return civicrm_api3_create_error("Not connected to Facebook.");
+      return civicrm_api3_create_error(ts('Not connected to Facebook.'));
     }
   }
 
@@ -119,13 +145,13 @@ function civicrm_api3_civisocial_user_updateStatus($params) {
         }
       }
       else {
-        return civicrm_api3_create_error("Invalid Twitter access token.");
+        return civicrm_api3_create_error(ts('Invalid Twitter access token.'));
       }
     }
     else {
-      return civicrm_api3_create_error("Not connected to Twitter.");
+      return civicrm_api3_create_error(ts('Not connected to Twitter.'));
     }
   }
 
-  return $response;
+  return civicrm_api3_create_success($response);
 }
