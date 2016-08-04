@@ -50,35 +50,11 @@
   <div id="tabs">
     <ul>
       <li><a href="#feed">Feed</a></li>
-      <li><a href="#notifications">Notifications (2)</a></li>
+      <li><a id="notification-label" href="#notifications">Notifications</a></li>
     </ul>
 
     <div id="feed">
-      <div class="activity">
-        <div class="avatar">
-          <img>
-        </div>
-        <div class="message">
-          Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <br/><br/>Lorem ipsum dolor sit amet. <span class="activity-status">2 hours ago</span>
-          <ul class="actions">
-            <li><a href="#">See Post</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="activity">
-        <div class="avatar">
-          <img>
-        </div>
-        <div class="message">
-          Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <span class="activity-status">6 hours ago</span>
-          <ul class="actions">
-            <li><a href="#">See Post</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="activity">
+      <!--<div class="activity">
         <div class="avatar">
           <img>
         </div>
@@ -88,10 +64,10 @@
             <li><a href="#">See Post</a></li>
           </ul>
         </div>
-      </div>
+      </div>-->
     </div>
     <div id="notifications">
-      <a href="#">
+      <!-- <a target="_blank" href="#">
         <div class="activity">
           <div class="avatar">
             <img>
@@ -101,20 +77,7 @@
             <span class="activity-status">2 hours ago</span>
           </div>
         </div>
-      </a>
-
-      <a href="#">
-        <div class="activity">
-          <div class="avatar">
-            <img>
-          </div>
-          <div class="message">
-            Someone posted on your page.
-            <span class="activity-status">Yesterday</span>
-          </div>
-        </div>
-      </a>
-
+      </a> -->
     </div>
 
     {literal}

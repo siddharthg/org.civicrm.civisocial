@@ -155,3 +155,99 @@ function civicrm_api3_civisocial_user_updateStatus($params) {
 
   return civicrm_api3_create_success($response);
 }
+
+
+/**
+ * Fetches Facebook page Feed
+ *
+ * @param array $params
+ *
+ * @return array
+ */
+function civicrm_api3_civisocial_user_getFacebookPageFeed($params) {
+  $session = CRM_Core_Session::singleton();
+
+  $pageId = $session->get('facebook_page_id');
+  $fbAccessToken = $session->get('facebook_page_access_token');
+  if ($pageId && $fbAccessToken) {
+    // Connected to page
+    $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
+    // Check if token is still valid
+    $pageFeed = $facebook->get("{$pageId}/feed?fields=story,message,link,type,from,updated_time&limit=10");
+    if ($pageFeed) {
+      $posts = array();
+      foreach ($pageFeed['data'] as $feedItem) {
+        $post = array();
+        $post['message'] = $feedItem['message'];
+        $post['link'] = $feedItem['link'];
+        $post['from'] = array();
+        $post['from']['name'] = $feedItem['from']['name'];
+        $post['from']['link'] = "https://www.facebook.com/{$feedItem['from']['id']}";
+        $post['from']['picture'] = "https://graph.facebook.com/{$feedItem['from']['id']}/picture";
+
+        $id = explode('_', $feedItem['id']);
+        $post['link'] = "https://www.facebook.com/{$id[0]}/posts/{$id[1]}";
+        $post['time'] = date('d M, Y H:i:A', strtotime($feedItem['updated_time']));
+
+        array_push($posts, $post);
+      }
+      return civicrm_api3_create_success($posts);
+    }
+    else {
+      return civicrm_api3_create_error(ts('Invalid Facebook access token.'));
+    }
+  }
+  else {
+    return civicrm_api3_create_error(ts('Not connected to Facebook.'));
+  }
+}
+
+/**
+ * Fetches Facebook page Feed
+ *
+ * @param array $params
+ *
+ * @return array
+ */
+function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
+  $session = CRM_Core_Session::singleton();
+  $response = array();
+
+  $pageId = $session->get('facebook_page_id');
+  $fbAccessToken = $session->get('facebook_page_access_token');
+  if ($pageId && $fbAccessToken) {
+    // Connected to page
+    $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
+    // Check if token is still valid
+    $result = $facebook->get("{$pageId}/notifications?fields=title,from,updated_time,link&limit=10");
+    if ($result) {
+      $notifications = array();
+      foreach ($result['data'] as $item) {
+        $notification = array();
+
+        $id = explode('_', $item['id']);
+
+        $notification['message'] = $item['title'];
+        $notification['link'] = "{$item['link']}&ref=notif&notif_id={$id[2]}";
+        $notification['from'] = array();
+        $notification['from']['name'] = $item['from']['name'];
+        $notification['from']['link'] = "https://www.facebook.com/{$item['from']['id']}";
+        $notification['from']['picture'] = "https://graph.facebook.com/{$item['from']['id']}/picture";
+        $notification['time'] = date('d M, Y H:i:A', strtotime($item['updated_time']));
+
+        array_push($notifications, $notification);
+      }
+      $response['notifications'] = $notifications;
+      $response['unseen_count'] = $result['summary']['unseen_count'];
+      return civicrm_api3_create_success($response);
+    }
+    else {
+      return civicrm_api3_create_error(ts('Invalid Facebook access token.'));
+    }
+  }
+  else {
+    return civicrm_api3_create_error(ts('Not connected to Facebook.'));
+  }
+
+
+}

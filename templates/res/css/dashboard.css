@@ -116,6 +116,13 @@ ul.actions li:last-child:after {
   content: '';
 }
 
+.message .posted-by {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
 .message .activity-status {
   display: block;
   color: #999;
