@@ -123,6 +123,10 @@ ul.actions li:last-child:after {
   margin-bottom: 5px;
 }
 
+.message a.media {
+  display: block;
+}
+
 .message .activity-status {
   display: block;
   color: #999;

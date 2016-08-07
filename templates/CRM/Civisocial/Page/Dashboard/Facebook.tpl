@@ -53,6 +53,10 @@
       <li><a id="notification-label" href="#notifications">Notifications</a></li>
     </ul>
 
+    <ul>
+      <li><a id="feed-prev" href="javascript:void(0);">Prev</a>
+      <li><a id="feed-next" href="javascript:void(0);">Next</a>
+    </ul>
     <div id="feed">
       <!--<div class="activity">
         <div class="avatar">

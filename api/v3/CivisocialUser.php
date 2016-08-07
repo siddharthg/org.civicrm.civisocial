@@ -165,6 +165,7 @@ function civicrm_api3_civisocial_user_updateStatus($params) {
  * @return array
  */
 function civicrm_api3_civisocial_user_getFacebookPageFeed($params) {
+  $response = array();
   $session = CRM_Core_Session::singleton();
 
   $pageId = $session->get('facebook_page_id');
@@ -172,8 +173,18 @@ function civicrm_api3_civisocial_user_getFacebookPageFeed($params) {
   if ($pageId && $fbAccessToken) {
     // Connected to page
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
-    // Check if token is still valid
-    $pageFeed = $facebook->get("{$pageId}/feed?fields=story,message,link,type,from,updated_time&limit=10");
+
+    $feedParams = array();
+    $feedParams['fields'] = 'story,message,link,type,from,updated_time';
+    $feedParams['limit'] = 5;
+
+    if (isset($params['next'])) {
+      $feedParams += $params['next'];
+    } else if (isset($params['prev'])) {
+      $feedParams += $params['prev'];
+    }
+
+    $pageFeed = $facebook->get("{$pageId}/feed", $feedParams);
     if ($pageFeed) {
       $posts = array();
       foreach ($pageFeed['data'] as $feedItem) {
@@ -191,7 +202,22 @@ function civicrm_api3_civisocial_user_getFacebookPageFeed($params) {
 
         array_push($posts, $post);
       }
-      return civicrm_api3_create_success($posts);
+      $response['data'] = $posts;
+
+      // Get paging params
+      $response['next'] = array();
+
+      $pagingNextParams = parsePagingUrl($pageFeed['paging']['next']);
+      $response['next']['until'] = $pagingNextParams['until'];
+      $response['next']['__paging_token'] = $pagingNextParams['__paging_token'];
+
+      $response['prev'] = array();
+      $response['prev']['__previous'] = 1;
+      $pagingPrevParams = parsePagingUrl($pageFeed['paging']['previous']);
+      $response['prev']['since'] = $pagingPrevParams['since'];
+      $response['prev']['__paging_token'] = $pagingPrevParams['__paging_token'];
+
+      return civicrm_api3_create_success($response);
     }
     else {
       return civicrm_api3_create_error(ts('Invalid Facebook access token.'));
@@ -248,6 +274,18 @@ function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
   else {
     return civicrm_api3_create_error(ts('Not connected to Facebook.'));
   }
+}
 
-
+/**
+ * Extacts query strings into an array from Facebook's Paging URL
+ *
+ * @param  $url
+ *   Paging URL
+ * @return array
+ */
+function parsePagingUrl($url) {
+  $urlParts = explode('?', $url);
+  $queryStrings = array();
+  parse_str($urlParts[1], $queryStrings);
+  return $queryStrings;
 }
