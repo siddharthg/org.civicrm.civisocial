@@ -244,8 +244,18 @@ function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
   if ($pageId && $fbAccessToken) {
     // Connected to page
     $facebook = new CRM_Civisocial_OAuthProvider_Facebook($fbAccessToken);
-    // Check if token is still valid
-    $result = $facebook->get("{$pageId}/notifications?fields=title,from,updated_time,link&limit=10");
+
+    $notifParams = array();
+    $notifParams['fields'] = 'title,from,updated_time,link';
+    $notifParams['limit'] = 5;
+
+    if (isset($params['next'])) {
+      $notifParams += $params['next'];
+    } else if (isset($params['prev'])) {
+      $notifParams += $params['prev'];
+    }
+
+    $result = $facebook->get("{$pageId}/notifications", $notifParams);
     if ($result) {
       $notifications = array();
       foreach ($result['data'] as $item) {
@@ -263,8 +273,22 @@ function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
 
         array_push($notifications, $notification);
       }
-      $response['notifications'] = $notifications;
+
+      $response['data'] = $notifications;
       $response['unseen_count'] = $result['summary']['unseen_count'];
+
+      // Get paging params
+      $pagingNextParams = parsePagingUrl($result['paging']['next']);
+      $response['next'] = array();
+      $response['next']['until'] = $pagingNextParams['until'];
+      $response['next']['__paging_token'] = $pagingNextParams['__paging_token'];
+
+      $pagingPrevParams = parsePagingUrl($result['paging']['previous']);
+      $response['prev'] = array();
+      $response['prev']['__previous'] = 1;
+      $response['prev']['since'] = $pagingPrevParams['since'];
+      $response['prev']['__paging_token'] = $pagingPrevParams['__paging_token'];
+
       return civicrm_api3_create_success($response);
     }
     else {

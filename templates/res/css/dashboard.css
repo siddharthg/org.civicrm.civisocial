@@ -149,3 +149,35 @@ ul.actions li:last-child:after {
   width: 50px;
   height: 50px;
 }
+
+.cursor {
+  height: 100%;
+  overflow: hidden;
+}
+
+div.cursor ul {
+  float: right;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cursor ul li {
+  float: left;
+  margin-left: 10px;
+}
+
+.cursor ul li a {
+  display: block;
+  width: 25px;
+  height: 25px;
+  border: 2px solid #ddd;
+  line-height: 25px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.cursor ul li a:hover {
+  background: #ddd;
+}

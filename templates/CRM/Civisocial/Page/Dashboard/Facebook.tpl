@@ -49,39 +49,51 @@
 
   <div id="tabs">
     <ul>
-      <li><a href="#feed">Feed</a></li>
-      <li><a id="notification-label" href="#notifications">Notifications</a></li>
+      <li><a href="#feed-container">Feed</a></li>
+      <li><a id="notif-label" href="#notif-container">Notifications</a></li>
     </ul>
 
-    <ul>
-      <li><a id="feed-prev" href="javascript:void(0);">Prev</a>
-      <li><a id="feed-next" href="javascript:void(0);">Next</a>
-    </ul>
-    <div id="feed">
-      <!--<div class="activity">
-        <div class="avatar">
-          <img>
-        </div>
-        <div class="message">
-          Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <br/><br/>Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <span class="activity-status">2 months ago</span>
-          <ul class="actions">
-            <li><a href="#">See Post</a></li>
-          </ul>
-        </div>
-      </div>-->
-    </div>
-    <div id="notifications">
-      <!-- <a target="_blank" href="#">
-        <div class="activity">
+    <div id="feed-container">
+      <div id="feed">
+        <!--<div class="activity">
           <div class="avatar">
             <img>
           </div>
           <div class="message">
-            Someon commented on your post. 
-            <span class="activity-status">2 hours ago</span>
+            Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <br/><br/>Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <span class="activity-status">2 months ago</span>
+            <ul class="actions">
+              <li><a href="#">See Post</a></li>
+            </ul>
           </div>
-        </div>
-      </a> -->
+        </div>-->
+      </div>
+      <div class="cursor">
+        <ul>
+          <li><a id="feed-prev" href="javascript:void(0);">&laquo;</a>
+          <li><a id="feed-next" href="javascript:void(0);">&raquo;</a>
+        </ul>
+      </div>
+    </div>
+    <div id="notif-container">
+      <div id="notif">
+        <!-- <a target="_blank" href="#">
+          <div class="activity">
+            <div class="avatar">
+              <img>
+            </div>
+            <div class="message">
+              Someon commented on your post. 
+              <span class="activity-status">2 hours ago</span>
+            </div>
+          </div>
+        </a> -->
+      </div>
+      <div class="cursor">
+        <ul>
+          <li><a id="notif-prev" href="javascript:void(0);">&laquo;</a>
+          <li><a id="notif-next" href="javascript:void(0);">&raquo;</a>
+        </ul>
+      </div>
     </div>
 
     {literal}
