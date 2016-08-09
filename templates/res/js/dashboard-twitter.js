@@ -24,6 +24,8 @@ CRM.$(function($) {
 
   function getTweets(postData) {
     postData = postData || {};
+    showLoader($('#tweets'));
+
   	CRM.api3('CivisocialUser', 'gettwitterfeed', postData).done(function(result) {
       if (!result.is_error) {
         processAjaxResult('tweets', result.values.data, postData);
@@ -71,12 +73,9 @@ CRM.$(function($) {
 
         maxId = result.values.max_id;
         sinceId = result.values.since_id;
+        hideLoader($('#tweets'));
       }
     });
-  }
-
-  function getFollowers(postData) {
-    
   }
 
   function processAjaxResult(resultType, data, postData) {

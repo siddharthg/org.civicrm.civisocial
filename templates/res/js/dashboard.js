@@ -104,4 +104,15 @@ CRM.$(function($) {
     }
     $('<span class="error block">' + message + '</span>').insertAfter('#make-post > .post-to');
   }
+
+  window.showLoader = function(elem) {
+    var loaderHtml = '<div class="loader"></div>';
+
+    $(elem).parent().css('position', 'relative');
+    $(elem).parent().append(loaderHtml);
+  };
+
+  window.hideLoader = function(elem) {
+    $(elem).parent().children('.loader').remove();
+  };
 });

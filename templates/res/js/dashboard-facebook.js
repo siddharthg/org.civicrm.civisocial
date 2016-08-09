@@ -19,6 +19,8 @@ CRM.$(function($) {
 
   function getFeed(postData) {
     postData = postData || {};
+
+    showLoader($('#feed'));
   	CRM.api3('CivisocialUser', 'getfacebookpagefeed', postData).done(function(result) {
       if (!result.is_error) {
         processAjaxResult('feed', result.values.data, postData);
@@ -48,6 +50,7 @@ CRM.$(function($) {
 
         feedNext = result.values.next;
         feedPrev = result.values.prev;
+        hideLoader($('#feed'));
       }
     });
   }
@@ -55,6 +58,7 @@ CRM.$(function($) {
   function getNotifs(postData) {
     postData = postData || null;
 
+    showLoader($('#notif'));
     CRM.api3('CivisocialUser', 'getfacebookpagenotifications', postData).done(function(result) {
       if (!result.is_error) {
         processAjaxResult('notif', result.values.data, postData);
@@ -82,6 +86,7 @@ CRM.$(function($) {
 
         notifNext = result.values.next;
         notifPrev = result.values.prev;
+        hideLoader($('#notif'));
       }
     });
   }

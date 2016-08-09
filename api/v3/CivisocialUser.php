@@ -319,7 +319,7 @@ function civicrm_api3_civisocial_user_getTwitterFeed($params) {
     $twitter = new CRM_Civisocial_OAuthProvider_Twitter($twitterAccessToken);
     if ($twitter->isAuthorized()) {
       $tweetsParams = array();
-      $tweetsParams['count'] = 20;
+      $tweetsParams['count'] = 10;
       if (isset($params['since_id'])) {
         $tweetsParams['since_id'] = $params['since_id'];
       }
