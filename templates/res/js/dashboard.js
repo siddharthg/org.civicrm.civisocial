@@ -60,7 +60,6 @@ CRM.$(function($) {
     $('#post-button').val('Posting..');
 
     CRM.api3('CivisocialUser', 'updatestatus', postData).done(function(result) {
-      console.log(result);
       if (result.is_error) {
         showError(result.error_message);
       }

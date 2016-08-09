@@ -20,11 +20,8 @@ CRM.$(function($) {
   function getFeed(postData) {
     postData = postData || {};
   	CRM.api3('CivisocialUser', 'getfacebookpagefeed', postData).done(function(result) {
-      if (result.is_error) {
-        // Show error
-      }
-      else {
-        processAjaxResult('feed', result, postData);
+      if (!result.is_error) {
+        processAjaxResult('feed', result.values.data, postData);
 
         var posts = result.values.data;
         for (var i = 0; i < posts.length; i++) {
@@ -58,12 +55,9 @@ CRM.$(function($) {
   function getNotifs(postData) {
     postData = postData || null;
 
-    CRM.api3('CivisocialUser', 'getfacebookpagenotifications').done(function(result) {
-      if (result.is_error) {
-        // Show error
-      }
-      else {
-        processAjaxResult('notif', result, postData);
+    CRM.api3('CivisocialUser', 'getfacebookpagenotifications', postData).done(function(result) {
+      if (!result.is_error) {
+        processAjaxResult('notif', result.values.data, postData);
 
         var notifications = result.values.data;
         for (var i = 0; i < notifications.length; i++) {
@@ -92,11 +86,11 @@ CRM.$(function($) {
     });
   }
 
-  function processAjaxResult(resultType, result, postData) {
-    if (result.values.data.length === 0) {
-      var nextBtn = $('#' + resultType + '-next').parent();
-      var prevBtn = $('#' + resultType + '-prev').parent();
+  function processAjaxResult(resultType, data, postData) {
+    var nextBtn = $('#' + resultType + '-next').parent();
+    var prevBtn = $('#' + resultType + '-prev').parent();
 
+    if (data.length === 0) {
       if ('next' in postData) {
         $(nextBtn).hide();
       }
@@ -106,11 +100,16 @@ CRM.$(function($) {
       return;
     }
 
-    $(nextBtn).is(':visible') ? null : $(nextBtn).show();
-    $(prevBtn).is(':visible') ? null : $(prevBtn).show();
+    if (!$(nextBtn).is(':visible')) {
+      $(nextBtn).show();
+    }
+    if (!$(prevBtn).is(':visible')) {
+      $(prevBtn).show();
+    }
 
     $('#' + resultType).empty();
   }
+
   // Get feed
   getFeed();
   getNotifs();

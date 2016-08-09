@@ -7,7 +7,6 @@ CRM.$(function($) {
       "integrate_facebook_events": checked
     }).done(function(result) {
       input.prop('disabled', false);
-      console.log('hell0');
 		});
 	});
 

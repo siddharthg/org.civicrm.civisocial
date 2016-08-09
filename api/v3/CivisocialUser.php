@@ -180,7 +180,8 @@ function civicrm_api3_civisocial_user_getFacebookPageFeed($params) {
 
     if (isset($params['next'])) {
       $feedParams += $params['next'];
-    } else if (isset($params['prev'])) {
+    }
+    elseif (isset($params['prev'])) {
       $feedParams += $params['prev'];
     }
 
@@ -251,10 +252,11 @@ function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
 
     if (isset($params['next'])) {
       $notifParams += $params['next'];
-    } else if (isset($params['prev'])) {
+    }
+    elseif (isset($params['prev'])) {
       $notifParams += $params['prev'];
     }
-
+    CRM_Core_Error::debug_var('notif', $notifParams);
     $result = $facebook->get("{$pageId}/notifications", $notifParams);
     if ($result) {
       $notifications = array();
