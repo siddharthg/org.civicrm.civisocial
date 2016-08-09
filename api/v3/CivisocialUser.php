@@ -256,7 +256,7 @@ function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
     elseif (isset($params['prev'])) {
       $notifParams += $params['prev'];
     }
-    CRM_Core_Error::debug_var('notif', $notifParams);
+
     $result = $facebook->get("{$pageId}/notifications", $notifParams);
     if ($result) {
       $notifications = array();
@@ -303,6 +303,78 @@ function civicrm_api3_civisocial_user_getFacebookPageNotifications($params) {
 }
 
 /**
+ * Fetches Twitter feed
+ *
+ * @param array $params
+ *
+ * @return array
+ */
+function civicrm_api3_civisocial_user_getTwitterFeed($params) {
+  $session = CRM_Core_Session::singleton();
+  $response = array();
+
+  $twitterId = $session->get('twitter_id');
+  $twitterAccessToken = $session->get('twitter_access_token');
+  if ($twitterId && $twitterAccessToken) {
+    $twitter = new CRM_Civisocial_OAuthProvider_Twitter($twitterAccessToken);
+    if ($twitter->isAuthorized()) {
+      $tweetsParams = array();
+      $tweetsParams['count'] = 20;
+      if (isset($params['since_id'])) {
+        $tweetsParams['since_id'] = $params['since_id'];
+      }
+      if (isset($params['max_id'])) {
+        $tweetsParams['max_id'] = $params['max_id'];
+      }
+
+      CRM_Core_Error::debug_var('params', $tweetsParams);
+      $result = $twitter->get('statuses/user_timeline', $tweetsParams);
+      $maxId = 0;
+
+      $tweets = array();
+      foreach ($result as $tweetItem) {
+        $tweet = array();
+        $tweet['id'] = $tweetItem['id'];
+        $tweet['text'] = parseScreenName(urlify($tweetItem['text']));
+        $tweet['time'] = date('d M, Y H:i:A', strtotime($tweetItem['created_at']));
+        $tweet['user'] = array();
+        $tweet['user']['screen_name'] = $tweetItem['user']['screen_name'];
+        $tweet['user']['name'] = $tweetItem['user']['name'];
+        $tweet['user']['link'] = "https://twitter.com/{$tweetItem['user']['screen_name']}";
+        $tweet['user']['image'] = $tweetItem['user']['profile_image_url'];
+
+        if ($tweetItem['quoted_status']) {
+          $tweet['quoted_status'] = array();
+          $tweet['quoted_status']['id'] = $tweetItem['quoted_status']['id'];
+          $tweet['quoted_status']['text'] = urlify($tweetItem['quoted_status']['text']);
+          $tweet['quoted_status']['time'] = date('d M, Y H:i:A', strtotime($tweetItem['quoted_status']['created_at']));
+          $tweet['quoted_status']['user'] = array();
+          $tweet['quoted_status']['user']['screen_name'] = $tweetItem['quoted_status']['user']['screen_name'];
+          $tweet['quoted_status']['user']['name'] = $tweetItem['quoted_status']['user']['name'];
+          $tweet['quoted_status']['user']['link'] = "https://twitter.com/{$tweetItem['quoted_status']['user']['screen_name']}";
+          $tweet['quoted_status']['user']['image'] = $tweetItem['quoted_status']['user']['profile_image_url'];
+
+        }
+        array_push($tweets, $tweet);
+        $maxId = $tweet['id'];
+      }
+
+      $response['data'] = $tweets;
+      $response['since_id'] = $tweets[0]['id'];
+      $response['max_id'] = $maxId;
+
+      return civicrm_api3_create_success($response);
+    }
+    else {
+      return civicrm_api3_create_error(ts('Invalid Twitter access token.'));
+    }
+  }
+  else {
+    return civicrm_api3_create_error(ts('Not connected to Twitter.'));
+  }
+}
+
+/**
  * Extacts query strings into an array from Facebook's Paging URL
  *
  * @param  $url
@@ -314,4 +386,26 @@ function parsePagingUrl($url) {
   $queryStrings = array();
   parse_str($urlParts[1], $queryStrings);
   return $queryStrings;
+}
+
+/**
+ * Converts links in a text to HTML links
+ *
+ * @param  string $text
+ *
+ * @return string
+ */
+function urlify($text) {
+  return preg_replace('/(http[s]{0,1}\:\/\/\S{4,})\s{0,}/ims', '<a href="$1" target="_blank">$1</a> ', $text);
+}
+
+/**
+ * Linkify twitter's screenname in text
+ *
+ * @param  string $text
+ *
+ * @return string
+ */
+function parseScreenName($text) {
+  return preg_replace('/@(\S{3,})\s{0,}/ims', '<a href="https://twitter.com/$1" target="_blank">@$1</a> ', $text);
 }

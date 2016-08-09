@@ -104,6 +104,10 @@
   margin: 5px 0 0 0;
 }
 
+.activity .quoted-status {
+  margin-top: 10px;
+}
+
 ul.actions li {
   display: inline-block;
 }

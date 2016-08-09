@@ -53,51 +53,31 @@
 
   <div id="tabs">
     <ul>
-      <li><a href="#tweets">Tweets</a></li>
+      <li><a href="#tweets-container">Tweets</a></li>
       <li><a href="#followers">Followers</a></li>
     </ul>
 
-    <div id="tweets">
-      <div class="activity">
-        <div class="avatar">
-          <img>
-        </div>
-        <div class="message">
-          Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <br/><br/>Lorem ipsum dolor sit amet. <span class="activity-status">2 hours ago</span>
-          <ul class="actions">
-            <li><a href="#">Reply</a></li>
-            <li><a href="#">Retweet</a></li>
-            <li><a href="#">Favorite</a></li>
-          </ul>
-        </div>
+    <div id="tweets-container">
+      <div id="tweets">
+        <!--<div class="activity">
+          <div class="avatar">
+            <img>
+          </div>
+          <div class="message">
+            Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <br/><br/>Lorem ipsum dolor sit amet. <span class="activity-status">2 hours ago</span>
+            <ul class="actions">
+              <li><a href="#">Reply</a></li>
+              <li><a href="#">Retweet</a></li>
+              <li><a href="#">Favorite</a></li>
+            </ul>
+          </div>
+        </div> -->
       </div>
-
-      <div class="activity">
-        <div class="avatar">
-          <img>
-        </div>
-        <div class="message">
-          Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <span class="activity-status">2 hours ago</span>
-          <ul class="actions">
-            <li><a href="#">Reply</a></li>
-            <li><a href="#">Retweet</a></li>
-            <li><a href="#">Favorite</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="activity">
-        <div class="avatar">
-          <img>
-        </div>
-        <div class="message">
-          Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <br/><br/>Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. <span class="activity-status">2 hours ago</span>
-          <ul class="actions">
-            <li><a href="#">Reply</a></li>
-            <li><a href="#">Retweet</a></li>
-            <li><a href="#">Favorite</a></li>
-          </ul>
-        </div>
+      <div class="cursor">
+        <ul>
+          <li><a id="tweets-prev" href="javascript:void(0);">&laquo;</a>
+          <li><a id="tweets-next" href="javascript:void(0);">&raquo;</a>
+        </ul>
       </div>
     </div>
     <div id="followers">
