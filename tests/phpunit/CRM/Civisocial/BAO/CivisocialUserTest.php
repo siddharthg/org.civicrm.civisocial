@@ -20,7 +20,7 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
       'social_user_id' => 123456,
       'access_token' => '7f550a9f4c44173a37664d938f1355f0f92a47a7',
       'oauth_provider' => 'facebook',
-      'created_date' => '20160819213000',
+      'created_date' => date('YmdHis'),
     );
 
     $socialUser = CRM_Civisocial_BAO_CivisocialUser::create($params);
@@ -44,19 +44,23 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
       'social_user_id' => 123456,
       'access_token' => '7f550a9f4c44173a37664d938f1355f0f92a47a7',
       'oauth_provider' => 'facebook',
-      'created_date' => '20160819213000',
+      'created_date' => date('YmdHis'),
     );
 
     $socialUser = CRM_Civisocial_BAO_CivisocialUser::create($params);
 
-    $params = array(
+    $params2 = array(
       'social_user_id' => $socialUser->social_user_id,
-      'oauth_provider_id' => $socialUser->oauth_provider,
+      'oauth_provider_id' => 'facebook',
     );
 
     $defaults = array();
-    CRM_Civisocial_BAO_CivisocialUser::retrieve($params, $defaults);
-    $this->assertEquals($contactId, $defaults['contact_id'], 'Check for CivisocialUser retrieval.');
+    CRM_Civisocial_BAO_CivisocialUser::retrieve($params2, $defaults);
+    foreach ($params as $key => $value) {
+      if ($key != 'created_date') {
+        $this->assertEquals($value, $defaults[$key], 'Check for CivisocialUser retrieval.');
+      }
+    }
   }
 
   /**
