@@ -37,4 +37,36 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
     $this->assertEquals($params['access_token'], $socialUser->access_token, 'Check for Access Token updation.');
   }
 
+  /**
+   * Test contact create method
+   */
+  public function testContactCreate() {
+    // Test case #1: Email already exists
+    $email = substr(md5(rand()), 0, 10) . '@civicrm.org';
+    $params = array(
+      'contact_type' => 'Individual',
+      'email' => $email,
+    );
+    $result = civicrm_api3('Contact', 'create', $params);
+    $contactId = $result['id'];
+
+    $contactId2 = CRM_Civisocial_BAO_CivisocialUser::createContact($params);
+
+    $this->assertEquals($contactId, $contactId2, 'Check contact creation.');
+
+    // Test case #2: Email doesn't exist
+    do {
+      $email = substr(md5(rand()), 0, 10) . '@civicrm.org';
+      $result = civicrm_api3('Contact', 'get', array('email' => 'rajb.dilip@gmail.comm'));
+    } while ($result['count'] != 0);
+
+    $params = array(
+      'contact_type' => 'Individual',
+      'email' => $email,
+    );
+
+    $contactId = CRM_Civisocial_BAO_CivisocialUser::createContact($params);
+    $this->assertTrue(!is_null($contactId));
+  }
+
 }
