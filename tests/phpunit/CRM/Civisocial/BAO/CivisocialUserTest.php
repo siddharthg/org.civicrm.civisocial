@@ -69,4 +69,20 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
     $this->assertTrue(!is_null($contactId));
   }
 
+  public function testSocialUserExists() {
+    $contactId = $this->individualCreate();
+    $params = array(
+      'contact_id' => $contactId,
+      'social_user_id' => 123456,
+      'access_token' => '7f550a9f4c44173a37664d938f1355f0f92a47a7',
+      'oauth_provider' => 'facebook',
+      'created_date' => date('YmdHis'),
+    );
+
+    $socialUser = CRM_Civisocial_BAO_CivisocialUser::create($params);
+    // socialUserExists() returns contact ID if the user exists
+    $contactId2 = CRM_Civisocial_BAO_CivisocialUser::socialUserExists($socialUser->social_user_id, $socialUser->oauth_provider);
+    $this->assertEquals($contactId2, $contactId, 'Check socialUserExists().');
+  }
+
 }
