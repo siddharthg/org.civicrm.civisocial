@@ -5,8 +5,6 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
    * Clean up after tests.
    */
   public function tearDown() {
-    // $this->quickCleanUpFinancialEntities();
-    // $this->quickCleanUpFinancialEntities(array('civicrm_event'));
     parent::tearDown();
   }
 
@@ -35,6 +33,30 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
     $socialUser = CRM_Civisocial_BAO_CivisocialUser::create($params, $ids);
 
     $this->assertEquals($params['access_token'], $socialUser->access_token, 'Check for Access Token updation.');
+  }
+
+  public function testRetrieve() {
+    $contactId = $this->individualCreate();
+
+    // Create social user
+    $params = array(
+      'contact_id' => $contactId,
+      'social_user_id' => 123456,
+      'access_token' => '7f550a9f4c44173a37664d938f1355f0f92a47a7',
+      'oauth_provider' => 'facebook',
+      'created_date' => '20160819213000',
+    );
+
+    $socialUser = CRM_Civisocial_BAO_CivisocialUser::create($params);
+
+    $params = array(
+      'social_user_id' => $socialUser->social_user_id,
+      'oauth_provider_id' => $socialUser->oauth_provider,
+    );
+
+    $defaults = array();
+    CRM_Civisocial_BAO_CivisocialUser::retrieve($params, $defaults);
+    $this->assertEquals($contactId, $defaults['contact_id'], 'Check for CivisocialUser retrieval.');
   }
 
   /**
@@ -69,6 +91,9 @@ class CRM_Civisocial_BAO_CivisocialUserTest extends CiviUnitTestCase {
     $this->assertTrue(!is_null($contactId));
   }
 
+  /**
+   * Test socialUserExists() method.
+   */
   public function testSocialUserExists() {
     $contactId = $this->individualCreate();
     $params = array(
