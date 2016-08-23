@@ -86,7 +86,8 @@
       </form>
     </div>
 
-    <div class="container">
+    <!-- @todo : SOCIAL FEED -->
+    <!-- <div class="container">
       <div class="activity">
         <div class="logo bg-twitter"></div>
         <div class="message">
@@ -118,6 +119,6 @@
           </ul>
         </div>
       </div>
-    </div>
+    </div> -->
   {/if}
 </div>

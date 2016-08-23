@@ -51,6 +51,13 @@
     <title>Social Media Settings</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
+    <item>
+    <path>civicrm/civisocial/privacypolicy</path>
+    <page_callback>CRM_Civisocial_Page_PrivacyPolicy</page_callback>
+    <title>CiviSocial Privacy Policy</title>
+    <access_callback>1</access_callback>
+    <is_public>true</is_public>
+  </item>
   <item>
     <path>civicrm/civisocial/event/rsvpfacebookevent</path>
     <page_callback>CRM_Civisocial_Page_Facebook_RSVPEvent</page_callback>
