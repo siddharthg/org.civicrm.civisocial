@@ -78,4 +78,4 @@ To be able to access social dashboard, you must connect the correpsonding or all
 
 After you have configured credentials for Facebook and/or Twitter, navigate to `Adminster >> CiviSocial >> Social Networks`. Click on **Connect Facebook Page** to connect your Facebook page to CiviCRM. Likewise, click on **Connect Twitter** to connect your Twitter account.
 
-You will now be able to access social dashboard(s) from `Social* menu.
+You will now be able to access social dashboard(s) from **Social** menu.
