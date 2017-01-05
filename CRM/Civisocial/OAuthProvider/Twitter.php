@@ -22,11 +22,11 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $this->getApiCredentials($this->alias);
 
     // Twitter, why you no upgrade to OAuth 2.0?
-    $this->sha1_method = new OAuthSignatureMethod_HMAC_SHA1();
-    $this->consumer = new OAuthConsumer($this->apiKey, $this->apiSecret);
+    $this->sha1_method = new CRM_Civisocial_OAuthProvider_OAuth_SignatureMethod_HMAC_SHA1();
+    $this->consumer = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($this->apiKey, $this->apiSecret);
 
     if ($accessToken && isset($accessToken['oauth_token']) && isset($accessToken['oauth_token_secret'])) {
-      $this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
+      $this->token = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
     }
   }
 
@@ -68,7 +68,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
       $this->redirect();
     }
 
-    $this->token = new OAuthConsumer($requestToken['oauth_token'], $requestToken['oauth_token_secret']);
+    $this->token = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($requestToken['oauth_token'], $requestToken['oauth_token_secret']);
 
     // Request Access Token from twitter
     $accessToken = $this->getAccessToken($_REQUEST['oauth_verifier']);
@@ -81,7 +81,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $session->set('oauth_token_secret', NULL);
     //@todo: Can't I UNSET using Session class?
 
-    $this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
+    $this->token = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
 
     if ($this->isAuthorized()) {
       $this->saveSocialUser($this->alias, $this->getUserProfile(), $accessToken);
@@ -145,7 +145,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
    * @param array $accessToken
    */
   public function setAccessToken($accessToken) {
-    $this->token = new OAuthConsumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
+    $this->token = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
   }
 
   /**
@@ -186,8 +186,8 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $params = array();
     $params['oauth_callback'] = $oauthCallback;
     $request = $this->oAuthRequest('https://api.twitter.com/oauth/request_token', 'GET', $params);
-    $token = OAuthUtil::parse_parameters($request);
-    $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
+    $token = CRM_Civisocial_OAuthProvider_OAuth_Util::parse_parameters($request);
+    $this->token = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($token['oauth_token'], $token['oauth_token_secret']);
     return $token;
   }
 
@@ -228,8 +228,8 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     $params = array();
     $params['oauth_verifier'] = $oauthVerifier;
     $request = $this->oAuthRequest('https://api.twitter.com/oauth/access_token', 'GET', $params);
-    $token = OAuthUtil::parse_parameters($request);
-    $this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
+    $token = CRM_Civisocial_OAuthProvider_OAuth_Util::parse_parameters($request);
+    $this->token = new CRM_Civisocial_OAuthProvider_OAuth_Consumer($token['oauth_token'], $token['oauth_token_secret']);
     return $token;
   }
 
@@ -301,7 +301,7 @@ class CRM_Civisocial_OAuthProvider_Twitter extends CRM_Civisocial_OAuthProvider 
     else {
       $url = $node;
     }
-    $request = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $params);
+    $request = CRM_Civisocial_OAuthProvider_OAuth_Request::from_consumer_and_token($this->consumer, $this->token, $method, $url, $params);
     $request->sign_request($this->sha1_method, $this->consumer, $this->token);
     switch ($method) {
       case 'GET':
