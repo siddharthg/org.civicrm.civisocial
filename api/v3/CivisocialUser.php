@@ -34,7 +34,7 @@ function civicrm_api3_civisocial_user_create($params) {
  *   Contact id of created/existing contact
  */
 function civicrm_api3_civisocial_user_createContact($params) {
-  civicrm_api3_verify_mandatory($params, NULL, array('email, contact_type'));
+  civicrm_api3_verify_mandatory($params, NULL, array('email', 'contact_type'));
   return CRM_Civisocial_BAO_CivisocialUser::createContact($params);
 }
 
